@@ -2,7 +2,7 @@ import { localeFromRequest } from "@openheard/i18n/locales";
 import { paraglideMiddleware } from "@openheard/i18n/server";
 import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/server";
 import { edgeCacheKey, hasSessionCookie, isImmutableAsset, isPrivatePath, isPublicCacheable } from "./lib/cache";
-import { registerServerLocaleStrategy } from "./lib/locale";
+import { localeLookupFailed, registerServerLocaleStrategy } from "./lib/locale";
 import { frameAncestorsFor } from "./lib/widget-frame";
 
 registerServerLocaleStrategy();
@@ -33,9 +33,11 @@ const SECURITY_HEADERS: Record<string, string> = {
 // Everything else, the sign-in popup included, stays unframeable.
 const FRAMEABLE_PATHS = ["/widget"];
 
-// Pages are rendered in the language the cookie or Accept-Language asks for, so
-// anything between us and the browser must keep a copy per value of each.
+// HTML pages are rendered in the language the cookie or Accept-Language asks
+// for, so anything between us and the browser must keep a copy per value of
+// each. Widget scripts, feeds, the API and uploads do not depend on either.
 function varyOnLanguage(headers: Headers) {
+  if (!headers.get("content-type")?.includes("text/html")) return;
   const current = headers.get("vary") ?? "";
   if (current.trim() === "*") return;
   const have = new Set(current.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean));
@@ -44,9 +46,9 @@ function varyOnLanguage(headers: Headers) {
 }
 
 // `ancestors` is the frame-ancestors directive for a frameable page.
-function secure(response: Response, ancestors: string | null, pathname: string): Response {
+function secure(response: Response, ancestors: string | null): Response {
   const out = new Response(response.body, response);
-  if (!isImmutableAsset(pathname)) varyOnLanguage(out.headers);
+  varyOnLanguage(out.headers);
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
     if (ancestors && k === "x-frame-options") continue;
     if (!out.headers.has(k)) out.headers.set(k, v);
@@ -57,10 +59,9 @@ function secure(response: Response, ancestors: string | null, pathname: string):
 
 export default {
   async fetch(request: Request, _env: unknown, ctx: ExecutionContext) {
-    const { pathname } = new URL(request.url);
-    const frameable = FRAMEABLE_PATHS.includes(pathname);
+    const frameable = FRAMEABLE_PATHS.includes(new URL(request.url).pathname);
     const [response, ancestors] = await Promise.all([handle(request, ctx), frameable ? frameAncestorsFor(request) : null]);
-    return secure(response, ancestors, pathname);
+    return secure(response, ancestors);
   },
   // Nightly: the public demo workspace goes back to its seed, and images that
   // were uploaded but never published, or whose post is gone, are deleted. Bindings come
@@ -108,6 +109,15 @@ async function handle(request: Request, ctx: ExecutionContext): Promise<Response
     }
 
     const response = await bounded(request, url);
+
+    // The workspace's language could not be read, so this page may be in the
+    // wrong one: serve it, keep neither the edge nor anyone else's cache from it.
+    if (localeLookupFailed(request)) {
+      const out = new Response(response.body, response);
+      out.headers.set("x-cache", "BYPASS");
+      out.headers.set("cache-control", "no-store");
+      return out;
+    }
 
     if (response.status === 200) {
       const contentLength = parseInt(response.headers.get("content-length") ?? "", 10);

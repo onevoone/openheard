@@ -1,4 +1,5 @@
 import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
 import { MonitorIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
 
 import { saveThemeChoice, type ThemeChoice, useVisitorTheme } from "@/lib/visitor-theme";
@@ -11,7 +12,7 @@ const ICON = { light: SunIcon, dark: MoonIcon, auto: MonitorIcon };
 export function ThemeSwitch({ workspaceId, fallback }: { workspaceId: string; fallback: "light" | "dark" }) {
   const { choice } = useVisitorTheme(workspaceId, fallback);
   const Icon = ICON[choice];
-  const label = m.theme_switch({ current: LABEL[choice](), next: LABEL[NEXT[choice]]().toLocaleLowerCase() });
+  const label = m.theme_switch({ current: LABEL[choice](), next: LABEL[NEXT[choice]]().toLocaleLowerCase(getLocale()) });
   return (
     <button
       type="button"

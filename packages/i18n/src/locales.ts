@@ -17,11 +17,13 @@ export function isLocale(value: unknown): value is Locale {
 // The visitor's explicit choice, set by the language switcher.
 export function localeFromCookie(cookieHeader: string | null | undefined): Locale | undefined {
   if (!cookieHeader) return undefined;
+  // Cookies of the same name can arrive from different paths or domains; the
+  // first one that holds a locale we ship wins, a stale one does not hide it.
   for (const part of cookieHeader.split(";")) {
     const eq = part.indexOf("=");
     if (eq < 0 || part.slice(0, eq).trim() !== LOCALE_COOKIE) continue;
     const value = part.slice(eq + 1).trim();
-    return isLocale(value) ? value : undefined;
+    if (isLocale(value)) return value;
   }
   return undefined;
 }

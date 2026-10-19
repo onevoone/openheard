@@ -21,6 +21,9 @@ describe("edgeCacheKey", () => {
 
   it("does not let a visitor pick another language's copy", () => {
     expect(edgeCacheKey(url("/?__locale=en"), "uk")).toBe(edgeCacheKey(url("/"), "uk"));
+    expect(edgeCacheKey(url("/?__locale=en"))).toBe(edgeCacheKey(url("/")));
+    expect(edgeCacheKey(url("/?__locale=en"))).not.toBe(edgeCacheKey(url("/"), "en"));
+    expect(edgeCacheKey(url("/?a=1&__locale=en&__locale=uk&b=2"))).toBe(edgeCacheKey(url("/?a=1&b=2")));
   });
 
   it("never varies the widget's metadata, which holds every language and is fetched without cookies", () => {
@@ -44,18 +47,31 @@ describe("hasSessionCookie", () => {
 describe("purgeWorkspaceCache", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("deletes the board-language copy and every language's copy of each page", async () => {
+  async function purged(postIds?: number[]) {
     const deleted: string[] = [];
     vi.stubGlobal("caches", { default: { delete: async (r: Request) => void deleted.push(r.url) } });
-    await purgeWorkspaceCache("https://acme.example.com", [7]);
+    await purgeWorkspaceCache("https://acme.example.com", postIds);
+    return deleted;
+  }
+
+  it("deletes the board-language copy and every language's copy of each page", async () => {
+    const deleted = await purged([7]);
     for (const path of ["/", "/roadmap", "/changelog", "/p/7"]) {
       const base = `https://acme.example.com${path}`;
-      const sep = base.includes("?") ? "&" : "?";
       expect(deleted, path).toContain(base);
-      expect(deleted, path).toContain(`${base}${sep}__locale=uk`);
-      expect(deleted, path).toContain(`${base}${sep}__locale=en`);
+      expect(deleted, path).toContain(`${base}?__locale=uk`);
+      expect(deleted, path).toContain(`${base}?__locale=en`);
     }
-    expect(deleted).toContain("https://acme.example.com/widget.json");
-    expect(deleted).toContain("https://acme.example.com/changelog.rss");
+  });
+
+  it("keeps one key for pages that are not rendered per language", async () => {
+    const deleted = await purged();
+    expect(deleted.filter((k) => k.includes("/widget.json"))).toEqual(["https://acme.example.com/widget.json"]);
+    expect(deleted.filter((k) => k.includes("/changelog.rss"))).toEqual(["https://acme.example.com/changelog.rss"]);
+  });
+
+  it("deletes each key once", async () => {
+    const deleted = await purged([7, 7]);
+    expect(new Set(deleted).size).toBe(deleted.length);
   });
 });

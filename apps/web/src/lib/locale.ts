@@ -9,15 +9,25 @@ import { workspaceLocale } from "./workspace-locale";
 // workspace needs the database (workspace-locale.ts caches it).
 // Server-only: the browser follows what the server rendered (locale-client.ts).
 
+// Requests whose workspace language could not be read. They get the base
+// locale, which is right more often than a failed page, but it may not be the
+// workspace's language, so the edge cache must not keep that page (server.ts).
+const lookupFailed = new WeakSet<Request>();
+
+export function localeLookupFailed(request: Request): boolean {
+  return lookupFailed.has(request);
+}
+
 export async function localeForRequest(request: Request): Promise<Locale | undefined> {
   const fromRequest = localeFromRequest(request);
   if (fromRequest) return fromRequest;
   try {
     const { workspaceSlugFromRequest } = await import("./session");
     return (await workspaceLocale(await workspaceSlugFromRequest(request))) ?? undefined;
-  } catch {
-    // No database, no migration yet, a workspace that no longer exists: the
-    // base locale is a better answer than a failed page.
+  } catch (err) {
+    // A database that is down or not migrated yet, say.
+    console.error("workspace language lookup failed, using the base locale:", err);
+    lookupFailed.add(request);
     return undefined;
   }
 }

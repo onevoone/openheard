@@ -1,5 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import { COMPILER_OPTIONS } from "../../packages/i18n/src/config";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
@@ -54,14 +55,14 @@ export default defineConfig({
     // Compiles packages/i18n/messages/*.json into typed message functions, on
     // build and on every edit in dev. `custom-openheard` is the server-side
     // chain in src/lib/locale.ts; `custom-htmlLang` makes the browser agree
-    // with what the server rendered (src/lib/locale-client.ts).
+    // with what the server rendered (src/lib/locale-client.ts). The options
+    // shared with `bun run i18n:compile` live in packages/i18n/src/config.ts.
     paraglideVitePlugin({
       project: "../../packages/i18n/project.inlang",
       outdir: "../../packages/i18n/src/paraglide",
-      outputStructure: "message-modules",
-      strategy: ["custom-openheard", "custom-htmlLang", "cookie", "baseLocale"],
+      ...COMPILER_OPTIONS,
+      strategy: [...COMPILER_OPTIONS.strategy],
       isServer: "import.meta.env.SSR",
-      cookieName: "PARAGLIDE_LOCALE",
     }),
     tailwindcss(),
     tanstackStart(),

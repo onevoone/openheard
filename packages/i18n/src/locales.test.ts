@@ -47,6 +47,11 @@ describe("localeFromCookie", () => {
     expect(localeFromCookie("PARAGLIDE_LOCALE=uk")).toBe("uk");
   });
 
+  it("skips an invalid value of the same cookie to find a valid one", () => {
+    expect(localeFromCookie("PARAGLIDE_LOCALE=fr; PARAGLIDE_LOCALE=en")).toBe("en");
+    expect(localeFromCookie("PARAGLIDE_LOCALE=; PARAGLIDE_LOCALE=uk; PARAGLIDE_LOCALE=en")).toBe("uk");
+  });
+
   it("ignores unknown values, lookalike names and a missing header", () => {
     expect(localeFromCookie("PARAGLIDE_LOCALE=fr")).toBeUndefined();
     expect(localeFromCookie("XPARAGLIDE_LOCALE=en")).toBeUndefined();
