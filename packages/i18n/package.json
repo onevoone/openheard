@@ -1,0 +1,24 @@
+{
+  "name": "@openheard/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./messages": "./src/paraglide/messages.js",
+    "./runtime": "./src/paraglide/runtime.js",
+    "./server": "./src/paraglide/server.js",
+    "./locales": "./src/locales.ts"
+  },
+  "scripts": {
+    "i18n:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy custom-openheard custom-htmlLang cookie baseLocale",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "^2.29.0",
+    "@inlang/plugin-message-format": "^4.5.4",
+    "@openheard/config": "workspace:*",
+    "typescript": "catalog:",
+    "vitest": "^3"
+  }
+}

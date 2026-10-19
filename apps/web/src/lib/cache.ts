@@ -1,3 +1,5 @@
+import { LOCALES, type Locale } from "@openheard/i18n/locales";
+
 const PUBLIC_PATHS = ["/", "/roadmap", "/changelog", "/widget.json"];
 const PUBLIC_PATH_PREFIXES = ["/p/"];
 const PRIVATE_PATHS = ["/dashboard", "/login", "/api", "/new", "/welcome", "/settings", "/demo"];
@@ -9,11 +11,24 @@ export function isPublicCacheable(pathname: string): boolean {
 
 // The widget's metadata is fetched on every host page view, from any origin,
 // with whatever query string the caller likes. Only `ws` (local dev) changes
-// the answer, so everything else is dropped from its cache key.
-export function edgeCacheKey(url: URL): string {
-  if (url.pathname !== "/widget.json") return url.toString();
-  const ws = url.searchParams.get("ws");
-  return url.origin + url.pathname + (ws ? `?ws=${encodeURIComponent(ws)}` : "");
+// the answer, so everything else is dropped from its cache key. It carries the
+// strings of every language and is fetched without cookies, so it never
+// varies by locale either.
+//
+// Every other page is rendered in the visitor's language: the cookie they
+// picked, else their Accept-Language, else the board's own (`locale`
+// undefined). That is `locales.length + 1` copies of a page at most.
+export function edgeCacheKey(url: URL, locale?: Locale): string {
+  if (url.pathname === "/widget.json") {
+    const ws = url.searchParams.get("ws");
+    return url.origin + url.pathname + (ws ? `?ws=${encodeURIComponent(ws)}` : "");
+  }
+  if (!locale) return url.toString();
+  // `set`, not `append`: a visitor-supplied value must not pick another
+  // language's copy.
+  const keyed = new URL(url);
+  keyed.searchParams.set("__locale", locale);
+  return keyed.toString();
 }
 
 export function isPrivatePath(pathname: string): boolean {
@@ -47,5 +62,7 @@ export async function purgeWorkspaceCache(origin: string, postIds?: number[]): P
   if (postIds) {
     for (const id of postIds) paths.push(`/p/${id}`);
   }
-  await Promise.all(paths.map((p) => cache.delete(new Request(origin + p))));
+  // The board's-own-language copy and one per language a visitor can ask for.
+  const variants: (Locale | undefined)[] = [undefined, ...LOCALES];
+  await Promise.all(paths.flatMap((p) => variants.map((locale) => cache.delete(new Request(edgeCacheKey(new URL(origin + p), locale))))));
 }

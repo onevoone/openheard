@@ -30,6 +30,9 @@ export const workspace = sqliteTable("workspace", {
   name: text("name").notNull().default("openheard"),
   tagline: text("tagline").notNull().default("Vote on what matters. We read every post and reply on the ones we ship."),
   theme: text("theme").notNull().default("dark"),
+  // Language of the board for visitors who have not picked one: a locale from
+  // @openheard/i18n. Not an enum here so adding a language needs no migration.
+  locale: text("locale").notNull().default("uk"),
   poweredBy: integer("powered_by", { mode: "boolean" }).notNull().default(true),
   requireApproval: integer("require_approval", { mode: "boolean" }).notNull().default(false),
   // Branding. Accent is a hex; null means the openheard blue.

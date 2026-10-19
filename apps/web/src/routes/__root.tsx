@@ -1,3 +1,5 @@
+import { getLocale } from "@openheard/i18n/runtime";
+import { m } from "@openheard/i18n/messages";
 import { Toaster } from "@openheard/ui/components/sonner";
 import { HeadContent, Outlet, Scripts, ScrollRestoration, createRootRouteWithContext, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -13,8 +15,14 @@ import type { MissingWorkspace } from "../lib/session";
 import { brandForeground, themeScript, useVisitorTheme } from "../lib/visitor-theme";
 import appCss from "../index.css?url";
 import geistLatinFont from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import geistCyrillicFont from "@fontsource-variable/geist/files/geist-cyrillic-wght-normal.woff2?url";
 
 export interface RouterAppContext {}
+
+const CYRILLIC_FONT_PRELOAD = { rel: "preload", href: geistCyrillicFont, as: "font", type: "font/woff2", crossOrigin: "anonymous" } as const;
+
+// Open Graph wants language_TERRITORY.
+const OG_LOCALE = { uk: "uk_UA", en: "en_US" } as const;
 
 const VITE_ENV = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
 const OPENPANEL_CLIENT_ID = VITE_ENV.VITE_OPENPANEL_CLIENT_ID;
@@ -26,6 +34,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: ({ loaderData, matches }) => {
     // The widget runs inside other people's apps; it never loads our analytics.
     const embedded = matches.some((m) => (m.routeId as string) === "/widget");
+    const locale = getLocale();
     const title = loaderData ? `${loaderData.workspace.name} · feedback` : "openheard";
     const description = loaderData?.workspace.tagline ?? "Open source feedback board.";
     // A self-hoster's own share image; its size is theirs to know, so no hints.
@@ -38,6 +47,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         { title },
         { name: "description", content: description },
         { property: "og:type", content: "website" },
+        { property: "og:locale", content: OG_LOCALE[locale] },
         { property: "og:site_name", content: loaderData?.workspace.name ?? "openheard" },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
@@ -55,6 +65,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       ],
       links: [
       { rel: "preload", href: geistLatinFont, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
+      // Ukrainian text is set in the Cyrillic subset; without this the first screen swaps fonts.
+      ...(locale === "uk" ? [CYRILLIC_FONT_PRELOAD] : []),
       { rel: "stylesheet", href: appCss },
       // The workspace logo is the tab icon once one is set.
       logo ? { rel: "icon", href: logo } : { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -77,10 +89,10 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     if (missing?.missingWorkspace) return <NoBoard {...missing} />;
     return (
       <main className="mx-auto max-w-3xl px-8 py-24 text-center">
-        <h1 className="text-xl font-semibold">Nothing here</h1>
-        <p className="mt-2 text-muted-foreground">That page or workspace does not exist.</p>
+        <h1 className="text-xl font-semibold">{m.not_found_title()}</h1>
+        <p className="mt-2 text-muted-foreground">{m.not_found_text_workspace()}</p>
         <a href="/" className="mt-6 inline-block text-sm text-link hover:underline">
-          Back to the board
+          {m.not_found_back()}
         </a>
       </main>
     );
@@ -92,21 +104,19 @@ function NoBoard({ missingWorkspace, rootDomain, signedIn }: MissingWorkspace) {
   const home = `https://${rootDomain ?? "openheard.com"}`;
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-24 text-center">
-      <a href={home} aria-label="openheard home" className="mb-3">
+      <a href={home} aria-label={m.no_board_home_label()} className="mb-3">
         <Logo size={32} />
       </a>
-      <h1 className="text-xl font-semibold">There is no board here yet</h1>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        Nobody has made a workspace at {missingWorkspace}.{rootDomain ?? "openheard.com"} yet.
-      </p>
+      <h1 className="text-xl font-semibold">{m.no_board_title()}</h1>
+      <p className="max-w-sm text-sm text-muted-foreground">{m.no_board_text({ slug: missingWorkspace, domain: rootDomain ?? "openheard.com" })}</p>
       <div className="mt-3 flex items-center gap-5 text-sm font-medium">
         {signedIn ? (
           <a href={`${home}/new?slug=${encodeURIComponent(missingWorkspace)}`} className="text-link hover:underline">
-            Create this workspace
+            {m.no_board_create()}
           </a>
         ) : null}
         <a href={home} className="text-muted-foreground hover:text-foreground">
-          Go to {rootDomain ?? "openheard.com"}
+          {m.no_board_go({ domain: rootDomain ?? "openheard.com" })}
         </a>
       </div>
     </main>
@@ -152,7 +162,7 @@ function RootDocument() {
   // the outlet holds the not-found page and nothing else has a workspace to read.
   if (!data) {
     return (
-      <html lang="en" className="dark">
+      <html lang={getLocale()} className="dark">
         <head>
           <HeadContent />
         </head>
@@ -168,7 +178,7 @@ function RootDocument() {
   return (
     // The head script may change the class before hydration, so React is
     // told not to flag the difference on <html>.
-    <html lang="en" className={theme} style={accent} data-brand={accentColor && visitorPage ? "" : undefined} suppressHydrationWarning>
+    <html lang={getLocale()} className={theme} style={accent} data-brand={accentColor && visitorPage ? "" : undefined} suppressHydrationWarning>
       <head>
         {visitorPage ? <script dangerouslySetInnerHTML={{ __html: themeScript(data.workspace.id, workspaceTheme) }} /> : null}
         <HeadContent />

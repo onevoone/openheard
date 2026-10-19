@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ListIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { Link, useLoaderData, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -8,11 +9,13 @@ import { ThemeSwitch } from "./theme-switch";
 import UserMenu from "./user-menu";
 import { cn } from "@openheard/ui/lib/utils";
 
+// Labels are functions: they are read at render, in the visitor's language,
+// never when this module loads.
 const links = [
-  { to: "/", label: "Board" },
-  { to: "/roadmap", label: "Roadmap" },
-  { to: "/changelog", label: "Changelog" },
-  { to: "/help", label: "Help" },
+  { to: "/", label: () => m.nav_board() },
+  { to: "/roadmap", label: () => m.nav_roadmap() },
+  { to: "/changelog", label: () => m.nav_changelog() },
+  { to: "/help", label: () => m.nav_help() },
 ] as const;
 
 export default function Header() {
@@ -58,7 +61,7 @@ export default function Header() {
                       )}
                     >
                       <span className={cn("size-[5px] rounded-full transition-colors duration-200", active ? "bg-link" : "bg-transparent group-hover/nav:bg-input")} />
-                      {label}
+                      {label()}
                     </Link>
                   );
                 })}
@@ -69,7 +72,7 @@ export default function Header() {
                 type="button"
                 onClick={() => setMobileSearch(true)}
                 className="inline-flex size-10 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground md:hidden"
-                aria-label="Search"
+                aria-label={m.nav_search()}
               >
                 <MagnifyingGlassIcon className="size-[18px]" />
               </button>
@@ -80,7 +83,7 @@ export default function Header() {
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="inline-flex size-10 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground lg:hidden"
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-label={menuOpen ? m.nav_menu_close() : m.nav_menu_open()}
                 aria-expanded={menuOpen}
               >
                 {menuOpen ? <XIcon className="size-[18px]" /> : <ListIcon className="size-[18px]" />}
@@ -105,7 +108,7 @@ export default function Header() {
                   )}
                 >
                   <span className={cn("size-[5px] rounded-full", active ? "bg-link" : "bg-transparent")} />
-                  {label}
+                  {label()}
                 </Link>
               );
             })}
@@ -140,7 +143,7 @@ function MobileSearchBar({ onClose }: { onClose: () => void }) {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => e.key === "Escape" && onClose()}
-        placeholder="Search posts"
+        placeholder={m.nav_search_posts()}
         className="min-w-0 flex-1 bg-transparent text-[14px] text-foreground outline-none placeholder:text-faint"
       />
       <button type="button" onClick={onClose} className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground">
@@ -185,7 +188,7 @@ function Search() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         onKeyDown={(e) => e.key === "Escape" && (e.target as HTMLInputElement).blur()}
-        placeholder="Search posts"
+        placeholder={m.nav_search_posts()}
         className="h-8 w-[220px] rounded-lg border bg-card pr-9 pl-8 text-[13px] text-foreground outline-none transition-colors placeholder:text-faint focus:border-ring/60 focus:ring-1 focus:ring-ring/40"
       />
       <Kbd className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2">/</Kbd>

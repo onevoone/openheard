@@ -12,6 +12,9 @@ jobs:
         with:
           bun-version: 1.3.11
       - run: bun install --frozen-lockfile
+      # Generated message functions: check-types and test import them.
+      - run: bun run i18n:compile
       - name: build
         run: bun run --filter web build
       - run: bun run check-types
+      - run: bun run test

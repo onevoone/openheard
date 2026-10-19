@@ -1,6 +1,11 @@
+import { localeFromRequest } from "@openheard/i18n/locales";
+import { paraglideMiddleware } from "@openheard/i18n/server";
 import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/server";
 import { edgeCacheKey, hasSessionCookie, isImmutableAsset, isPrivatePath, isPublicCacheable } from "./lib/cache";
+import { registerServerLocaleStrategy } from "./lib/locale";
 import { frameAncestorsFor } from "./lib/widget-frame";
+
+registerServerLocaleStrategy();
 
 const handler = createStartHandler(defaultStreamHandler);
 
@@ -28,9 +33,20 @@ const SECURITY_HEADERS: Record<string, string> = {
 // Everything else, the sign-in popup included, stays unframeable.
 const FRAMEABLE_PATHS = ["/widget"];
 
+// Pages are rendered in the language the cookie or Accept-Language asks for, so
+// anything between us and the browser must keep a copy per value of each.
+function varyOnLanguage(headers: Headers) {
+  const current = headers.get("vary") ?? "";
+  if (current.trim() === "*") return;
+  const have = new Set(current.split(",").map((v) => v.trim().toLowerCase()).filter(Boolean));
+  const add = ["Cookie", "Accept-Language"].filter((v) => !have.has(v.toLowerCase()));
+  if (add.length) headers.set("vary", [current.trim(), ...add].filter(Boolean).join(", "));
+}
+
 // `ancestors` is the frame-ancestors directive for a frameable page.
-function secure(response: Response, ancestors: string | null): Response {
+function secure(response: Response, ancestors: string | null, pathname: string): Response {
   const out = new Response(response.body, response);
+  if (!isImmutableAsset(pathname)) varyOnLanguage(out.headers);
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
     if (ancestors && k === "x-frame-options") continue;
     if (!out.headers.has(k)) out.headers.set(k, v);
@@ -41,9 +57,10 @@ function secure(response: Response, ancestors: string | null): Response {
 
 export default {
   async fetch(request: Request, _env: unknown, ctx: ExecutionContext) {
-    const frameable = FRAMEABLE_PATHS.includes(new URL(request.url).pathname);
+    const { pathname } = new URL(request.url);
+    const frameable = FRAMEABLE_PATHS.includes(pathname);
     const [response, ancestors] = await Promise.all([handle(request, ctx), frameable ? frameAncestorsFor(request) : null]);
-    return secure(response, ancestors);
+    return secure(response, ancestors, pathname);
   },
   // Nightly: the public demo workspace goes back to its seed, and images that
   // were uploaded but never published, or whose post is gone, are deleted. Bindings come
@@ -78,7 +95,10 @@ async function handle(request: Request, ctx: ExecutionContext): Promise<Response
     !hasSessionCookie(request) &&
     isPublicCacheable(url.pathname)
   ) {
-    const cacheKey = new Request(edgeCacheKey(url), { method: "GET" });
+    // The page depends on the visitor's language, which the cache key must know
+    // before anything is rendered. Cookie and Accept-Language are all that can
+    // be read this early; with neither, the page is in the board's own language.
+    const cacheKey = new Request(edgeCacheKey(url, localeFromRequest(request)), { method: "GET" });
     const cached = await cache.match(cacheKey);
     if (cached) {
       const resp = new Response(cached.body, cached);
@@ -140,7 +160,10 @@ function bounded(request: Request, url: URL): Promise<Response> {
       }));
     }, REQUEST_TIMEOUT_MS);
 
-    Promise.resolve(handler(request)).then(
+    // The original request goes in, not the one the middleware hands back: the
+    // locale is stored for this request's async context, and the router does
+    // no URL rewriting for us to undo.
+    Promise.resolve(paraglideMiddleware(request, () => handler(request))).then(
       (res: Response) => { clearTimeout(timer); resolve(res); },
       (err: unknown) => { clearTimeout(timer); reject(err); },
     );

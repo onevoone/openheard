@@ -2,8 +2,10 @@ import { board, membership, workspace } from "@openheard/db";
 import type { Db } from "@openheard/db";
 import { invite } from "@openheard/db/schema/feedback";
 import { user } from "@openheard/db/schema/auth";
+import type { Locale } from "@openheard/i18n/locales";
 import { and, count, eq, isNull, ne } from "drizzle-orm";
 
+import { forgetWorkspaceLocale } from "@/lib/workspace-locale";
 import { assertNotDemo, assertNotDemoIdentity, isDemo } from "@/lib/demo";
 import { PLANS } from "@/lib/plans";
 import { seedStatuses } from "@/lib/status-db";
@@ -77,6 +79,7 @@ export type WorkspacePatch = Partial<{
   name: string;
   tagline: string;
   theme: "dark" | "light";
+  locale: Locale;
   poweredBy: boolean;
   requireApproval: boolean;
   accent: string | null;
@@ -102,6 +105,9 @@ export async function updateWorkspace(ctx: OpCtx, patch: WorkspacePatch) {
   if (Object.keys(set).length) {
     await ctx.db.update(workspace).set(set).where(eq(workspace.id, ctx.workspace.id));
     Object.assign(ctx.workspace, set);
+    // The language of every page is resolved from this row, remembered for a
+    // few seconds per isolate.
+    if (set.locale !== undefined) forgetWorkspaceLocale(ctx.workspace.id);
     refresh(ctx);
   }
   return { updated: Object.keys(set) };

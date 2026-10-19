@@ -1,9 +1,13 @@
+import { LOCALES, LOCALE_NAMES } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
+import { getLocale, setLocale } from "@openheard/i18n/runtime";
 import type { Icon } from "@phosphor-icons/react";
 import {
   ArrowSquareOutIcon,
   CaretDownIcon,
   CaretRightIcon,
   CheckCircleIcon,
+  CheckIcon,
   CircleDashedIcon,
   CircleHalfIcon,
   CircleIcon,
@@ -175,6 +179,16 @@ function AccountMenu({ children }: { children: ReactNode }) {
           <CaretDownIcon className="size-3 text-faint" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" side="top" className="min-w-48">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>{m.lang_switch_label()}</DropdownMenuLabel>
+            {LOCALES.map((locale) => (
+              <DropdownMenuItem key={locale} lang={locale} onClick={() => locale !== getLocale() && setLocale(locale)}>
+                {LOCALE_NAMES[locale]}
+                {locale === getLocale() ? <CheckIcon className="ml-auto size-4" /> : null}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() =>
               authClient.signOut({
