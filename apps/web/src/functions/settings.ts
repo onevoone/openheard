@@ -1,3 +1,4 @@
+import { LOCALES } from "@openheard/i18n/locales";
 import { apiKey, board, createDb, membership, post, postTag, tag } from "@openheard/db";
 
 import { apiKeyInput } from "@/lib/api-auth";
@@ -40,6 +41,7 @@ export const saveWorkspace = createServerFn({ method: "POST" })
         name: z.string().trim().min(1).max(60),
         tagline: z.string().trim().max(200),
         theme: z.enum(["dark", "light"]),
+        locale: z.enum(LOCALES).optional(),
         poweredBy: z.boolean(),
         requireApproval: z.boolean(),
         accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),

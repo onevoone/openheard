@@ -14,6 +14,8 @@ const DEMO_WORKSPACE_DEFAULTS = {
   name: "Acme",
   tagline: "A live demo board. Vote, comment, open the dashboard. It resets every night.",
   theme: "dark",
+  // The demo copy is English; a visitor's own language still wins.
+  locale: "en",
   accent: null,
   logoUrl: null,
   website: null,

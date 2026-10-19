@@ -53,6 +53,8 @@
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
     "check-types": "bun run --filter '*' check-types",
+    "test": "bun run --filter '*' test",
+    "i18n:compile": "bun run --filter @openheard/i18n i18n:compile",
     "dev:web": "bun run --filter web dev:bare",
     "db:generate": "bun run --filter @openheard/db db:generate",
     "deploy": "bun run --filter @openheard/infra deploy",

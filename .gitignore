@@ -10,6 +10,8 @@ build
 
 # Generated files
 apps/web/src/routeTree.gen.ts
+# Compiled from packages/i18n/messages by `bun run i18n:compile` (and the Vite plugin)
+packages/i18n/src/paraglide
 apps/web/local.db
 apps/web/local.db-*
 # Local databases hold real accounts; never commit one.

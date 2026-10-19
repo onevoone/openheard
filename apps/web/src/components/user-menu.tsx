@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import {
   DropdownMenu,
@@ -27,7 +28,7 @@ export default function UserMenu() {
   if (isDemo(data?.workspace) && user?.id !== DEMO_ADMIN_ID) {
     return (
       <Button variant="outline" size="sm" nativeButton={false} render={<a href="/demo" />}>
-        Open dashboard
+        {m.nav_open_dashboard()}
       </Button>
     );
   }
@@ -36,7 +37,7 @@ export default function UserMenu() {
     return (
       <Link to="/login">
         <Button variant="outline" size="sm">
-          Sign in
+          {m.nav_sign_in()}
         </Button>
       </Link>
     );
@@ -56,7 +57,7 @@ export default function UserMenu() {
           <DropdownMenuSeparator />
           {user.role === "admin" ? (
             <DropdownMenuItem render={<Link to="/dashboard/inbox" />}>
-              <GearSixIcon className="size-4" /> Dashboard
+              <GearSixIcon className="size-4" /> {m.nav_dashboard()}
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem
@@ -64,7 +65,7 @@ export default function UserMenu() {
               authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate().then(() => router.navigate({ to: "/" })) } })
             }
           >
-            Sign out
+            {m.nav_sign_out()}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
