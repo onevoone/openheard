@@ -28,6 +28,26 @@
     tabs: ds.tabs,
   };
   var live = {};
+  // The loader's own words, per language, come with /widget.json (see
+  // loaderStrings in widget-settings.ts). English until they arrive, or if
+  // they never do.
+  var FALLBACK = {
+    name: "feedback",
+    defaultLabel: "Feedback",
+    panel: "Feedback",
+    badge: "new",
+    open: "Open {name}",
+    openNew: "Open {name}, new updates",
+    close: "Close {name}",
+  };
+  // Languages in order of preference: data-lang, then the browser's own list.
+  // The panel gets the same list in its URL, so it speaks what the launcher does.
+  var langs = [];
+  var asked = [ds.lang].concat(navigator.languages && navigator.languages.length ? Array.prototype.slice.call(navigator.languages) : [navigator.language]);
+  for (var a = 0; a < asked.length; a++) {
+    var tag = String(asked[a] || "").toLowerCase().split("-")[0];
+    if (/^[a-z]{2,3}$/.test(tag) && langs.indexOf(tag) < 0) langs.push(tag);
+  }
   var VALID = {
     theme: /^(dark|light|auto)$/,
     accent: HEX,
@@ -38,7 +58,7 @@
     label: /^[^]{1,24}$/,
     tabs: /^((feedback|roadmap|changelog),?)+$/,
   };
-  var DEFAULTS = { theme: "dark", launcher: "icon", label: "Feedback", icon: "chat", position: "bottom-right", radius: "soft", tabs: "" };
+  var DEFAULTS = { theme: "dark", launcher: "icon", icon: "chat", position: "bottom-right", radius: "soft", tabs: "" };
   var cfg = {};
   var light = false;
   var dark = w.matchMedia ? w.matchMedia("(prefers-color-scheme: dark)") : null;
@@ -62,6 +82,26 @@
     } catch (e) {
       return 0;
     }
+  }
+
+  // The language to speak: the first one asked for that the workspace has words
+  // for, else the workspace's own.
+  function lang() {
+    var all = saved.strings;
+    if (!all || typeof all !== "object") return null;
+    for (var i = 0; i < langs.length; i++) if (all[langs[i]]) return langs[i];
+    return all[saved.defaultLocale] ? saved.defaultLocale : null;
+  }
+
+  function t(key) {
+    var all = saved.strings;
+    var l = lang();
+    var set = l && all[l];
+    return set && typeof set[key] === "string" ? set[key] : FALLBACK[key];
+  }
+
+  function named(text, name) {
+    return text.split("{name}").join(name);
   }
 
   function query(extra) {
@@ -138,7 +178,7 @@
   var panel = d.createElement("div");
   panel.className = "p";
   panel.setAttribute("role", "dialog");
-  panel.setAttribute("aria-label", "Feedback");
+  panel.setAttribute("aria-label", t("panel"));
   var launcher = d.createElement("button");
   launcher.type = "button";
   launcher.className = "l";
@@ -147,7 +187,7 @@
   label.className = "t";
   var dot = d.createElement("span");
   dot.className = "b";
-  dot.textContent = "new";
+  dot.textContent = t("badge");
   wrap.appendChild(style);
   wrap.appendChild(panel);
   wrap.appendChild(launcher);
@@ -160,7 +200,7 @@
       if (v && v.join) v = v.join(",");
       if (v != null && VALID[k].test(String(v))) return String(v);
     }
-    return DEFAULTS[k] || null;
+    return k === "label" ? t("defaultLabel") : DEFAULTS[k] || null;
   }
 
   // Dark ink on light accents, white on dark ones.
@@ -200,6 +240,9 @@
       launcher.appendChild(dot);
     }
     label.textContent = cfg.label;
+    panel.setAttribute("aria-label", t("panel"));
+    dot.textContent = t("badge");
+    if (frame) frame.title = t("panel");
     badge();
     post({ type: "openheard:config", config: frameConfig() });
   }
@@ -209,19 +252,20 @@
     var last = seen();
     var on = latest > 0 && (last ? latest > last : Date.now() - latest < 2592e6);
     wrap.classList.toggle("n", on);
-    var name = cfg.launcher === "label" ? cfg.label : "feedback";
-    launcher.setAttribute("aria-label", isOpen ? "Close " + name : on ? "Open " + name + ", new updates" : "Open " + name);
+    var name = cfg.launcher === "label" ? cfg.label : t("name");
+    launcher.setAttribute("aria-label", named(t(isOpen ? "close" : on ? "openNew" : "open"), name));
   }
 
   function ensureFrame(tab) {
     if (frame) return;
     frame = d.createElement("iframe");
-    frame.title = "Feedback";
+    frame.title = t("panel");
     frame.setAttribute("allow", "clipboard-write");
     var c = frameConfig();
     var params = { seen: String(seen()), theme: c.theme, accent: c.accent, radius: c.radius };
     if (tab) params.tab = frameTab = tab;
     if (c.tabs) params.tabs = c.tabs;
+    if (langs.length) params.lang = langs.join(",");
     frame.src = origin + "/widget" + query(params);
     panel.appendChild(frame);
   }

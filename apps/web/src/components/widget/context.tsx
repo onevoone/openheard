@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import type { SessionUser } from "@/lib/session";
@@ -42,7 +43,7 @@ export function useLoad<T>(fn: () => Promise<T>, deps: unknown[]) {
     setState((s) => ({ ...s, loading: true }));
     fn().then(
       (data) => !off && setState({ data, loading: false }),
-      (err: unknown) => !off && setState({ error: err instanceof Error ? err.message : "Could not load", loading: false }),
+      (err: unknown) => !off && setState({ error: err instanceof Error ? err.message : m.widget_load_failed(), loading: false }),
     );
     return () => {
       off = true;

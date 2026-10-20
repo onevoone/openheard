@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Skeleton } from "@openheard/ui/components/skeleton";
 import { cn } from "@openheard/ui/lib/utils";
 import { useLoaderData } from "@tanstack/react-router";
@@ -22,7 +23,7 @@ export function RoadmapTab() {
   if (error) return <Failed message={error} retry={reload} />;
   if (loading && !posts) return <ListSkeleton />;
 
-  if (posts && posts.length === 0) return <p className="px-5 py-8 text-center text-xs text-faint">Nothing planned yet. Post an idea and vote on the ones you want.</p>;
+  if (posts && posts.length === 0) return <p className="px-5 py-8 text-center text-xs text-faint">{m.widget_roadmap_empty()}</p>;
 
   return (
     <div className="flex flex-col gap-1 pt-1 pb-3">
@@ -35,7 +36,7 @@ export function RoadmapTab() {
               {meta.label}
               <span className="ml-auto text-faint">{items.length}</span>
             </header>
-            {items.length === 0 ? <p className="px-5 pb-3 text-xs text-faint">Nothing here yet</p> : null}
+            {items.length === 0 ? <p className="px-5 pb-3 text-xs text-faint">{m.widget_roadmap_column_empty()}</p> : null}
             <ol role="list" className="mx-2 flex flex-col">
               {items.map((p) => (
                 <li key={p.id} className="border-b border-foreground/6 last:border-b-0">
@@ -88,8 +89,8 @@ export function ChangelogTab({ entries, error, retry, seenAt }: { entries?: Chan
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 px-8 py-16 text-center">
-        <p className="text-[14px] font-semibold">Nothing shipped yet</p>
-        <p className="text-[13px] text-muted-foreground">Updates land here when the team releases something.</p>
+        <p className="text-[14px] font-semibold">{m.widget_changelog_empty_title()}</p>
+        <p className="text-[13px] text-muted-foreground">{m.widget_changelog_empty_text()}</p>
       </div>
     );
   }
@@ -121,7 +122,7 @@ function ChangelogRow({ entry: e, fresh, onPost }: { entry: ChangelogEntry; fres
           {fresh ? (
             <span className="inline-flex items-center gap-1.5 text-link">
               <span className="size-1.5 rounded-full bg-link" />
-              New
+              {m.widget_new()}
             </span>
           ) : null}
         </div>
@@ -129,7 +130,7 @@ function ChangelogRow({ entry: e, fresh, onPost }: { entry: ChangelogEntry; fres
         {e.body ? <p className={cn("text-[13px]/5 whitespace-pre-wrap text-muted-foreground", !open && "line-clamp-2")}>{e.body}</p> : null}
         {open && e.posts.length ? (
           <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-            <span className="mr-1 text-xs font-medium text-muted-foreground">Shipped from</span>
+            <span className="mr-1 text-xs font-medium text-muted-foreground">{m.widget_shipped_from()}</span>
             {e.posts.map((p) => (
               <button
                 key={p.id}

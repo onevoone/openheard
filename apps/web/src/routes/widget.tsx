@@ -1,3 +1,5 @@
+import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
 import { Button } from "@openheard/ui/components/button";
 import { cn } from "@openheard/ui/lib/utils";
 import { ArrowsOutSimpleIcon, XIcon } from "@phosphor-icons/react";
@@ -17,6 +19,11 @@ import { MSG, getWidgetToken, newNonce, sessionFromMessage, setWidgetToken, widg
 type Search = WidgetLook & { tab?: WidgetTab; seen?: number };
 
 const TABS: WidgetTab[] = ["feedback", "roadmap", "changelog"];
+const TAB_LABEL: Record<WidgetTab, () => string> = {
+  feedback: () => m.widget_tab_feedback(),
+  roadmap: () => m.widget_tab_roadmap(),
+  changelog: () => m.widget_tab_changelog(),
+};
 
 // The panel the embed script opens in an iframe on the host site. It is the
 // only route that may be framed (see server.ts).
@@ -28,7 +35,7 @@ export const Route = createFileRoute("/widget")({
   }),
   head: ({ matches }) => {
     const root = matches[0]?.loaderData as { workspace?: { name: string } } | undefined;
-    return { meta: [{ title: root?.workspace ? `${root.workspace.name} · feedback` : "Feedback" }, { name: "robots", content: "noindex" }] };
+    return { meta: [{ title: root?.workspace ? m.widget_page_title({ name: root.workspace.name }) : m.widget_page_title_fallback() }, { name: "robots", content: "noindex" }] };
   },
   component: Widget,
 });
@@ -73,7 +80,7 @@ function Widget() {
   const after = useRef<(() => void) | undefined>(undefined);
   // The sign-in attempt in flight: the popup it opened and its nonce.
   const flow = useRef<SignInFlow>({ popup: null, nonce: null });
-  const headers = useMemo(() => widgetTokenHeaders(token), [token]);
+  const headers = useMemo(() => widgetTokenHeaders(token, getLocale()), [token]);
 
   const storeToken = useCallback((next: string | null) => {
     setWidgetToken(next);
@@ -158,7 +165,7 @@ function Widget() {
     const left = Math.max(0, window.screenX + (window.outerWidth - w) / 2);
     const top = Math.max(0, window.screenY + (window.outerHeight - h) / 2);
     const nonce = newNonce();
-    const p = window.open(`/widget/connect?nonce=${nonce}`, "openheard-sign-in", `popup,width=${w},height=${h},left=${left},top=${top}`);
+    const p = window.open(`/widget/connect?nonce=${nonce}&lang=${getLocale()}`, "openheard-sign-in", `popup,width=${w},height=${h},left=${left},top=${top}`);
     flow.current = { popup: p, nonce: p ? nonce : null };
     setAuth(p ? "waiting" : "retry");
   }, []);
@@ -233,19 +240,19 @@ function Widget() {
               {ws.name.slice(0, 1)}
             </span>
           )}
-          <span className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-[-0.01em]">{ws.name} feedback</span>
-          <a href="/" target="_blank" rel="noopener" title="Open the full board" aria-label="Open the full board" className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+          <span className="min-w-0 flex-1 truncate text-[15px] font-semibold tracking-[-0.01em]">{m.widget_header_title({ name: ws.name })}</span>
+          <a href="/" target="_blank" rel="noopener" title={m.widget_open_board()} aria-label={m.widget_open_board()} className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
             <ArrowsOutSimpleIcon className="size-4" />
           </a>
           {embedded ? (
-            <button type="button" onClick={() => toParent({ type: MSG.close })} aria-label="Close" className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+            <button type="button" onClick={() => toParent({ type: MSG.close })} aria-label={m.widget_close()} className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
               <XIcon className="size-4" />
             </button>
           ) : null}
         </header>
 
         {tabs.length > 1 ? (
-          <nav className="flex h-11 shrink-0 items-stretch border-b px-2 text-[13px]" aria-label="Sections">
+          <nav className="flex h-11 shrink-0 items-stretch border-b px-2 text-[13px]" aria-label={m.widget_sections_label()}>
             {tabs.map((t) => (
               <button
                 key={t}
@@ -256,15 +263,15 @@ function Widget() {
                 }}
                 aria-current={tab === t ? "page" : undefined}
                 className={cn(
-                  "relative inline-flex items-center gap-2 px-3 capitalize outline-none focus-visible:text-foreground",
+                  "relative inline-flex items-center gap-2 px-3 outline-none focus-visible:text-foreground",
                   tab === t ? "text-foreground" : "text-faint hover:text-muted-foreground",
                 )}
               >
-                {t}
+                {TAB_LABEL[t]()}
                 {t === "changelog" && unseen ? (
                   <>
                     <span aria-hidden className="size-1.5 rounded-full bg-link" />
-                    <span className="sr-only">, new updates</span>
+                    <span className="sr-only">{m.widget_new_updates_sr()}</span>
                   </>
                 ) : null}
                 {tab === t ? <motion.span layoutId="widget-tab" transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 40 }} className="absolute inset-x-0 -bottom-px h-[1.5px] bg-foreground" /> : null}
@@ -301,12 +308,12 @@ function Widget() {
           <footer className="relative flex h-11 shrink-0 items-center justify-center border-t px-4 text-xs text-faint">
             {ws.poweredBy ? (
               <a href="https://openheard.com" target="_blank" rel="noopener" className="transition-colors hover:text-muted-foreground">
-                Powered by <span className="text-foreground">openheard</span>
+                {m.footer_powered_by()} <span className="text-foreground">openheard</span>
               </a>
             ) : null}
             {token && me ? (
-              <button type="button" onClick={ctx.signOut} title={`Signed in as ${me.name}`} className="absolute right-4 transition-colors hover:text-foreground">
-                sign out
+              <button type="button" onClick={ctx.signOut} title={m.widget_signed_in_as({ name: me.name })} className="absolute right-4 transition-colors hover:text-foreground">
+                {m.widget_sign_out()}
               </button>
             ) : null}
           </footer>
@@ -371,23 +378,19 @@ function SignInSheet({ state, wsName, onContinue, onCancel }: { state: "ask" | "
       >
         <div className="flex flex-col gap-1">
           <h2 id="widget-sign-in" className="text-[16px] font-semibold tracking-[-0.02em]">
-            {state === "waiting" ? "Finish in the new window" : `Sign in to ${wsName}`}
+            {state === "waiting" ? m.widget_sign_in_waiting_title() : m.widget_sign_in_title({ name: wsName })}
           </h2>
           <p className="text-[13px] text-muted-foreground">
-            {state === "waiting"
-              ? "Sign in there and this panel picks it up on its own."
-              : state === "retry"
-                ? "Signed in already, or the window was blocked? Continue and it takes a second."
-                : "Vote and post as yourself. Sign-in opens in a small window, so your password never touches this page."}
+            {state === "waiting" ? m.widget_sign_in_waiting_text() : state === "retry" ? m.widget_sign_in_retry_text() : m.widget_sign_in_ask_text()}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button arrow full size="lg" variant={state === "waiting" ? "secondary" : "primary"} onClick={onContinue}>
-            {state === "waiting" ? "Open the window again" : "Continue"}
+            {state === "waiting" ? m.widget_open_window_again() : m.widget_continue()}
           </Button>
         </div>
         <button type="button" onClick={onCancel} className="self-center text-xs text-faint hover:text-foreground">
-          Not now
+          {m.widget_not_now()}
         </button>
       </motion.div>
     </motion.div>
