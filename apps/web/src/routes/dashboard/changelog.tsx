@@ -76,7 +76,7 @@ function ChangelogPage() {
                 </span>
               ) : null}
               <span className="flex-1" />
-              <span className="text-[12px] text-faint tabular-nums" title={fullDate(e.publishedAt ?? e.createdAt)}>
+              <span className="text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(e.publishedAt ?? e.createdAt)}>
                 {ago(e.publishedAt ?? e.createdAt)}
               </span>
               <Avatar name={root.user?.name ?? "?"} image={root.user?.image} size={24} />

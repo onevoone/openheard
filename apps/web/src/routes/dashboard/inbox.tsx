@@ -180,7 +180,7 @@ function Inbox() {
                   <ChatCircleIcon className="size-[13px]" /> {p.commentCount}
                 </span>
               ) : null}
-              <span className="w-9 text-right text-[12px] text-faint tabular-nums">{ago(p.createdAt)}</span>
+              <span className="min-w-9 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums">{ago(p.createdAt)}</span>
               <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={24} />
               <VoteChip n={p.voteCount} />
             </Link>
@@ -629,7 +629,7 @@ function VoteChip({ n }: { n: number }) {
 }
 
 function Trending() {
-  return <span className="inline-flex h-5 items-center rounded-md bg-status-shipped/15 px-1.5 text-[11px] font-semibold text-status-shipped">{m.dash_inbox_trending()}</span>;
+  return <span className="inline-flex h-5 shrink-0 items-center rounded-md bg-status-shipped/15 px-1.5 text-[11px] font-semibold whitespace-nowrap text-status-shipped">{m.dash_inbox_trending()}</span>;
 }
 
 function Reactions({ reactions, onToggle }: { commentId: number; reactions: { emoji: string; count: number; mine: boolean }[]; onToggle: (e: (typeof REACTIONS)[number]) => void }) {
