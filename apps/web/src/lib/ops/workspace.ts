@@ -7,6 +7,7 @@ import type { Locale } from "@openheard/i18n/locales";
 import { m } from "@openheard/i18n/messages";
 import { and, count, eq, isNull, ne } from "drizzle-orm";
 
+import { emailLocale } from "@/lib/email-locale";
 import { forgetWorkspaceLocale } from "@/lib/workspace-locale";
 import { assertNotDemo, assertNotDemoIdentity, isDemo } from "@/lib/demo";
 import { PLANS } from "@/lib/plans";
@@ -236,6 +237,6 @@ export async function createInvite(ctx: OpCtx, data: { email: string; role: "adm
   await ctx.db.insert(invite).values({ workspaceId: ctx.workspace.id, email, role: data.role, token, expiresAt });
   const [{ env }, { sendInviteEmail }] = await Promise.all([import("@openheard/env/server"), import("@/lib/email")]);
   const baseUrl = env.BETTER_AUTH_URL || "http://localhost:3001";
-  await sendInviteEmail(email, ctx.actor?.name ?? ctx.workspace.name, ctx.workspace.name, `${baseUrl}/join/${token}`);
+  await sendInviteEmail(email, ctx.actor?.name ?? ctx.workspace.name, ctx.workspace.name, `${baseUrl}/join/${token}`, emailLocale(ctx.workspace));
   return { invited: email, role: data.role, expiresAt };
 }

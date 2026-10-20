@@ -3,10 +3,13 @@
 // their handlers.
 import { changelogSubscriber, comment, emailOptout, post, user, vote } from "@openheard/db";
 import type { Db, EmailKind } from "@openheard/db";
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { and, asc, eq, inArray, isNotNull } from "drizzle-orm";
 
 import { DEMO_ADMIN_ID, isDemo } from "./demo";
 import { type SendResult, sendEmail } from "./email";
+import { emailLocale } from "./email-locale";
 import { type EmailTokenKind, signEmailToken } from "./email-token";
 import { type Rendered, type StatusLabel, type Unsub, changelogEmail, statusChangeEmail } from "./notify-email";
 
@@ -160,17 +163,17 @@ async function secret(): Promise<string> {
   return (env as unknown as { BETTER_AUTH_SECRET: string }).BETTER_AUTH_SECRET;
 }
 
-const UNSUB_LABEL: Record<Exclude<EmailTokenKind, "confirm">, string> = {
-  status: "Stop emails about posts you follow",
-  changelog: "Stop changelog emails",
+const UNSUB_LABEL: Record<Exclude<EmailTokenKind, "confirm">, (locale: Locale) => string> = {
+  status: (locale) => m.email_unsub_status({}, { locale }),
+  changelog: (locale) => m.email_unsub_changelog({}, { locale }),
 };
 
-async function unsubLinks(origin: string, workspaceId: string, email: string, kinds: Exclude<EmailTokenKind, "confirm">[], key: string) {
+async function unsubLinks(origin: string, workspaceId: string, email: string, kinds: Exclude<EmailTokenKind, "confirm">[], key: string, locale: Locale) {
   const unsubs: Unsub[] = [];
   let header: Record<string, string> | undefined;
   for (const k of kinds) {
     const t = await signEmailToken({ k, w: workspaceId, e: email }, key);
-    unsubs.push({ url: `${origin}/unsubscribe?t=${t}`, label: UNSUB_LABEL[k] });
+    unsubs.push({ url: `${origin}/unsubscribe?t=${t}`, label: UNSUB_LABEL[k](locale) });
     // The inbox's own unsubscribe button: one POST, no page, no sign-in.
     // The last kind wins, so a changelog email's button stops changelog mail.
     header = { "List-Unsubscribe": `<${origin}/api/unsubscribe?t=${t}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
@@ -188,7 +191,7 @@ export type StatusChange = {
 
 export async function buildStatusEmails(input: {
   db: Db;
-  workspace: WorkspaceLike & { name: string };
+  workspace: WorkspaceLike & { name: string; locale: string };
   origin: string;
   actor: { id: string; email?: string | null };
   change: StatusChange;
@@ -199,17 +202,18 @@ export async function buildStatusEmails(input: {
   if (!recipients.length) return [];
   const key = input.key ?? (await secret());
   const postUrl = `${origin}/p/${change.postId}`;
+  const locale = emailLocale(workspace);
   return Promise.all(
     recipients.map(async (r) => {
-      const { unsubs, headers } = await unsubLinks(origin, workspace.id, r.email, ["status"], key);
-      return { to: r.email, headers, ...statusChangeEmail({ workspaceName: workspace.name, postTitle: change.postTitle, postUrl, from: change.from, to: change.to, note: change.note, unsubs }) };
+      const { unsubs, headers } = await unsubLinks(origin, workspace.id, r.email, ["status"], key, locale);
+      return { to: r.email, headers, ...statusChangeEmail({ locale, workspaceName: workspace.name, postTitle: change.postTitle, postUrl, from: change.from, to: change.to, note: change.note, unsubs }) };
     }),
   );
 }
 
 export async function buildChangelogEmails(input: {
   db: Db;
-  workspace: WorkspaceLike & { name: string };
+  workspace: WorkspaceLike & { name: string; locale: string };
   origin: string;
   actor: { id: string; email?: string | null };
   entry: { title: string; version?: string | null; body: string };
@@ -220,15 +224,16 @@ export async function buildChangelogEmails(input: {
   const recipients = await changelogRecipients(db, workspace, posts.map((p) => p.id), actor);
   if (!recipients.length) return [];
   const key = input.key ?? (await secret());
+  const locale = emailLocale(workspace);
   const linked = posts.map((p) => ({ title: p.title, url: `${origin}/p/${p.id}` }));
   return Promise.all(
     recipients.map(async (r) => {
       const kinds: ("status" | "changelog")[] = [...(r.follows ? (["status"] as const) : []), ...(r.subscribed ? (["changelog"] as const) : [])];
-      const { unsubs, headers } = await unsubLinks(origin, workspace.id, r.email, kinds, key);
+      const { unsubs, headers } = await unsubLinks(origin, workspace.id, r.email, kinds, key, locale);
       return {
         to: r.email,
         headers,
-        ...changelogEmail({ workspaceName: workspace.name, title: entry.title, version: entry.version, body: entry.body, entryUrl: `${origin}/changelog`, posts: linked, follows: r.follows, unsubs }),
+        ...changelogEmail({ locale, workspaceName: workspace.name, title: entry.title, version: entry.version, body: entry.body, entryUrl: `${origin}/changelog`, posts: linked, follows: r.follows, unsubs }),
       };
     }),
   );

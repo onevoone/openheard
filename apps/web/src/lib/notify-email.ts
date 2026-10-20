@@ -1,6 +1,9 @@
 // The emails that close the loop with voters: a post changed status, a
 // changelog entry went out, and the changelog double opt-in. Pure string
 // building; lib/notify.ts decides who gets them.
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
+
 import { emailButton, emailLayout, escapeHtml } from "./email";
 
 const TEXT = "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;";
@@ -33,6 +36,7 @@ function statusPill(label: string, color: string): string {
 export type StatusLabel = { label: string; color: string };
 
 export function statusChangeEmail(input: {
+  locale: Locale;
   workspaceName: string;
   postTitle: string;
   postUrl: string;
@@ -41,42 +45,44 @@ export function statusChangeEmail(input: {
   note?: string | null;
   unsubs: Unsub[];
 }): Rendered {
-  const { workspaceName, postTitle, postUrl, from, to, note, unsubs } = input;
-  const subject = `${oneLine(postTitle, 80)} is now ${oneLine(to.label, 30).toLowerCase()}`;
+  const { locale, workspaceName, postTitle, postUrl, from, to, note, unsubs } = input;
+  const subject = m.email_status_subject({ title: oneLine(postTitle, 80), status: oneLine(to.label, 30).toLocaleLowerCase(locale) }, { locale });
   const noteHtml = note
     ? `<div style="border-left: 2px solid #e5e5e5; padding: 2px 0 2px 14px; margin: 20px 0 0;">
-        <p style="${TEXT} font-size: 12px; color: #999; margin: 0 0 4px;">Note from the ${escapeHtml(workspaceName)} team</p>
+        <p style="${TEXT} font-size: 12px; color: #999; margin: 0 0 4px;">${m.email_status_note_title({ workspace: escapeHtml(workspaceName) }, { locale })}</p>
         <p style="${TEXT} font-size: 15px; color: #333; line-height: 1.6; margin: 0; white-space: pre-wrap;">${escapeHtml(note)}</p>
       </div>`
     : "";
   const html = emailLayout(
     `
-      <p style="${TEXT} font-size: 13px; color: #999; margin: 0 0 8px;">An update from ${escapeHtml(workspaceName)} on a post you follow</p>
+      <p style="${TEXT} font-size: 13px; color: #999; margin: 0 0 8px;">${m.email_status_intro({ workspace: escapeHtml(workspaceName) }, { locale })}</p>
       <h1 style="${TEXT} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 16px; letter-spacing: -0.3px;">${escapeHtml(postTitle)}</h1>
       <p style="${TEXT} margin: 0;">${statusPill(from.label, from.color)} <span style="color: #999; font-size: 13px; padding: 0 6px;">&rarr;</span> ${statusPill(to.label, to.color)}</p>
       ${noteHtml}
-      ${emailButton(postUrl, "View the post")}
-      <p style="${TEXT} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">You are getting this because you voted on, commented on or posted this idea.</p>
+      ${emailButton(postUrl, m.email_status_button({}, { locale }))}
+      <p style="${TEXT} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">${m.email_why_status({}, { locale })}</p>
     `,
+    locale,
     footer(unsubs),
     escapeHtml(workspaceName),
   );
   const text = [
-    `An update from ${workspaceName} on a post you follow`,
+    m.email_status_intro({ workspace: workspaceName }, { locale }),
     "",
     postTitle,
     `${from.label} -> ${to.label}`,
-    ...(note ? ["", `Note from the team: ${note}`] : []),
+    ...(note ? ["", m.email_status_note_text({ note }, { locale })] : []),
     "",
-    `View the post: ${postUrl}`,
+    `${m.email_status_button({}, { locale })}: ${postUrl}`,
     "",
-    "You are getting this because you voted on, commented on or posted this idea.",
+    m.email_why_status({}, { locale }),
     textFooter(unsubs),
   ].join("\n");
   return { subject, html, text };
 }
 
 export function changelogEmail(input: {
+  locale: Locale;
   workspaceName: string;
   title: string;
   version?: string | null;
@@ -87,36 +93,37 @@ export function changelogEmail(input: {
   follows: boolean;
   unsubs: Unsub[];
 }): Rendered {
-  const { workspaceName, title, version, body, entryUrl, posts, follows, unsubs } = input;
-  const subject = `${oneLine(workspaceName, 40)} shipped: ${oneLine(title, 80)}`;
+  const { locale, workspaceName, title, version, body, entryUrl, posts, follows, unsubs } = input;
+  const subject = m.email_changelog_subject({ workspace: oneLine(workspaceName, 40), title: oneLine(title, 80) }, { locale });
   const excerpt = body.length > 600 ? body.slice(0, 597).trimEnd() + "…" : body;
   const postsHtml = posts.length
-    ? `<p style="${TEXT} font-size: 12px; color: #999; margin: 20px 0 6px;">Shipped from</p>
+    ? `<p style="${TEXT} font-size: 12px; color: #999; margin: 20px 0 6px;">${m.email_changelog_shipped_from({}, { locale })}</p>
        <ul style="${TEXT} margin: 0; padding: 0 0 0 18px; font-size: 14px; line-height: 1.7;">
          ${posts.map((p) => `<li><a href="${escapeHtml(p.url)}" style="color: #111;">${escapeHtml(p.title)}</a></li>`).join("")}
        </ul>`
     : "";
-  const why = follows ? "You are getting this because you voted on, commented on or posted one of these ideas." : `You are getting this because you subscribed to the ${workspaceName} changelog.`;
+  const why = follows ? m.email_why_changelog_follow({}, { locale }) : m.email_why_changelog_subscribed({ workspace: workspaceName }, { locale });
   const html = emailLayout(
     `
-      <p style="${TEXT} font-size: 13px; color: #999; margin: 0 0 8px;">New in ${escapeHtml(workspaceName)}${version ? ` &middot; ${escapeHtml(version)}` : ""}</p>
+      <p style="${TEXT} font-size: 13px; color: #999; margin: 0 0 8px;">${m.email_changelog_eyebrow({ workspace: escapeHtml(workspaceName) }, { locale })}${version ? ` &middot; ${escapeHtml(version)}` : ""}</p>
       <h1 style="${TEXT} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px; letter-spacing: -0.3px;">${escapeHtml(title)}</h1>
       ${excerpt ? `<p style="${TEXT} font-size: 15px; color: #555; line-height: 1.7; margin: 0; white-space: pre-wrap;">${escapeHtml(excerpt)}</p>` : ""}
       ${postsHtml}
-      ${emailButton(entryUrl, "Read the changelog")}
+      ${emailButton(entryUrl, m.email_changelog_button({}, { locale }))}
       <p style="${TEXT} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">${escapeHtml(why)}</p>
     `,
+    locale,
     footer(unsubs),
     escapeHtml(workspaceName),
   );
   const text = [
-    `New in ${workspaceName}${version ? ` · ${version}` : ""}`,
+    `${m.email_changelog_eyebrow({ workspace: workspaceName }, { locale })}${version ? ` · ${version}` : ""}`,
     "",
     title,
     ...(excerpt ? ["", excerpt] : []),
-    ...(posts.length ? ["", "Shipped from:", ...posts.map((p) => `- ${p.title}: ${p.url}`)] : []),
+    ...(posts.length ? ["", `${m.email_changelog_shipped_from({}, { locale })}:`, ...posts.map((p) => `- ${p.title}: ${p.url}`)] : []),
     "",
-    `Read the changelog: ${entryUrl}`,
+    `${m.email_changelog_button({}, { locale })}: ${entryUrl}`,
     "",
     why,
     textFooter(unsubs),
@@ -124,16 +131,16 @@ export function changelogEmail(input: {
   return { subject, html, text };
 }
 
-export function confirmSubscriptionEmail(input: { workspaceName: string; confirmUrl: string }): Rendered {
-  const { workspaceName, confirmUrl } = input;
+export function confirmSubscriptionEmail(input: { locale: Locale; workspaceName: string; confirmUrl: string }): Rendered {
+  const { locale, workspaceName, confirmUrl } = input;
   return {
-    subject: `Confirm changelog emails from ${oneLine(workspaceName, 60)}`,
+    subject: m.email_confirm_subject({ workspace: oneLine(workspaceName, 60) }, { locale }),
     html: emailLayout(`
-      <h1 style="${TEXT} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">Confirm your subscription</h1>
-      <p style="${TEXT} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">Confirm to get one email from ${escapeHtml(workspaceName)} each time something ships. This link expires in 7 days.</p>
-      ${emailButton(confirmUrl, "Confirm")}
-      <p style="${TEXT} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">If you did not ask for this, ignore this email and nothing will be sent.</p>
-    `, "", escapeHtml(workspaceName)),
-    text: `Confirm changelog emails from ${workspaceName}\n\nConfirm here: ${confirmUrl}\n\nThis link expires in 7 days. If you did not ask for this, ignore this email.`,
+      <h1 style="${TEXT} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">${m.email_confirm_title({}, { locale })}</h1>
+      <p style="${TEXT} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">${m.email_confirm_body({ workspace: escapeHtml(workspaceName) }, { locale })}</p>
+      ${emailButton(confirmUrl, m.email_confirm_button({}, { locale }))}
+      <p style="${TEXT} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">${m.email_confirm_ignore({}, { locale })}</p>
+    `, locale, "", escapeHtml(workspaceName)),
+    text: `${m.email_confirm_subject({ workspace: workspaceName }, { locale })}\n\n${m.email_confirm_text_link({ url: confirmUrl }, { locale })}\n\n${m.email_confirm_text_note({}, { locale })}`,
   };
 }

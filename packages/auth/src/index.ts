@@ -2,7 +2,9 @@ import { createDb } from "@openheard/db";
 import * as schema from "@openheard/db/schema/auth";
 import { defaultStatuses, defaultTagline } from "@openheard/db/defaults";
 import { membership, status, workspace } from "@openheard/db/schema/feedback";
-import { BASE_LOCALE } from "@openheard/i18n/locales";
+import { BASE_LOCALE, type Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
 import { env } from "@openheard/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -19,6 +21,18 @@ function authFrom() {
   return vars.EMAIL_FROM
     ? { email: vars.EMAIL_FROM, name: vars.EMAIL_FROM_NAME || "openheard" }
     : { email: "hello@openheard.com", name: "openheard" };
+}
+
+// Sign-in and verification emails go out inside the request that asked for
+// them, so they use the language of that request: the visitor's cookie or
+// Accept-Language, then the workspace's board language, then Ukrainian. Outside
+// a request there is nothing to read, so the base language applies.
+function requestLocale(): Locale {
+  try {
+    return getLocale();
+  } catch {
+    return BASE_LOCALE;
+  }
 }
 
 async function authSendEmail(to: string, subject: string, html: string, text: string) {
@@ -94,22 +108,24 @@ export function createAuth(opts?: { demo?: boolean }) {
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
+        const locale = requestLocale();
         await authSendEmail(
           user.email,
-          "Verify your email",
-          `<p>Click to verify your email address.</p><p><a href="${url}">${url}</a></p>`,
-          `Verify your email: ${url}`,
+          m.auth_email_verify_subject({}, { locale }),
+          `<p>${m.auth_email_verify_html({}, { locale })}</p><p><a href="${url}">${url}</a></p>`,
+          m.auth_email_verify_text({ url }, { locale }),
         );
       },
     },
     emailAndPassword: {
       enabled: true,
       sendResetPassword: async ({ user, url }) => {
+        const locale = requestLocale();
         await authSendEmail(
           user.email,
-          "Reset your password",
-          `<p>Click to reset your password. Expires in 1 hour.</p><p><a href="${url}">${url}</a></p>`,
-          `Reset your password: ${url}`,
+          m.auth_email_reset_subject({}, { locale }),
+          `<p>${m.auth_email_reset_html({}, { locale })}</p><p><a href="${url}">${url}</a></p>`,
+          m.auth_email_reset_text({ url }, { locale }),
         );
       },
     },
@@ -165,11 +181,12 @@ export function createAuth(opts?: { demo?: boolean }) {
               link = url.replace(baseOrigin, reqOrigin);
             }
           }
+          const locale = requestLocale();
           await authSendEmail(
             email,
-            "Your sign-in link",
-            `<p>Click to sign in. Expires in 5 minutes.</p><p><a href="${link}">${link}</a></p>`,
-            `Sign in: ${link}`,
+            m.auth_email_signin_subject({}, { locale }),
+            `<p>${m.auth_email_signin_html({}, { locale })}</p><p><a href="${link}">${link}</a></p>`,
+            m.auth_email_signin_text({ url: link }, { locale }),
           );
         },
       }),

@@ -3,6 +3,7 @@ import type { Db } from "@openheard/db";
 import { m } from "@openheard/i18n/messages";
 import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 
+import { emailLocale } from "@/lib/email-locale";
 import { HELP_SLUG, type HelpIcon, uniqueSlug } from "@/lib/help";
 import { removeHelpArticle } from "@/lib/help-db";
 import { notifyIntegrations } from "@/lib/integration-db";
@@ -261,7 +262,7 @@ export async function saveChangelog(ctx: OpCtx, data: { id?: number; title: stri
       const out: Outgoing[] = [];
       for (const p of shipped) {
         const postTitle = posts.find((x) => x.id === p.id)?.title ?? "";
-        const change = { postId: p.id, postTitle, from: label(p.status), to: label(done), note: `Shipped in ${version || title}` };
+        const change = { postId: p.id, postTitle, from: label(p.status), to: label(done), note: m.email_shipped_note({ name: version || title }, { locale: emailLocale(workspace) }) };
         out.push(...(await buildStatusEmails({ db, workspace, origin, actor, change })));
       }
       await deliver(out, undefined, "changelog-email");
