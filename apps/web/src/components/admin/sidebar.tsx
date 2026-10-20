@@ -77,14 +77,14 @@ function WorkspaceItems() {
       {(list ?? [{ id: root.workspace.id, name: root.workspace.name, role: "admin" }]).map((w) => (
         <DropdownMenuItem key={w.id} disabled={w.id === root.workspace.id} onClick={() => (window.location.href = workspaceUrl(w.id, root.rootDomain, "/dashboard"))}>
           <span className="flex-1 truncate">{w.name}</span>
-          <span className="text-xs text-faint capitalize">{w.role}</span>
+          <span className="text-xs text-faint">{w.role === "admin" ? m.dash_role_admin() : m.dash_role_member()}</span>
         </DropdownMenuItem>
       ))}
       {root.rootDomain && !isDemo(root.workspace) ? (
         <>
           <DropdownMenuSeparator />
           <DropdownMenuItem render={<Link to="/new" />}>
-            <PlusIcon className="size-3.5" /> New workspace
+            <PlusIcon className="size-3.5" /> {m.dash_nav_new_workspace()}
           </DropdownMenuItem>
         </>
       ) : null}
@@ -103,26 +103,26 @@ export function FilterColumn() {
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col overflow-y-auto border-r px-3 pt-[15px] pb-4 [scrollbar-width:none]">
       <div className="flex h-7 items-center pl-2">
-        <span className="text-[15px] font-semibold">Posts</span>
+        <span className="text-[15px] font-semibold">{m.dash_nav_posts()}</span>
       </div>
       <div className="flex flex-col gap-1 pt-3">
-        <Item to="/dashboard/inbox" active={plain} icon={TrayIcon} label="All posts" count={root.total} />
+        <Item to="/dashboard/inbox" active={plain} icon={TrayIcon} label={m.dash_nav_all_posts()} count={root.total} />
       </div>
-      <Group label="Status">
+      <Group label={m.dash_status()}>
         {statuses.map((s) => {
           const G = GLYPH[KIND_ICON[s.kind]];
           const filled = s.kind === "done" || s.kind === "closed";
           return <Item key={s.key} to="/dashboard/inbox" search={{ status: s.key }} active={inInbox && status === s.key} icon={G} iconColor={s.color} weight={filled ? "fill" : "regular"} label={s.label} count={root.statusCounts[s.key] ?? 0} />;
         })}
       </Group>
-      <Group label="Quick filters">
-        <Expand icon={SquaresFourIcon} label="Boards">
+      <Group label={m.dash_nav_quick_filters()}>
+        <Expand icon={SquaresFourIcon} label={m.dash_nav_boards()}>
           {root.boards.map((b) => (
             <Item key={b.id} to="/dashboard/inbox" search={{ status, board: b.id }} active={inInbox && (search as { board?: string }).board === b.id} label={b.name} count={b.count} sub />
           ))}
         </Expand>
-        <Expand icon={TagIcon} label="Tags">
-          {root.tags.length === 0 ? <div className="px-2 py-1 pl-[38px] text-xs text-faint">No tags yet</div> : null}
+        <Expand icon={TagIcon} label={m.dash_tags()}>
+          {root.tags.length === 0 ? <div className="px-2 py-1 pl-[38px] text-xs text-faint">{m.dash_tags_none()}</div> : null}
           {root.tags.map((t) => (
             <Item key={t.id} to="/dashboard/inbox" search={{ status, tag: t.id }} active={inInbox && (search as { tag?: string }).tag === t.id} label={t.name} sub />
           ))}
@@ -142,7 +142,7 @@ export function AdminSidebar({ onNewPost, onCollapse }: { onNewPost?: () => void
     <aside className="flex h-full min-h-0 w-[200px] flex-col px-3 pt-3.5 pb-4">
       <div className="flex shrink-0 items-center justify-between px-1">
         <WorkspaceSwitcher />
-        <button type="button" onClick={onCollapse} className="inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground" title="Collapse sidebar">
+        <button type="button" onClick={onCollapse} className="inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground" title={m.dash_nav_collapse()}>
           <SidebarSimpleIcon className="size-[15px]" />
         </button>
       </div>
@@ -150,17 +150,17 @@ export function AdminSidebar({ onNewPost, onCollapse }: { onNewPost?: () => void
       {/* Pages scroll on short windows so the account footer stays on screen. */}
       <div className="-mx-3 min-h-0 flex-1 overflow-y-auto px-3 pb-3 [scrollbar-width:none]">
       <Group>
-        <Item to="/dashboard/inbox" active={inInbox && !(search as { status?: string }).status} icon={TrayIcon} label="Posts" count={root.total} />
-        <Item to="/dashboard/roadmap" icon={MapTrifoldIcon} label="Roadmap" />
-        <Item to="/dashboard/changelog" icon={MegaphoneIcon} label="Changelog" />
-        <Item to="/dashboard/help" icon={LifebuoyIcon} label="Help center" />
-        <Item icon={PlusIcon} label="New post" onClick={onNewPost} />
+        <Item to="/dashboard/inbox" active={inInbox && !(search as { status?: string }).status} icon={TrayIcon} label={m.dash_nav_posts()} count={root.total} />
+        <Item to="/dashboard/roadmap" icon={MapTrifoldIcon} label={m.nav_roadmap()} />
+        <Item to="/dashboard/changelog" icon={MegaphoneIcon} label={m.nav_changelog()} />
+        <Item to="/dashboard/help" icon={LifebuoyIcon} label={m.dash_nav_help()} />
+        <Item icon={PlusIcon} label={m.dash_nav_new_post()} onClick={onNewPost} />
       </Group>
       </div>
 
       <AccountMenu>
-        <Item to="/" icon={ArrowSquareOutIcon} label="Public board" />
-        <Item to="/dashboard/settings/general" icon={GearSixIcon} label="Settings" />
+        <Item to="/" icon={ArrowSquareOutIcon} label={m.dash_nav_public_board()} />
+        <Item to="/dashboard/settings/general" icon={GearSixIcon} label={m.dash_nav_settings()} />
       </AccountMenu>
     </aside>
   );
@@ -198,7 +198,7 @@ function AccountMenu({ children }: { children: ReactNode }) {
               })
             }
           >
-            <SignOutIcon className="size-4" /> Sign out
+            <SignOutIcon className="size-4" /> {m.nav_sign_out()}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -313,32 +313,32 @@ export function AdminRail({ onExpand, onNewPost }: { onExpand?: () => void; onNe
         </Tip>
         <DropdownMenuContent align="start" side="right" className="min-w-52">
           <DropdownMenuGroup>
-            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Workspaces</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{m.dash_nav_workspaces()}</DropdownMenuLabel>
             <WorkspaceItems />
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Tip label="Posts">
+      <Tip label={m.dash_nav_posts()}>
         <Link to="/dashboard/inbox" preload="viewport" className={cls(inInbox)}>
           <TrayIcon className="size-[17px]" />
         </Link>
       </Tip>
-      <Tip label="Roadmap">
+      <Tip label={m.nav_roadmap()}>
         <Link to="/dashboard/roadmap" preload="viewport" className={cls(pathname.startsWith("/dashboard/roadmap"))}>
           <MapTrifoldIcon className="size-[17px]" />
         </Link>
       </Tip>
-      <Tip label="Changelog">
+      <Tip label={m.nav_changelog()}>
         <Link to="/dashboard/changelog" preload="viewport" className={cls(pathname.startsWith("/dashboard/changelog"))}>
           <MegaphoneIcon className="size-[17px]" />
         </Link>
       </Tip>
-      <Tip label="Help center">
+      <Tip label={m.dash_nav_help()}>
         <Link to="/dashboard/help" preload="viewport" className={cls(pathname.startsWith("/dashboard/help"))}>
           <LifebuoyIcon className="size-[17px]" />
         </Link>
       </Tip>
-      <Tip label="New post">
+      <Tip label={m.dash_nav_new_post()}>
         <button type="button" onClick={onNewPost} className={cls(false)}>
           <PlusIcon className="size-[17px]" />
         </button>
@@ -346,18 +346,18 @@ export function AdminRail({ onExpand, onNewPost }: { onExpand?: () => void; onNe
       </div>
       <div className="flex shrink-0 flex-col items-center gap-1 pt-1">
       {onExpand ? (
-        <Tip label="Expand sidebar">
+        <Tip label={m.dash_nav_expand()}>
           <button type="button" onClick={onExpand} className={cls(false)}>
             <SidebarSimpleIcon className="size-[17px]" />
           </button>
         </Tip>
       ) : null}
-      <Tip label="Public board">
+      <Tip label={m.dash_nav_public_board()}>
         <Link to="/" preload="viewport" className={cls(false)}>
           <ArrowSquareOutIcon className="size-[17px]" />
         </Link>
       </Tip>
-      <Tip label="Settings">
+      <Tip label={m.dash_nav_settings()}>
         <Link to="/dashboard/settings/general" preload="viewport" className={cls(pathname.startsWith("/dashboard/settings"))}>
           <GearSixIcon className="size-[17px]" />
         </Link>
@@ -374,7 +374,7 @@ export function AdminRail({ onExpand, onNewPost }: { onExpand?: () => void; onNe
               })
             }
           >
-            <SignOutIcon className="size-4" /> Sign out
+            <SignOutIcon className="size-4" /> {m.nav_sign_out()}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

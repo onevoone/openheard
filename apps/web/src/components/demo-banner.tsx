@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { XIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
@@ -13,8 +14,8 @@ export function DemoBanner() {
   if (!shown) return null;
   return (
     <div className="flex h-9 shrink-0 items-center gap-3 border-b px-4">
-      <span className="text-xs font-medium text-muted-foreground">Demo</span>
-      <p className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">Everything here is shared, and everything resets every night.</p>
+      <span className="text-xs font-medium text-muted-foreground">{m.dash_demo_label()}</span>
+      <p className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">{m.dash_demo_text()}</p>
       <button
         type="button"
         onClick={() => {
@@ -22,7 +23,7 @@ export function DemoBanner() {
           setShown(false);
         }}
         className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-faint transition-colors duration-150 hover:bg-accent hover:text-foreground"
-        aria-label="Dismiss"
+        aria-label={m.dash_demo_dismiss()}
       >
         <XIcon className="size-3.5" />
       </button>
