@@ -1,4 +1,5 @@
 import { changelogSubscriber, createDb, emailOptout, user, workspace } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { and, eq, isNotNull } from "drizzle-orm";
@@ -25,16 +26,16 @@ function clientIp(): string {
 // the box cannot be used to learn who follows a workspace.
 export const subscribeChangelog = createServerFn({ method: "POST" })
   .middleware([sessionMiddleware])
-  .validator((d: unknown) => z.object({ email: z.string().trim().email("Enter a valid email").max(254) }).parse(d))
+  .validator((d: unknown) => z.object({ email: z.string().trim().email({ error: () => m.err_email_enter() }).max(254) }).parse(d))
   .handler(async ({ data, context }) => {
     const ws = context.workspace;
-    if (isDemo(ws)) throw new Error("The demo does not send email");
+    if (isDemo(ws)) throw new Error(m.err_demo_no_email());
     const email = normalizeEmail(data.email);
     const [byIp, byAddress] = await Promise.all([
       rateLimit(`changelog-subscribe:${clientIp()}`, { window: 600, max: 5, failClosed: true }),
       rateLimit(`changelog-subscribe:${ws.id}:${email}`, { window: 3600, max: 2, failClosed: true }),
     ]);
-    if (!byIp.allowed || !byAddress.allowed) throw new Error("Too many tries. Try again in a few minutes.");
+    if (!byIp.allowed || !byAddress.allowed) throw new Error(m.err_too_many_tries());
     await requestConfirmation(ws, email);
     return { ok: true };
   });
@@ -119,7 +120,7 @@ export const saveEmailPrefs = createServerFn({ method: "POST" })
     else if (account?.verified) await optIn(db, ws, email, "changelog");
     else {
       const limit = await rateLimit(`changelog-subscribe:${ws}:${email}`, { window: 3600, max: 2, failClosed: true });
-      if (!limit.allowed) throw new Error("Too many tries. Try again in a few minutes.");
+      if (!limit.allowed) throw new Error(m.err_too_many_tries());
       confirmSent = await requestConfirmation(context.workspace, email);
     }
     if (changeWorkspace) {

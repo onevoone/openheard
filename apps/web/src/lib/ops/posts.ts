@@ -1,4 +1,5 @@
 import { activity, attachment, board, changelogPost, comment, post, postTag, tag, vote } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 import { and, desc, eq, inArray, notInArray, or, sql } from "drizzle-orm";
 
 import { claimQuery, reserveAttachments } from "@/lib/attachment-db";
@@ -20,7 +21,7 @@ export async function ownPost(ctx: OpCtx, postId: number) {
     .from(post)
     .where(and(eq(post.id, postId), eq(post.workspaceId, ctx.workspace.id)))
     .limit(1);
-  if (!row) throw new OpError(`Post ${postId} not found in workspace '${ctx.workspace.id}'`, 404);
+  if (!row) throw new OpError(m.err_post_not_found_in_workspace({ id: postId, workspace: ctx.workspace.id }, { locale: ctx.locale }), 404);
   return row;
 }
 
@@ -29,7 +30,7 @@ export async function resolveStatus(ctx: OpCtx, keyOrLabel: string) {
   const all = await listStatuses(ctx.db, ctx.workspace.id);
   const want = keyOrLabel.trim().toLowerCase();
   const hit = all.find((s) => s.key === keyOrLabel) ?? all.find((s) => s.key.toLowerCase() === want || s.label.toLowerCase() === want);
-  if (!hit) throw new OpError(`Status '${keyOrLabel}' not found; statuses are: ${listOf(all.map((s) => s.key))}`);
+  if (!hit) throw new OpError(m.err_status_not_found({ status: keyOrLabel, list: listOf(all.map((s) => s.key), ctx.locale) }, { locale: ctx.locale }));
   return hit;
 }
 
@@ -38,7 +39,7 @@ export async function resolveBoard(ctx: OpCtx, idOrName: string) {
   const all = await ctx.db.select({ id: board.id, name: board.name }).from(board).where(eq(board.workspaceId, ctx.workspace.id));
   const want = idOrName.trim().toLowerCase();
   const hit = all.find((b) => b.id === idOrName) ?? all.find((b) => b.id.toLowerCase() === want || b.name.toLowerCase() === want);
-  if (!hit) throw new OpError(`Board '${idOrName}' not found; boards are: ${listOf(all.map((b) => `${b.id} (${b.name})`))}`);
+  if (!hit) throw new OpError(m.err_board_not_found_list({ board: idOrName, list: listOf(all.map((b) => `${b.id} (${b.name})`), ctx.locale) }, { locale: ctx.locale }));
   return hit;
 }
 
@@ -52,7 +53,7 @@ export async function resolveTags(ctx: OpCtx, names: string[], opts: { create?: 
     const hit = all.find((t) => t.id === n || t.name.toLowerCase() === want);
     if (hit) ids.push(hit.id);
     else if (opts.create) ids.push(await opts.create(n.trim()));
-    else throw new OpError(`Tag '${n}' not found; tags are: ${listOf(all.map((t) => t.name))}`);
+    else throw new OpError(m.err_tag_not_found({ tag: n, list: listOf(all.map((t) => t.name), ctx.locale) }, { locale: ctx.locale }));
   }
   return [...new Set(ids)];
 }
@@ -105,11 +106,11 @@ export async function setPinned(ctx: OpCtx, postId: number, pinned?: boolean) {
 // the merged post keeps a pointer so its old URL still resolves.
 export async function mergePosts(ctx: OpCtx, from: number, into: number) {
   const { db } = ctx;
-  if (from === into) throw new OpError("Pick a different post");
+  if (from === into) throw new OpError(m.err_pick_different_post({}, { locale: ctx.locale }));
   const source = await ownPost(ctx, from);
   const target = await ownPost(ctx, into);
   if (source.mergedIntoId === into) return { into, alreadyMerged: true, votesAdded: 0 };
-  if (target.mergedIntoId) throw new OpError(`Post ${into} was itself merged into ${target.mergedIntoId}; merge into that one`);
+  if (target.mergedIntoId) throw new OpError(m.err_merge_target_merged({ into, target: target.mergedIntoId }, { locale: ctx.locale }));
   const fromVotes = await db.select({ userId: vote.userId }).from(vote).where(eq(vote.postId, from));
   const intoVotes = new Set((await db.select({ userId: vote.userId }).from(vote).where(eq(vote.postId, into))).map((v) => v.userId));
   const moved = fromVotes.filter((v) => !intoVotes.has(v.userId));
@@ -167,11 +168,11 @@ export async function setPostText(ctx: OpCtx, postId: number, data: { title?: st
   const set: { title?: string; body?: string } = {};
   if (data.title !== undefined) {
     const title = data.title.trim();
-    if (title.length < 4 || title.length > 140) throw new OpError("Title must be 4 to 140 characters");
+    if (title.length < 4 || title.length > 140) throw new OpError(m.err_title_length({ min: 4, max: 140 }, { locale: ctx.locale }));
     set.title = title;
   }
   if (data.body !== undefined) {
-    if (data.body.length > 5000) throw new OpError("Body is at most 5000 characters");
+    if (data.body.length > 5000) throw new OpError(m.err_body_max({ max: 5000 }, { locale: ctx.locale }));
     set.body = data.body.trim();
   }
   if (Object.keys(set).length) {
@@ -222,8 +223,8 @@ export async function addComment(ctx: OpCtx, data: { postId: number; body: strin
   const { db } = ctx;
   const body = data.body.trim();
   const attachments = data.attachments ?? [];
-  if (!body && !attachments.length) throw new OpError("Write something or attach an image");
-  if (body.length > 5000) throw new OpError("Comment too long (max 5000 characters)");
+  if (!body && !attachments.length) throw new OpError(m.err_comment_empty({}, { locale: ctx.locale }));
+  if (body.length > 5000) throw new OpError(m.err_comment_max({ max: 5000 }, { locale: ctx.locale }));
   await ownPost(ctx, data.postId);
   const authorId = ctx.actor?.id ?? null;
   const countUp = data.internal ? [] : [db.update(post).set({ commentCount: sql`${post.commentCount} + 1` }).where(eq(post.id, data.postId))];

@@ -1,5 +1,236 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
+  "default_board_description": "Що б ви хотіли бачити в продукті",
+  "default_board_name": "Побажання",
+  "default_status_closed": "Закрито",
+  "default_status_done": "Випущено",
+  "default_status_open": "Очікує",
+  "default_status_planned": "Заплановано",
+  "default_status_progress": "У роботі",
+  "default_status_review": "На розгляді",
+  "default_tagline": "Голосуйте за те, що важливо. Ми читаємо кожну ідею й відповідаємо на ті, що випускаємо.",
+  "err_admins_only": "Лише для адміністраторів",
+  "err_already_pro": "У вас уже тариф Pro",
+  "err_anon_voting_off": "Анонімне голосування не ввімкнено",
+  "err_article_not_found": "Статтю не знайдено",
+  "err_attachments_max": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Не більше {count} зображення",
+        "countPlural=few": "Не більше {count} зображень",
+        "countPlural=many": "Не більше {count} зображень",
+        "countPlural=other": "Не більше {count} зображення"
+      }
+    }
+  ],
+  "err_billing_account_missing": "Платіжного акаунта ще немає",
+  "err_billing_not_configured": "Оплату не налаштовано",
+  "err_board_has_posts": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "У цій дошці {count} ідея. Перенесіть або видаліть її.",
+        "countPlural=few": "У цій дошці {count} ідеї. Перенесіть або видаліть їх.",
+        "countPlural=many": "У цій дошці {count} ідей. Перенесіть або видаліть їх.",
+        "countPlural=other": "У цій дошці {count} ідеї. Перенесіть або видаліть їх."
+      }
+    }
+  ],
+  "err_board_name_length": "Назва дошки має містити від {min} до {max} символів",
+  "err_board_not_found": "Дошку не знайдено",
+  "err_board_not_found_list": "Дошку «{board}» не знайдено. Наявні дошки: {list}",
+  "err_board_required": "Спершу оберіть дошку",
+  "err_boards_gone": "Вибраних дошок більше немає. Оновіть сторінку й оберіть знову",
+  "err_body_max": "Текст — не більше {max} символів",
+  "err_changelog_not_found": "Запис журналу змін {id} не знайдено",
+  "err_changelog_posts_max": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Можна додати не більше {count} ідеї",
+        "countPlural=few": "Можна додати не більше {count} ідей",
+        "countPlural=many": "Можна додати не більше {count} ідей",
+        "countPlural=other": "Можна додати не більше {count} ідеї"
+      }
+    }
+  ],
+  "err_collection_not_found": "Розділ {id} не знайдено",
+  "err_collection_not_found_list": "Розділ {id} не знайдено. Наявні розділи: {list}",
+  "err_collection_slug_taken": "Адресу {slug} уже використовує інший розділ",
+  "err_color_invalid": "Колір має бути у форматі hex, наприклад #6e8bff",
+  "err_comment_empty": "Напишіть щось або додайте зображення",
+  "err_comment_max": "Коментар задовгий (не більше {max} символів)",
+  "err_comment_not_found": "Коментар не знайдено",
+  "err_cross_origin_upload": "Завантаження з іншого сайту заборонено",
+  "err_demo_access_locked": "Налаштування доступу в демо змінювати не можна",
+  "err_demo_account": "Недоступно для демо-акаунта",
+  "err_demo_no_email": "Демо не надсилає листів",
+  "err_demo_uploads_off": "У демо завантаження зображень вимкнено",
+  "err_demo_workspace": "Недоступно в демо-просторі",
+  "err_email_enter": "Вкажіть коректну адресу електронної пошти",
+  "err_email_invalid": "«{email}» не схоже на адресу електронної пошти",
+  "err_event_unknown": "Невідома подія «{event}». Доступні події: {events}",
+  "err_fetch_credentials": "Адреси з логіном і паролем не відкриваються",
+  "err_fetch_lookup_failed": "Не вдалося знайти цю адресу",
+  "err_fetch_no_such_host": "Такої адреси не існує",
+  "err_fetch_not_html": "За цією адресою немає веб-сторінки",
+  "err_fetch_not_web_address": "Це не веб-адреса",
+  "err_fetch_port": "Відкриваються лише стандартні веб-порти",
+  "err_fetch_private": "Ця адреса приватна",
+  "err_fetch_redirect_nowhere": "Сайт перенаправив нікуди",
+  "err_fetch_scheme": "Працюють лише адреси http і https",
+  "err_fetch_status": "Сайт відповів кодом {status}",
+  "err_fetch_too_large": "Файл завеликий",
+  "err_fetch_too_many_redirects": "Забагато перенаправлень",
+  "err_help_article_not_found": "Статтю довідки {id} не знайдено",
+  "err_help_slug_invalid": "Адреса «{slug}» недійсна: використовуйте малі латинські літери, цифри й дефіси",
+  "err_help_slug_taken": "Адресу /help/{slug} уже використовує інша стаття",
+  "err_integration_missing": "Підключення «{kind}» ще немає. Спершу підключіть його або вкажіть URL для перевірки.",
+  "err_invite_email_mismatch": "Увійдіть з адресою, на яку надіслано запрошення",
+  "err_invite_not_found": "Запрошення не знайдено або воно вже недійсне",
+  "err_merge_target_merged": "Ідею {into} уже об'єднано з {target}. Об'єднайте з тією",
+  "err_name_in_use": "Ця назва вже зайнята",
+  "err_name_length": "Назва має містити від {min} до {max} символів",
+  "err_not_allowed": "Не дозволено",
+  "err_origin_invalid": "«{origin}» не схоже на адресу сайту. Вкажіть протокол і домен, наприклад https://example.com",
+  "err_origins_max": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Не більше {count} сайту",
+        "countPlural=few": "Не більше {count} сайтів",
+        "countPlural=many": "Не більше {count} сайтів",
+        "countPlural=other": "Не більше {count} сайту"
+      }
+    }
+  ],
+  "err_pick_different_post": "Оберіть іншу ідею",
+  "err_plan_limit_free": [
+    {
+      "declarations": [
+        "input limit",
+        "input pro",
+        "local limitPlural = limit: plural"
+      ],
+      "selectors": [
+        "limitPlural"
+      ],
+      "match": {
+        "limitPlural=one": "Безкоштовний тариф дозволяє {limit} простір. Перейдіть на Pro, щоб мати до {pro}.",
+        "limitPlural=few": "Безкоштовний тариф дозволяє {limit} простори. Перейдіть на Pro, щоб мати до {pro}.",
+        "limitPlural=many": "Безкоштовний тариф дозволяє {limit} просторів. Перейдіть на Pro, щоб мати до {pro}.",
+        "limitPlural=other": "Безкоштовний тариф дозволяє {limit} простору. Перейдіть на Pro, щоб мати до {pro}."
+      }
+    }
+  ],
+  "err_plan_limit_pro": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Тариф Pro дозволяє {count} простір",
+        "countPlural=few": "Тариф Pro дозволяє {count} простори",
+        "countPlural=many": "Тариф Pro дозволяє {count} просторів",
+        "countPlural=other": "Тариф Pro дозволяє {count} простору"
+      }
+    }
+  ],
+  "err_post_members_only": "Публікувати на цій дошці можуть лише учасники команди",
+  "err_post_not_found": "Ідею не знайдено",
+  "err_post_not_found_in_workspace": "Ідею {id} не знайдено в просторі «{workspace}»",
+  "err_posts_not_found": "Не знайдено ідеї в цьому просторі: {ids}",
+  "err_remove_own_admin": "Ви не можете забрати в себе роль адміністратора",
+  "err_remove_self": "Ви не можете видалити себе",
+  "err_reserved_account": "Зарезервований акаунт",
+  "err_sign_in_first": "Спершу увійдіть",
+  "err_sign_in_required": "Увійдіть, щоб це зробити",
+  "err_sign_in_to_attach": "Увійдіть, щоб додавати зображення",
+  "err_site_unreadable": "Не вдалося прочитати цей сайт. Перевірте адресу й спробуйте ще раз.",
+  "err_slug_chars": "Використовуйте малі латинські літери, цифри й дефіси",
+  "err_slug_invalid": "Оберіть іншу адресу: щонайменше 5 літер, цифр або дефісів",
+  "err_slug_taken": "Адресу «{slug}» уже зайнято",
+  "err_status_in_use": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} ідея має цей статус. Перенесіть її.",
+        "countPlural=few": "{count} ідеї мають цей статус. Перенесіть їх.",
+        "countPlural=many": "{count} ідей мають цей статус. Перенесіть їх.",
+        "countPlural=other": "{count} ідеї мають цей статус. Перенесіть їх."
+      }
+    }
+  ],
+  "err_status_label_length": "Підпис статусу має містити від {min} до {max} символів",
+  "err_status_last_closed": "Потрібен принаймні один статус типу «closed»",
+  "err_status_last_open": "Потрібен принаймні один статус типу «open»",
+  "err_status_not_found": "Статус «{status}» не знайдено. Наявні статуси: {list}",
+  "err_status_unknown": "Невідомий статус",
+  "err_stripe_no_url": "Stripe не повернув посилання на оплату",
+  "err_tag_name_length": "Назва тегу має містити від {min} до {max} символів",
+  "err_tag_not_found": "Тег «{tag}» не знайдено. Наявні теги: {list}",
+  "err_title_length": "Заголовок має містити від {min} до {max} символів",
+  "err_title_required": "Додайте заголовок",
+  "err_too_many_answers": "Забагато відповідей. Спробуйте за хвилину.",
+  "err_too_many_matches": "Забагато перевірок сайту. Спробуйте за хвилину.",
+  "err_too_many_searches": "Забагато пошуків. Спробуйте за хвилину.",
+  "err_too_many_tries": "Забагато спроб. Спробуйте за кілька хвилин.",
+  "err_too_many_uploads": "Забагато завантажень. Спробуйте за хвилину.",
+  "err_upload_bad_type": "Цей файл не є зображенням PNG, JPEG, GIF чи WebP.",
+  "err_upload_daily_limit": "Денний ліміт завантаження зображень — {limit}. Спробуйте завтра.",
+  "err_upload_empty": "Файл порожній.",
+  "err_upload_not_set_up": "Завантаження зображень на цьому сервері не налаштовано",
+  "err_upload_too_large": "Зображення можуть бути до {max}.",
+  "err_url_credentials": "URL із логіном чи паролем не приймаються",
+  "err_url_discord": "Вставте вебхук Discord, він починається з https://discord.com/api/webhooks/",
+  "err_url_discord_path": "У цьому URL Discord немає ідентифікатора або токена вебхука",
+  "err_url_host_unreachable": "openheard не може дістатися до цього хоста",
+  "err_url_https": "URL вебхуків мають починатися з https",
+  "err_url_invalid": "Це не схоже на URL",
+  "err_url_port": "Вебхуки надсилаються на порт 443",
+  "err_url_slack": "Вставте вхідний вебхук Slack, він починається з https://hooks.slack.com/",
+  "err_url_slack_path": "У цьому URL Slack немає шляху вебхука",
+  "err_webhook_url_required": "Спершу вставте URL вебхука",
+  "err_widget_accent_invalid": "Колір акценту має бути у форматі hex, наприклад #6e8bff",
+  "err_widget_label_empty": "Додайте текст до підпису",
+  "err_widget_label_long": "Підпис — не довше {max} символів",
+  "err_widget_tabs_min": "Залиште ввімкненою принаймні одну вкладку",
+  "err_workspace_gone": "Цього простору більше немає. Оновіть сторінку.",
   "footer_key_move": "переміщення",
   "footer_key_new_post": "нова ідея",
   "footer_key_vote": "голос",
@@ -8,6 +239,7 @@
   "footer_source": "Код",
   "footer_terms": "Умови",
   "lang_switch_label": "Мова",
+  "list_none": "поки немає",
   "nav_board": "Дошка",
   "nav_changelog": "Журнал змін",
   "nav_dashboard": "Панель керування",
@@ -34,5 +266,133 @@
   "theme_auto": "Авто (як у системі)",
   "theme_dark": "Темна",
   "theme_light": "Світла",
-  "theme_switch": "Тема: {current}. Далі: {next}"
+  "theme_switch": "Тема: {current}. Далі: {next}",
+  "time_ago_day": "{count} дн.",
+  "time_ago_hour": "{count} год",
+  "time_ago_minute": "{count} хв",
+  "time_ago_month": "{count} міс.",
+  "time_ago_second": "{count} с",
+  "time_ago_week": "{count} тиж.",
+  "time_ago_year": "{count} р.",
+  "time_just_now": "щойно",
+  "time_now": "зараз",
+  "time_since_day": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} день тому",
+        "countPlural=few": "{count} дні тому",
+        "countPlural=many": "{count} днів тому",
+        "countPlural=other": "{count} дня тому"
+      }
+    }
+  ],
+  "time_since_hour": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} годину тому",
+        "countPlural=few": "{count} години тому",
+        "countPlural=many": "{count} годин тому",
+        "countPlural=other": "{count} години тому"
+      }
+    }
+  ],
+  "time_since_minute": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} хвилину тому",
+        "countPlural=few": "{count} хвилини тому",
+        "countPlural=many": "{count} хвилин тому",
+        "countPlural=other": "{count} хвилини тому"
+      }
+    }
+  ],
+  "time_since_month": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} місяць тому",
+        "countPlural=few": "{count} місяці тому",
+        "countPlural=many": "{count} місяців тому",
+        "countPlural=other": "{count} місяця тому"
+      }
+    }
+  ],
+  "time_since_second": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} секунду тому",
+        "countPlural=few": "{count} секунди тому",
+        "countPlural=many": "{count} секунд тому",
+        "countPlural=other": "{count} секунди тому"
+      }
+    }
+  ],
+  "time_since_week": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} тиждень тому",
+        "countPlural=few": "{count} тижні тому",
+        "countPlural=many": "{count} тижнів тому",
+        "countPlural=other": "{count} тижня тому"
+      }
+    }
+  ],
+  "time_since_year": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} рік тому",
+        "countPlural=few": "{count} роки тому",
+        "countPlural=many": "{count} років тому",
+        "countPlural=other": "{count} року тому"
+      }
+    }
+  ]
 }

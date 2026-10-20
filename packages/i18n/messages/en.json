@@ -1,5 +1,222 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
+  "default_board_description": "Things you wish the product did",
+  "default_board_name": "Feature requests",
+  "default_status_closed": "Closed",
+  "default_status_done": "Shipped",
+  "default_status_open": "Pending",
+  "default_status_planned": "Planned",
+  "default_status_progress": "In progress",
+  "default_status_review": "Under review",
+  "default_tagline": "Vote on what matters. We read every post and reply on the ones we ship.",
+  "err_admins_only": "Admins only",
+  "err_already_pro": "You are already on Pro",
+  "err_anon_voting_off": "Anonymous voting is not enabled",
+  "err_article_not_found": "Article not found",
+  "err_attachments_max": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Up to {count} image each",
+        "countPlural=other": "Up to {count} images each"
+      }
+    }
+  ],
+  "err_billing_account_missing": "No billing account yet",
+  "err_billing_not_configured": "Billing is not configured",
+  "err_board_has_posts": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "This board has {count} post. Move or delete it first.",
+        "countPlural=other": "This board has {count} posts. Move or delete them first."
+      }
+    }
+  ],
+  "err_board_name_length": "Board name must be {min} to {max} characters",
+  "err_board_not_found": "Board not found",
+  "err_board_not_found_list": "Board '{board}' not found; boards are: {list}",
+  "err_board_required": "Pick a board first",
+  "err_boards_gone": "The boards you picked no longer exist. Reload the page and pick again",
+  "err_body_max": "Body is at most {max} characters",
+  "err_changelog_not_found": "Changelog entry {id} not found",
+  "err_changelog_posts_max": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Link at most {count} post",
+        "countPlural=other": "Link at most {count} posts"
+      }
+    }
+  ],
+  "err_collection_not_found": "Collection {id} not found",
+  "err_collection_not_found_list": "Collection {id} not found; collections are: {list}",
+  "err_collection_slug_taken": "Another collection already uses {slug}",
+  "err_color_invalid": "Colour must be a hex like #6e8bff",
+  "err_comment_empty": "Write something or attach an image",
+  "err_comment_max": "Comment too long (max {max} characters)",
+  "err_comment_not_found": "Comment not found",
+  "err_cross_origin_upload": "Cross-origin uploads are not allowed",
+  "err_demo_access_locked": "Demo access settings cannot be changed",
+  "err_demo_account": "Not available for the demo account",
+  "err_demo_no_email": "The demo does not send email",
+  "err_demo_uploads_off": "Image uploads are off in the demo",
+  "err_demo_workspace": "Not available in the demo workspace",
+  "err_email_enter": "Enter a valid email",
+  "err_email_invalid": "'{email}' is not an email address",
+  "err_event_unknown": "Unknown event '{event}'; events are: {events}",
+  "err_fetch_credentials": "Addresses with a login in them are not fetched",
+  "err_fetch_lookup_failed": "Could not look up that address",
+  "err_fetch_no_such_host": "That address does not exist",
+  "err_fetch_not_html": "That address is not a web page",
+  "err_fetch_not_web_address": "That is not a web address",
+  "err_fetch_port": "Only the standard web ports are fetched",
+  "err_fetch_private": "That address is private",
+  "err_fetch_redirect_nowhere": "The site redirected nowhere",
+  "err_fetch_scheme": "Only http and https addresses work",
+  "err_fetch_status": "The site answered {status}",
+  "err_fetch_too_large": "That file is too large",
+  "err_fetch_too_many_redirects": "Too many redirects",
+  "err_help_article_not_found": "Help article {id} not found",
+  "err_help_slug_invalid": "Slug '{slug}' is not valid: use lowercase letters, numbers and dashes",
+  "err_help_slug_taken": "Another article already uses /help/{slug}",
+  "err_integration_missing": "No {kind} connection yet. Connect one first, or pass a URL to test.",
+  "err_invite_email_mismatch": "Sign in with the invited email",
+  "err_invite_not_found": "Invite not found or expired",
+  "err_merge_target_merged": "Post {into} was itself merged into {target}; merge into that one",
+  "err_name_in_use": "That name is already in use",
+  "err_name_length": "Name must be {min} to {max} characters",
+  "err_not_allowed": "Not allowed",
+  "err_origin_invalid": "Not an origin: {origin}. Use the scheme and host, like https://example.com",
+  "err_origins_max": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "At most {count} site",
+        "countPlural=other": "At most {count} sites"
+      }
+    }
+  ],
+  "err_pick_different_post": "Pick a different post",
+  "err_plan_limit_free": [
+    {
+      "declarations": [
+        "input limit",
+        "input pro",
+        "local limitPlural = limit: plural"
+      ],
+      "selectors": [
+        "limitPlural"
+      ],
+      "match": {
+        "limitPlural=one": "Free allows {limit} workspace. Upgrade to Pro for {pro}.",
+        "limitPlural=other": "Free allows {limit} workspaces. Upgrade to Pro for {pro}."
+      }
+    }
+  ],
+  "err_plan_limit_pro": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Pro allows {count} workspace",
+        "countPlural=other": "Pro allows {count} workspaces"
+      }
+    }
+  ],
+  "err_post_members_only": "Only team members can post on this board",
+  "err_post_not_found": "Post not found",
+  "err_post_not_found_in_workspace": "Post {id} not found in workspace '{workspace}'",
+  "err_posts_not_found": "Post {ids} not found in this workspace",
+  "err_remove_own_admin": "You cannot remove your own admin role",
+  "err_remove_self": "You cannot remove yourself",
+  "err_reserved_account": "Reserved account",
+  "err_sign_in_first": "Sign in first",
+  "err_sign_in_required": "Sign in to do that",
+  "err_sign_in_to_attach": "Sign in to attach images",
+  "err_site_unreadable": "Could not read that website. Check the address and try again.",
+  "err_slug_chars": "Use lowercase letters, numbers and dashes",
+  "err_slug_invalid": "Pick a different slug: at least 5 letters, numbers or dashes",
+  "err_slug_taken": "The slug '{slug}' is taken",
+  "err_status_in_use": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} post uses this status. Move it first.",
+        "countPlural=other": "{count} posts use this status. Move them first."
+      }
+    }
+  ],
+  "err_status_label_length": "Status label must be {min} to {max} characters",
+  "err_status_last_closed": "You need at least one \"closed\" status",
+  "err_status_last_open": "You need at least one \"open\" status",
+  "err_status_not_found": "Status '{status}' not found; statuses are: {list}",
+  "err_status_unknown": "Unknown status",
+  "err_stripe_no_url": "Stripe did not return a checkout URL",
+  "err_tag_name_length": "Tag name must be {min} to {max} characters",
+  "err_tag_not_found": "Tag '{tag}' not found; tags are: {list}",
+  "err_title_length": "Title must be {min} to {max} characters",
+  "err_title_required": "Give it a title",
+  "err_too_many_answers": "Too many answers. Try again in a minute.",
+  "err_too_many_matches": "Too many website matches. Try again in a minute.",
+  "err_too_many_searches": "Too many searches. Try again in a minute.",
+  "err_too_many_tries": "Too many tries. Try again in a few minutes.",
+  "err_too_many_uploads": "Too many uploads. Try again in a minute.",
+  "err_upload_bad_type": "That file is not a PNG, JPEG, GIF or WebP image.",
+  "err_upload_daily_limit": "You can upload up to {limit} of images a day. Try again tomorrow.",
+  "err_upload_empty": "That file is empty.",
+  "err_upload_not_set_up": "Image uploads are not set up on this server",
+  "err_upload_too_large": "Images can be up to {max}.",
+  "err_url_credentials": "URLs with a username or password are not accepted",
+  "err_url_discord": "Paste a Discord webhook, it starts with https://discord.com/api/webhooks/",
+  "err_url_discord_path": "That Discord URL is missing its webhook id or token",
+  "err_url_host_unreachable": "That host is not reachable from openheard",
+  "err_url_https": "Webhook URLs must use https",
+  "err_url_invalid": "That is not a URL",
+  "err_url_port": "Webhooks go to port 443",
+  "err_url_slack": "Paste a Slack incoming webhook, it starts with https://hooks.slack.com/",
+  "err_url_slack_path": "That Slack URL is missing its webhook path",
+  "err_webhook_url_required": "Paste a webhook URL first",
+  "err_widget_accent_invalid": "Accent must be a hex colour like #6e8bff",
+  "err_widget_label_empty": "The label needs some text",
+  "err_widget_label_long": "The label is at most {max} characters",
+  "err_widget_tabs_min": "Keep at least one tab on",
+  "err_workspace_gone": "This workspace no longer exists. Reload the page.",
   "footer_key_move": "move",
   "footer_key_new_post": "new post",
   "footer_key_vote": "vote",
@@ -8,6 +225,7 @@
   "footer_source": "Source",
   "footer_terms": "Terms",
   "lang_switch_label": "Language",
+  "list_none": "none yet",
   "nav_board": "Board",
   "nav_changelog": "Changelog",
   "nav_dashboard": "Dashboard",
@@ -34,5 +252,119 @@
   "theme_auto": "Auto (system)",
   "theme_dark": "Dark",
   "theme_light": "Light",
-  "theme_switch": "Theme: {current}. Switch to {next}"
+  "theme_switch": "Theme: {current}. Switch to {next}",
+  "time_ago_day": "{count}d",
+  "time_ago_hour": "{count}h",
+  "time_ago_minute": "{count}m",
+  "time_ago_month": "{count}mo",
+  "time_ago_second": "{count}s",
+  "time_ago_week": "{count}w",
+  "time_ago_year": "{count}y",
+  "time_just_now": "just now",
+  "time_now": "now",
+  "time_since_day": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} day ago",
+        "countPlural=other": "{count} days ago"
+      }
+    }
+  ],
+  "time_since_hour": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} hour ago",
+        "countPlural=other": "{count} hours ago"
+      }
+    }
+  ],
+  "time_since_minute": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} minute ago",
+        "countPlural=other": "{count} minutes ago"
+      }
+    }
+  ],
+  "time_since_month": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} month ago",
+        "countPlural=other": "{count} months ago"
+      }
+    }
+  ],
+  "time_since_second": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} second ago",
+        "countPlural=other": "{count} seconds ago"
+      }
+    }
+  ],
+  "time_since_week": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} week ago",
+        "countPlural=other": "{count} weeks ago"
+      }
+    }
+  ],
+  "time_since_year": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} year ago",
+        "countPlural=other": "{count} years ago"
+      }
+    }
+  ]
 }

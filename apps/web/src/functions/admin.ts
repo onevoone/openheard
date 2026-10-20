@@ -1,4 +1,6 @@
 import { activity, comment, createDb, membership, post, postTag, status, vote, workspace } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
 
 import { createServerFn } from "@tanstack/react-start";
 import { and, asc, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
@@ -137,8 +139,8 @@ export const setRole = createServerFn({ method: "POST" })
     assertNotDemo(context.workspace);
     // The shared demo login must never gain a membership anywhere else: that
     // membership is also what marks the demo workspace as ours to reset.
-    if (data.userId === DEMO_ADMIN_ID) throw new Error("Reserved account");
-    if (data.userId === me.id && data.role !== "admin") throw new Error("You cannot remove your own admin role");
+    if (data.userId === DEMO_ADMIN_ID) throw new Error(m.err_reserved_account());
+    if (data.userId === me.id && data.role !== "admin") throw new Error(m.err_remove_own_admin());
     await createDb()
       .insert(membership)
       .values({ workspaceId: context.workspace.id, userId: data.userId, role: data.role })
@@ -199,7 +201,7 @@ export const createWorkspace = createServerFn({ method: "POST" })
     // The workspace guard is not enough on its own: the demo cookie also
     // reaches the apex host, where the workspace resolves to default.
     assertNotDemoIdentity(u);
-    return createWorkspaceOp(createDb(), u, data);
+    return createWorkspaceOp(createDb(), u, data, { locale: getLocale() });
   });
 
 // Roadmap admin: all non-merged posts in roadmap statuses, grouped by status.

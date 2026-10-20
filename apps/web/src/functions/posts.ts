@@ -1,4 +1,6 @@
 import { activity, anonymousVote, attachment, board, comment, commentReaction, createDb, post, postTag, status, tag, vote } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
 
 import { purgeWorkspaceCache } from "@/lib/cache";
 import { listStatuses, statusOfKind } from "@/lib/status-db";
@@ -30,7 +32,7 @@ function escapeLike(s: string) {
 // Every mutation checks the post is in this workspace before touching it.
 async function ownBoard(db: ReturnType<typeof createDb>, boardId: string, workspaceId: string) {
   const [row] = await db.select({ id: board.id }).from(board).where(and(eq(board.id, boardId), eq(board.workspaceId, workspaceId))).limit(1);
-  if (!row) throw new Error("Board not found");
+  if (!row) throw new Error(m.err_board_not_found());
 }
 
 // Drops any tag id that does not belong to this workspace.
@@ -42,11 +44,11 @@ async function ownTags(db: ReturnType<typeof createDb>, tagIds: string[], worksp
 
 async function ownPost(db: ReturnType<typeof createDb>, postId: number, workspaceId: string) {
   const [row] = await db.select({ id: post.id }).from(post).where(and(eq(post.id, postId), eq(post.workspaceId, workspaceId))).limit(1);
-  if (!row) throw new Error("Post not found");
+  if (!row) throw new Error(m.err_post_not_found());
 }
 
 // Ids from /api/uploads: the caller's own unclaimed uploads, or the submit fails.
-const attachmentIds = z.array(z.string().max(40)).max(MAX_IMAGES, `Up to ${MAX_IMAGES} images each`).default([]);
+const attachmentIds = z.array(z.string().max(40)).max(MAX_IMAGES, { error: () => m.err_attachments_max({ count: MAX_IMAGES }) }).default([]);
 const attachmentColumns = { id: true, contentType: true, width: true, height: true } as const;
 
 const listInput = z.object({
@@ -163,7 +165,7 @@ export const getPost = createServerFn({ method: "GET" })
       ? (await db.select({ userId: vote.userId }).from(vote).where(and(eq(vote.postId, p.id), eq(vote.userId, context.user.id)))).length > 0
       : false;
     // Merge candidates: posts whose titles share a word of 5+ letters.
-    const similar = (await similarPosts({ db, workspace: context.workspace, actor: null, origin: "" }, p.title, { excludeId: p.id, limit: 3 })).map(({ id, title, voteCount }) => ({ id, title, voteCount }));
+    const similar = (await similarPosts({ db, workspace: context.workspace, actor: null, origin: "", locale: getLocale() }, p.title, { excludeId: p.id, limit: 3 })).map(({ id, title, voteCount }) => ({ id, title, voteCount }));
     const mergedInto = p.mergedIntoId
       ? await db.query.post.findFirst({ where: eq(post.id, p.mergedIntoId), columns: { id: true, title: true } })
       : null;
@@ -206,8 +208,8 @@ export const createPost = createServerFn({ method: "POST" })
   .validator((d: unknown) =>
     z
       .object({
-        boardId: z.string().min(1, "Pick a board first"),
-        title: z.string().trim().min(4, "Give it a title").max(140),
+        boardId: z.string().min(1, { error: () => m.err_board_required() }),
+        title: z.string().trim().min(4, { error: () => m.err_title_required() }).max(140),
         body: z.string().trim().max(5000).default(""),
         tags: z.array(z.string()).max(5).default([]),
         attachments: attachmentIds,
@@ -216,7 +218,7 @@ export const createPost = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const u = requireUser(context.user);
-    if (context.workspace.whoCanPost === "members" && u.role === "guest") throw new Error("Only team members can post on this board");
+    if (context.workspace.whoCanPost === "members" && u.role === "guest") throw new Error(m.err_post_members_only());
     const db = createDb();
     await ownBoard(db, data.boardId, context.workspace.id);
     const tagIds = await ownTags(db, data.tags, context.workspace.id);
@@ -256,7 +258,7 @@ export const toggleVote = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ postId: z.number().int() }).parse(d))
   .handler(async ({ data, context }) => {
     const u = requireUser(context.user);
-    const ctx = { db: createDb(), workspace: context.workspace, actor: u, origin: originFromRequest() };
+    const ctx = { db: createDb(), workspace: context.workspace, actor: u, origin: originFromRequest(), locale: getLocale() };
     return setVote(ctx, data.postId, u.id);
   });
 
@@ -264,7 +266,7 @@ export const toggleAnonVote = createServerFn({ method: "POST" })
   .middleware([sessionMiddleware])
   .validator((d: unknown) => z.object({ postId: z.number().int(), anonToken: z.string().min(16).max(64) }).parse(d))
   .handler(async ({ data, context }) => {
-    if (!context.workspace.anonymousVoting) throw new Error("Anonymous voting is not enabled");
+    if (!context.workspace.anonymousVoting) throw new Error(m.err_anon_voting_off());
     const db = createDb();
     await ownPost(db, data.postId, context.workspace.id);
     const existing = await db
@@ -288,12 +290,12 @@ export const addComment = createServerFn({ method: "POST" })
   .validator((d: unknown) =>
     z
       .object({ postId: z.number().int(), body: z.string().trim().max(5000), internal: z.boolean().default(false), attachments: attachmentIds })
-      .refine((c) => c.body.length > 0 || c.attachments.length > 0, "Write something or attach an image")
+      .refine((c) => c.body.length > 0 || c.attachments.length > 0, { error: () => m.err_comment_empty() })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     const u = requireUser(context.user);
-    const ctx = { db: createDb(), workspace: context.workspace, actor: u, origin: originFromRequest() };
+    const ctx = { db: createDb(), workspace: context.workspace, actor: u, origin: originFromRequest(), locale: getLocale() };
     await addCommentOp(ctx, { postId: data.postId, body: data.body, internal: data.internal && u.role === "admin", attachments: data.attachments });
     return { ok: true };
   });
@@ -307,7 +309,7 @@ export const toggleReaction = createServerFn({ method: "POST" })
     const u = requireUser(context.user);
     const db = createDb();
     const [c] = await db.select({ postId: comment.postId }).from(comment).where(eq(comment.id, data.commentId)).limit(1);
-    if (!c) throw new Error("Comment not found");
+    if (!c) throw new Error(m.err_comment_not_found());
     await ownPost(db, c.postId, context.workspace.id);
     const existing = await db.select().from(commentReaction).where(and(eq(commentReaction.commentId, data.commentId), eq(commentReaction.userId, u.id), eq(commentReaction.emoji, data.emoji)));
     if (existing.length) {

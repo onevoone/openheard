@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createClient } from "@libsql/client";
 import type { Db } from "@openheard/db";
+import { defaultStatuses } from "@openheard/db/defaults";
 import * as schema from "@openheard/db/schema/index";
 import { drizzle } from "drizzle-orm/libsql";
 import { eq } from "drizzle-orm";
@@ -64,7 +65,7 @@ async function seed() {
     { workspaceId: "other", userId: "bob", role: "admin" },
   ]);
   for (const ws of ["acme", "beta", "other"]) {
-    await db.insert(schema.status).values(schema.DEFAULT_STATUSES.map((s, i) => ({ workspaceId: ws, ...s, position: i })));
+    await db.insert(schema.status).values(defaultStatuses("en").map((s, i) => ({ workspaceId: ws, ...s, position: i })));
     await db.insert(schema.board).values({ id: `${ws}-features`, workspaceId: ws, name: "Feature requests" });
   }
   await db.insert(schema.post).values([

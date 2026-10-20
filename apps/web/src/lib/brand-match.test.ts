@@ -242,3 +242,18 @@ describe("matchWebsite", () => {
     expect(called).toBe(false);
   });
 });
+
+describe("BlockedUrlError wording", () => {
+  it("keeps `message` in English and words `localized()` for the reader", () => {
+    let err: unknown;
+    try {
+      checkUrl("http://localhost/");
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(BlockedUrlError);
+    expect((err as BlockedUrlError).message).toBe("That address is private");
+    expect((err as BlockedUrlError).localized("en")).toBe("That address is private");
+    expect((err as BlockedUrlError).localized("uk")).toBe("Ця адреса приватна");
+  });
+});

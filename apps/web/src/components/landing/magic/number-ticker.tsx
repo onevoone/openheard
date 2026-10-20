@@ -5,6 +5,8 @@ import { useInView, useMotionValue, useSpring } from "motion/react"
 
 import { cn } from "@openheard/ui/lib/utils"
 
+import { formatNumber } from "@/lib/format"
+
 interface NumberTickerProps extends ComponentPropsWithoutRef<"span"> {
   value: number
   startValue?: number
@@ -64,10 +66,10 @@ export function NumberTicker({
     () =>
       springValue.on("change", (latest) => {
         if (ref.current) {
-          ref.current.textContent = Intl.NumberFormat("en-US", {
+          ref.current.textContent = formatNumber(Number(latest.toFixed(decimalPlaces)), {
             minimumFractionDigits: decimalPlaces,
             maximumFractionDigits: decimalPlaces,
-          }).format(Number(latest.toFixed(decimalPlaces)))
+          })
         }
       }),
     [springValue, decimalPlaces]

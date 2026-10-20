@@ -1,4 +1,6 @@
 import type { Db } from "@openheard/db";
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 
 import { purgeWorkspaceCache } from "@/lib/cache";
 import { invalidate } from "@/lib/kv-cache";
@@ -11,7 +13,11 @@ import type { Workspace } from "@/lib/session";
 // owner, so it can be null; anything that needs a person (votes, workspace
 // creation) says so.
 export type Actor = { id: string; name: string; email: string };
-export type OpCtx = { db: Db; workspace: Workspace; actor: Actor | null; origin: string };
+//
+// `locale` is the language error messages are written in. A dashboard call
+// passes the request's language; the HTTP API and MCP pass "en", because
+// they are machine interfaces whose texts are part of the contract.
+export type OpCtx = { db: Db; workspace: Workspace; actor: Actor | null; origin: string; locale: Locale };
 
 // A refusal the caller can act on. `status` is what the HTTP API answers with.
 export class OpError extends Error {
@@ -33,8 +39,8 @@ export function refresh(ctx: OpCtx, postIds?: number[]) {
   void purgeWorkspaceCache(ctx.origin, postIds);
 }
 
-// "a, b and c" for error messages that list what does exist.
-export function listOf(items: string[], none = "none yet"): string {
-  if (!items.length) return none;
+// "'a', 'b'" for error messages that list what does exist.
+export function listOf(items: string[], locale: Locale): string {
+  if (!items.length) return m.list_none({}, { locale });
   return items.map((s) => `'${s}'`).join(", ");
 }

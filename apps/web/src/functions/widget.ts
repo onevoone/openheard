@@ -1,4 +1,5 @@
 import { createDb } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -18,10 +19,10 @@ export const connectWidget = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const request = getRequest();
     const site = request.headers.get("sec-fetch-site");
-    if (site && site !== "same-origin") throw new Error("Not allowed");
+    if (site && site !== "same-origin") throw new Error(m.err_not_allowed());
     // Browsers without Sec-Fetch-Site still send Origin on a POST.
     const origin = request.headers.get("origin");
-    if (!site && origin && origin !== new URL(request.url).origin) throw new Error("Not allowed");
+    if (!site && origin && origin !== new URL(request.url).origin) throw new Error(m.err_not_allowed());
     if (!context.user) return { token: null };
     return mintWidgetToken(createDb(), { userId: context.user.id, workspaceId: context.workspace.id });
   });

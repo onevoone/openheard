@@ -13,6 +13,7 @@ import { ChangelogSkeleton, ErrorState } from "@/components/states";
 import { deleteChangelog, listChangelog, saveChangelog } from "@/functions/changelog";
 import { subscribeChangelog } from "@/functions/notifications";
 import { searchPosts } from "@/functions/posts";
+import { formatShortDate } from "@/lib/format";
 import { cn } from "@openheard/ui/lib/utils";
 
 export const Route = createFileRoute("/changelog")({
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/changelog")({
 type Entry = Awaited<ReturnType<typeof listChangelog>>[number];
 
 function shortDate(d: Date | string | number) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return formatShortDate(d);
 }
 
 function ChangelogPage() {

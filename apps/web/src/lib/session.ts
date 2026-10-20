@@ -1,11 +1,16 @@
 import type { Db, workspace } from "@openheard/db";
+import { defaultTagline } from "@openheard/db/defaults";
 import type { Role } from "@openheard/db/schema/feedback";
+import { BASE_LOCALE, localeFromRequest } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
 import { notFound } from "@tanstack/react-router";
 import { createMiddleware } from "@tanstack/react-start";
 import { and, eq } from "drizzle-orm";
 
 import { DEMO_ADMIN_ID, DEMO_WORKSPACE_ID } from "./demo";
 import { WIDGET_TOKEN_HEADER } from "./widget-auth";
+import { forgetWorkspaceLocale } from "./workspace-locale";
 
 export type SessionUser = { id: string; name: string; email: string; role: Role | "guest"; image?: string | null };
 export type Workspace = typeof workspace.$inferSelect;
@@ -61,7 +66,9 @@ async function localWorkspaceOverride(request: Request): Promise<string | null> 
   } catch {
     // Outside a request context there is no response to clear it on.
   }
-  if (request.method !== "GET" && request.method !== "HEAD") throw new Error("This workspace no longer exists. Reload the page.");
+  if (request.method !== "GET" && request.method !== "HEAD") // The language of this request is being worked out right now, and
+  // asking for it again would start the lookup over: say it explicitly.
+  throw new Error(m.err_workspace_gone({}, { locale: localeFromRequest(request) ?? BASE_LOCALE }));
   return null;
 }
 
@@ -132,8 +139,12 @@ async function resolveSession(request: Request, widget?: string) {
   let [ws] = wsResult;
   if (!ws && slug === "default") {
     const { seedStatuses } = await import("./status-db");
-    await db.insert(workspace).values({ id: "default" }).onConflictDoNothing();
-    await seedStatuses(db, "default");
+    // A self-hosted board starts in the language of whoever opens it first;
+    // the admin changes it in Settings.
+    const locale = getLocale();
+    await db.insert(workspace).values({ id: "default", locale, tagline: defaultTagline(locale) }).onConflictDoNothing();
+    await seedStatuses(db, "default", locale);
+    forgetWorkspaceLocale("default");
     [ws] = await db.select().from(workspace).where(eq(workspace.id, slug)).limit(1);
   }
   // An address nobody has claimed yet. The root route shows it as a 404 that
@@ -206,13 +217,13 @@ export const widgetSessionMiddleware = createMiddleware().server(async ({ next, 
 export type Ctx = { user: SessionUser | null; workspace: Workspace; marketing: boolean };
 
 export function requireUser(user: SessionUser | null): SessionUser {
-  if (!user) throw new Error("Sign in to do that");
+  if (!user) throw new Error(m.err_sign_in_required());
   return user;
 }
 
 export function requireAdmin(user: SessionUser | null): SessionUser {
   const u = requireUser(user);
-  if (u.role !== "admin") throw new Error("Admins only");
+  if (u.role !== "admin") throw new Error(m.err_admins_only());
   return u;
 }
 

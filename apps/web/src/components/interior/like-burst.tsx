@@ -7,6 +7,8 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
+import { formatNumber } from "@/lib/format";
+
 const EASE = [0.23, 1, 0.32, 1] as const;
 const CELL = { type: "spring", stiffness: 520, damping: 34, mass: 0.45 } as const;
 const CROSSFADE = { type: "spring", stiffness: 260, damping: 34, mass: 0.8 } as const;
@@ -29,8 +31,7 @@ export const SPARKS = Array.from({ length: 8 }, (_, i) => {
   };
 });
 
-const DEFAULT_FORMAT = (value: number) =>
-  new Intl.NumberFormat("en-US").format(value);
+const DEFAULT_FORMAT = (value: number) => formatNumber(value);
 
 export type LikeCommit = (
   liked: boolean,

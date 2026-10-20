@@ -1,3 +1,4 @@
+import { getLocale } from "@openheard/i18n/runtime";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
@@ -41,7 +42,7 @@ export const prefillWorkspaceBrand = createServerFn({ method: "POST" })
     const u = requireAdmin(context.user);
     const ws = context.workspace;
     if (isDemo(ws) || ws.accent || ws.logoUrl) return { ok: false };
-    await assertMatchAllowed(u.id);
+    await assertMatchAllowed(u.id, getLocale());
     const { prefillBrand } = await import("@/lib/brand-match");
     await prefillBrand(ws.id, data.website);
     purgeWorkspaceCache(new URL(getRequest().url).origin);

@@ -3,6 +3,7 @@
 // on a client that refuses any statement D1 would refuse.
 import { createClient, type Client } from "@libsql/client";
 import type { Db } from "@openheard/db";
+import { defaultStatuses } from "@openheard/db/defaults";
 import * as schema from "@openheard/db/schema/index";
 import { drizzle } from "drizzle-orm/libsql";
 import { eq } from "drizzle-orm";
@@ -43,7 +44,7 @@ async function freshDb() {
 }
 
 const ann = { id: "ann", name: "Ann", email: "ann@example.com" };
-const ctx = (ws = "acme"): OpCtx => ({ db, workspace: { id: ws, name: ws } as OpCtx["workspace"], actor: ann, origin: "http://localhost:3000" });
+const ctx = (ws = "acme"): OpCtx => ({ db, workspace: { id: ws, name: ws } as OpCtx["workspace"], actor: ann, origin: "http://localhost:3000", locale: "en" });
 const ids = (n: number, from = 100) => Array.from({ length: n }, (_, i) => from + i);
 
 beforeEach(async () => {
@@ -53,7 +54,7 @@ beforeEach(async () => {
   await db.insert(schema.workspace).values([{ id: "acme", name: "Acme" }, { id: "beta", name: "Beta" }]);
   await db.insert(schema.membership).values([{ workspaceId: "acme", userId: "ann", role: "admin" }, { workspaceId: "beta", userId: "ann", role: "admin" }]);
   for (const ws of ["acme", "beta"]) {
-    await db.insert(schema.status).values(schema.DEFAULT_STATUSES.map((s, i) => ({ workspaceId: ws, ...s, position: i })));
+    await db.insert(schema.status).values(defaultStatuses("en").map((s, i) => ({ workspaceId: ws, ...s, position: i })));
     await db.insert(schema.board).values({ id: `${ws}-features`, workspaceId: ws, name: "Feature requests" });
   }
   for (const id of ids(50)) await db.insert(schema.post).values({ id, workspaceId: "acme", boardId: "acme-features", title: `Post ${id}` });

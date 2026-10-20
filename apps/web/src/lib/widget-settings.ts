@@ -1,3 +1,5 @@
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { z } from "zod";
 
 // How the widget looks and which tabs it shows, saved per workspace in
@@ -21,25 +23,35 @@ export type WidgetPosition = (typeof WIDGET_POSITIONS)[number];
 export type WidgetRadius = (typeof WIDGET_RADII)[number];
 export type WidgetTabName = (typeof WIDGET_TABS)[number];
 
-export const widgetSettingsSchema = z.object({
-  theme: z.enum(WIDGET_THEMES),
-  // null follows the workspace brand accent.
-  accent: z
-    .string()
-    .regex(/^#[0-9a-fA-F]{6}$/, "Accent must be a hex colour like #6e8bff")
-    .transform((s) => s.toLowerCase())
-    .nullable(),
-  launcher: z.enum(WIDGET_LAUNCHERS),
-  label: z.string().trim().min(1, "The label needs some text").max(WIDGET_LABEL_MAX, `The label is at most ${WIDGET_LABEL_MAX} characters`),
-  icon: z.enum(WIDGET_ICONS),
-  position: z.enum(WIDGET_POSITIONS),
-  radius: z.enum(WIDGET_RADII),
-  // In display order; the first one opens by default.
-  tabs: z
-    .array(z.enum(WIDGET_TABS))
-    .min(1, "Keep at least one tab on")
-    .transform((t) => WIDGET_TABS.filter((name) => t.includes(name))),
-});
+// The messages are callbacks, so they are worded when a value is checked, in
+// the language of that request (or of `locale`, for callers that must not
+// follow it, like the MCP server), never when this module loads.
+export const widgetSettingsSchemaFor = (locale?: Locale) =>
+  z.object({
+    theme: z.enum(WIDGET_THEMES),
+    // null follows the workspace brand accent.
+    accent: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/, { error: () => m.err_widget_accent_invalid({}, { locale }) })
+      .transform((s) => s.toLowerCase())
+      .nullable(),
+    launcher: z.enum(WIDGET_LAUNCHERS),
+    label: z
+      .string()
+      .trim()
+      .min(1, { error: () => m.err_widget_label_empty({}, { locale }) })
+      .max(WIDGET_LABEL_MAX, { error: () => m.err_widget_label_long({ max: WIDGET_LABEL_MAX }, { locale }) }),
+    icon: z.enum(WIDGET_ICONS),
+    position: z.enum(WIDGET_POSITIONS),
+    radius: z.enum(WIDGET_RADII),
+    // In display order; the first one opens by default.
+    tabs: z
+      .array(z.enum(WIDGET_TABS))
+      .min(1, { error: () => m.err_widget_tabs_min({}, { locale }) })
+      .transform((t) => WIDGET_TABS.filter((name) => t.includes(name))),
+  });
+
+export const widgetSettingsSchema = widgetSettingsSchemaFor();
 
 export type WidgetSettings = z.output<typeof widgetSettingsSchema>;
 

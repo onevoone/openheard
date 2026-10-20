@@ -2,6 +2,7 @@
 // uploads bucket so a board never hotlinks someone else's server. Server
 // only: routes reach it through a dynamic import.
 import type { Db } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 
 import { imageSize, sniffImageType } from "./attachments";
 import { type BrandSuggestion, parsePage, suggestBrand } from "./brand-extract";
@@ -41,8 +42,8 @@ export async function fetchLogo(src: string, deps: Deps = {}): Promise<{ bytes: 
 
 export async function matchWebsite(input: string, deps: Deps = {}): Promise<BrandMatch> {
   const page = await safeFetch(normalizeWebsite(input), { ...deps, maxBytes: PAGE_BYTES, timeoutMs: 5000, truncate: true, accept: "text/html" });
-  if (page.status >= 400) throw new BlockedUrlError(`The site answered ${page.status}`);
-  if (page.contentType && !/html/i.test(page.contentType)) throw new BlockedUrlError("That address is not a web page");
+  if (page.status >= 400) throw new BlockedUrlError((o) => m.err_fetch_status({ status: page.status }, o));
+  if (page.contentType && !/html/i.test(page.contentType)) throw new BlockedUrlError((o) => m.err_fetch_not_html({}, o));
   const info = parsePage(text(page.bytes), page.url);
 
   const css = await Promise.all(

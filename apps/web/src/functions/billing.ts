@@ -1,4 +1,5 @@
 import { createDb, membership, user } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 import { createServerFn } from "@tanstack/react-start";
 import { and, count, eq, ne } from "drizzle-orm";
 import { z } from "zod";
@@ -32,10 +33,10 @@ export const startCheckout = createServerFn({ method: "POST" })
     assertNotDemoIdentity(u);
     const { getStripe, priceFor, billingEnv } = await import("@/lib/billing");
     const stripe = await getStripe();
-    if (!stripe) throw new Error("Billing is not configured");
+    if (!stripe) throw new Error(m.err_billing_not_configured());
     const db = createDb();
     const [row] = await db.select({ customer: user.stripeCustomerId, plan: user.plan }).from(user).where(eq(user.id, u.id)).limit(1);
-    if (row?.plan === "pro") throw new Error("You are already on Pro");
+    if (row?.plan === "pro") throw new Error(m.err_already_pro());
     let customer = row?.customer ?? null;
     if (!customer) {
       const c = await stripe.customers.create({ email: u.email, name: u.name, metadata: { userId: u.id } });
@@ -53,7 +54,7 @@ export const startCheckout = createServerFn({ method: "POST" })
       cancel_url: `${base}/dashboard/settings/billing`,
       subscription_data: { metadata: { userId: u.id } },
     });
-    if (!session.url) throw new Error("Stripe did not return a checkout URL");
+    if (!session.url) throw new Error(m.err_stripe_no_url());
     return { url: session.url };
   });
 
@@ -66,10 +67,10 @@ export const openPortal = createServerFn({ method: "POST" })
     assertNotDemoIdentity(u);
     const { getStripe, billingEnv } = await import("@/lib/billing");
     const stripe = await getStripe();
-    if (!stripe) throw new Error("Billing is not configured");
+    if (!stripe) throw new Error(m.err_billing_not_configured());
     const db = createDb();
     const [row] = await db.select({ customer: user.stripeCustomerId }).from(user).where(eq(user.id, u.id)).limit(1);
-    if (!row?.customer) throw new Error("No billing account yet");
+    if (!row?.customer) throw new Error(m.err_billing_account_missing());
     const base = (await billingEnv()).BETTER_AUTH_URL || "http://localhost:3001";
     const session = await stripe.billingPortal.sessions.create({ customer: row.customer, return_url: `${base}/dashboard/settings/billing` });
     return { url: session.url };
