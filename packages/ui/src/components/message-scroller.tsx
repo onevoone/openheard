@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { cn } from "@openheard/ui/lib/utils";
 import {
@@ -108,7 +109,7 @@ function MessageScrollerButton({
         <>
           <ArrowDownIcon />
           <span className="sr-only">
-            {direction === "end" ? "Scroll to end" : "Scroll to start"}
+            {direction === "end" ? m.ui_scroll_end() : m.ui_scroll_start()}
           </span>
         </>
       )}

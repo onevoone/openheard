@@ -33,10 +33,10 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   loader: () => getWorkspace(),
   head: ({ loaderData, matches }) => {
     // The widget runs inside other people's apps; it never loads our analytics.
-    const embedded = matches.some((m) => (m.routeId as string) === "/widget");
+    const embedded = matches.some((match) => (match.routeId as string) === "/widget");
     const locale = getLocale();
-    const title = loaderData ? `${loaderData.workspace.name} · feedback` : "openheard";
-    const description = loaderData?.workspace.tagline ?? "Open source feedback board.";
+    const title = loaderData ? m.root_title({ workspace: loaderData.workspace.name }) : "openheard";
+    const description = loaderData?.workspace.tagline ?? m.root_description();
     // A self-hoster's own share image; its size is theirs to know, so no hints.
     const ogImage = loaderData?.ogImage;
     const logo = loaderData?.workspace.logoUrl;

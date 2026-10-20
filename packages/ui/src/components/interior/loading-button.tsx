@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "@openheard/i18n/messages";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowRightIcon } from "@phosphor-icons/react";
@@ -182,8 +183,8 @@ export function LoadingButton({
   onAction,
   children,
   pendingLabel = children,
-  successLabel = "Done",
-  errorLabel = "Try again",
+  successLabel = m.ui_done(),
+  errorLabel = m.ui_try_again(),
   resetAfter = 1400,
   disabled = false,
   onError,

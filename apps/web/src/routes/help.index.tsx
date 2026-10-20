@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ArrowRightIcon, FileTextIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { Link, createFileRoute, useLoaderData, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -17,8 +18,8 @@ export const Route = createFileRoute("/help/")({
   loaderDeps: () => ({}),
   loader: () => getHelpCenter(),
   head: ({ match }) => {
-    const title = "Help center";
-    const description = "Guides and answers from the team.";
+    const title = m.help_title();
+    const description = m.help_description();
     return {
       meta: [
         { title },
@@ -69,7 +70,7 @@ function HelpHome() {
             if (!live) return;
             // Say so, rather than showing a failed search as no matches.
             setHits([]);
-            setFailed(err instanceof Error ? err.message : "Search failed. Try again.");
+            setFailed(err instanceof Error ? err.message : m.help_search_failed_text());
           })
           .finally(() => live && setSearching(false)),
       120,
@@ -85,9 +86,9 @@ function HelpHome() {
   return (
     <div className="mx-auto flex w-full max-w-[1072px] flex-1 flex-col px-4 md:px-8">
       <section className="mx-auto flex w-full max-w-[560px] flex-col items-center pt-14 pb-12 text-center md:pt-20">
-        <HelpLabel>Help center</HelpLabel>
-        <h1 className="mt-3 text-[30px] leading-[1.15] font-semibold tracking-[-0.03em] md:text-[36px]">How can we help?</h1>
-        <p className="mt-3 text-[15px] text-muted-foreground">Guides and answers from the {root.workspace.name} team.</p>
+        <HelpLabel>{m.help_title()}</HelpLabel>
+        <h1 className="mt-3 text-[30px] leading-[1.15] font-semibold tracking-[-0.03em] md:text-[36px]">{m.help_heading()}</h1>
+        <p className="mt-3 text-[15px] text-muted-foreground">{m.help_subtitle({ workspace: root.workspace.name })}</p>
 
         <SearchBox value={q} onChange={setQ} hits={hits} disabled={empty} />
 
@@ -96,7 +97,7 @@ function HelpHome() {
             <Results q={searchingFor} hits={hits} searching={searching} failed={failed} />
           ) : data.popular.length ? (
             <>
-              <HelpLabel className="pb-2 pl-0.5">Popular</HelpLabel>
+              <HelpLabel className="pb-2 pl-0.5">{m.help_popular()}</HelpLabel>
               <div className="flex flex-col">
                 {data.popular.map((a) => (
                   <ArticleRow key={a.slug} slug={a.slug} title={a.title} collection={a.collection} />
@@ -109,11 +110,11 @@ function HelpHome() {
 
       {empty ? (
         <div className="border-t px-6 py-16 text-center">
-          <p className="text-[14px] font-semibold">No articles yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">{root.user?.role === "admin" ? "Write the first one from the dashboard." : "The team has not published anything here yet. Ask on the board instead."}</p>
+          <p className="text-[14px] font-semibold">{m.help_empty_title()}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{root.user?.role === "admin" ? m.help_empty_admin() : m.help_empty_visitor()}</p>
         </div>
       ) : (
-        <section className={cn("grid grid-cols-1 border-t", data.collections.length + (data.uncategorised.length ? 1 : 0) > 1 && "md:grid-cols-2 md:[&>div:nth-child(odd)]:border-r md:[&>div:nth-child(odd)]:pr-10 md:[&>div:nth-child(even)]:pl-10", searchingFor && "opacity-60 transition-opacity duration-150")} aria-label="Collections">
+        <section className={cn("grid grid-cols-1 border-t", data.collections.length + (data.uncategorised.length ? 1 : 0) > 1 && "md:grid-cols-2 md:[&>div:nth-child(odd)]:border-r md:[&>div:nth-child(odd)]:pr-10 md:[&>div:nth-child(even)]:pl-10", searchingFor && "opacity-60 transition-opacity duration-150")} aria-label={m.help_collections()}>
           {data.collections.map((c) => (
             <div key={c.id} className="flex gap-4 border-b py-7 md:py-8">
               <HelpIconBox name={c.icon} />
@@ -122,9 +123,7 @@ function HelpHome() {
                   <Link to="/help/collections/$slug" params={{ slug: c.slug }} className="text-[16px] font-semibold tracking-[-0.01em] hover:underline hover:decoration-foreground/30 hover:underline-offset-4">
                     {c.title}
                   </Link>
-                  <span className="shrink-0 text-[12px] text-faint tabular-nums">
-                    {c.articles.length} {c.articles.length === 1 ? "article" : "articles"}
-                  </span>
+                  <span className="shrink-0 text-[12px] text-faint tabular-nums">{m.help_articles_count({ count: c.articles.length })}</span>
                 </div>
                 {c.description ? <p className="mt-0.5 text-[14px] text-muted-foreground">{c.description}</p> : null}
                 <ul className="mt-4 flex flex-col">
@@ -139,7 +138,7 @@ function HelpHome() {
                 </ul>
                 {c.articles.length > PREVIEW ? (
                   <Link to="/help/collections/$slug" params={{ slug: c.slug }} className="mt-1.5 self-start text-[14px] text-link hover:underline hover:underline-offset-4">
-                    View all {c.articles.length}
+                    {m.help_view_all({ count: c.articles.length })}
                   </Link>
                 ) : null}
               </div>
@@ -150,7 +149,7 @@ function HelpHome() {
               <HelpIconBox name="book" />
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-[16px] font-semibold tracking-[-0.01em]">More articles</span>
+                  <span className="text-[16px] font-semibold tracking-[-0.01em]">{m.help_more_articles()}</span>
                   <span className="shrink-0 text-[12px] text-faint tabular-nums">{data.uncategorised.length}</span>
                 </div>
                 <ul className="mt-4 flex flex-col">
@@ -171,8 +170,8 @@ function HelpHome() {
 
       <section className="flex flex-col items-start justify-between gap-4 py-10 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-[16px] font-semibold tracking-[-0.01em]">Didn't find it?</h2>
-          <p className="mt-0.5 text-[14px] text-muted-foreground">Ask on the board. If others need it too, it becomes a feature.</p>
+          <h2 className="text-[16px] font-semibold tracking-[-0.01em]">{m.help_not_found_title()}</h2>
+          <p className="mt-0.5 text-[14px] text-muted-foreground">{m.help_not_found_text()}</p>
         </div>
         <AskOnBoard />
       </section>
@@ -238,14 +237,15 @@ function SearchBox({ value, onChange, hits, disabled }: { value: string; onChang
             document.querySelector<HTMLAnchorElement>("[data-help-hit]")?.focus();
           }
         }}
-        placeholder="Search articles"
-        aria-label="Search help articles"
+        placeholder={m.help_search_placeholder()}
+        aria-label={m.help_search_label()}
+        data-help-search
         autoComplete="off"
         spellCheck={false}
         className="h-12 w-full rounded-xl border border-input bg-card pr-16 pl-11 text-[15px] text-foreground outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-faint focus:border-ring/60 focus:ring-1 focus:ring-ring/40 disabled:opacity-60"
       />
       {value ? (
-        <button type="button" onClick={() => (onChange(""), ref.current?.focus())} aria-label="Clear search" className="absolute top-1/2 right-3 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground">
+        <button type="button" onClick={() => (onChange(""), ref.current?.focus())} aria-label={m.help_search_clear()} className="absolute top-1/2 right-3 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground">
           <XIcon className="size-3.5" />
         </button>
       ) : (
@@ -259,7 +259,7 @@ function Results({ q, hits, searching, failed }: { q: string; hits: Hit[] | null
   if (failed) {
     return (
       <div className="border-y py-8 text-center" role="alert">
-        <p className="text-[14px] font-semibold">Search did not go through</p>
+        <p className="text-[14px] font-semibold">{m.help_search_failed_title()}</p>
         <p className="mt-1 text-sm text-muted-foreground">{failed}</p>
       </div>
     );
@@ -267,7 +267,7 @@ function Results({ q, hits, searching, failed }: { q: string; hits: Hit[] | null
   if (!hits) {
     return (
       <div className="flex flex-col" aria-busy>
-        <HelpLabel className="pb-2 pl-0.5">Searching</HelpLabel>
+        <HelpLabel className="pb-2 pl-0.5">{m.help_searching()}</HelpLabel>
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex h-[52px] items-center border-b">
             <div className="h-3 w-2/3 animate-pulse rounded bg-accent motion-reduce:animate-none" />
@@ -279,15 +279,15 @@ function Results({ q, hits, searching, failed }: { q: string; hits: Hit[] | null
   if (!hits.length) {
     return (
       <div className="border-y py-8 text-center" aria-live="polite">
-        <p className="text-[14px] font-semibold">Nothing matches “{q}”</p>
-        <p className="mt-1 text-sm text-muted-foreground">Try fewer words, or ask on the board below.</p>
+        <p className="text-[14px] font-semibold">{m.help_no_matches({ q })}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{m.help_no_matches_text()}</p>
       </div>
     );
   }
   return (
     <div className={cn("flex flex-col transition-opacity duration-150", searching && "opacity-70")} aria-live="polite">
       <HelpLabel className="pb-2 pl-0.5">
-        {hits.length} {hits.length === 1 ? "result" : "results"}
+        {m.help_results_count({ count: hits.length })}
       </HelpLabel>
       {hits.map((h, i) => (
         <Link
@@ -298,7 +298,7 @@ function Results({ q, hits, searching, failed }: { q: string; hits: Hit[] | null
           onKeyDown={(e) => {
             const rows = [...document.querySelectorAll<HTMLAnchorElement>("[data-help-hit]")];
             if (e.key === "ArrowDown") (e.preventDefault(), rows[i + 1]?.focus());
-            if (e.key === "ArrowUp") (e.preventDefault(), i === 0 ? document.querySelector<HTMLInputElement>("[aria-label='Search help articles']")?.focus() : rows[i - 1]?.focus());
+            if (e.key === "ArrowUp") (e.preventDefault(), i === 0 ? document.querySelector<HTMLInputElement>("[data-help-search]")?.focus() : rows[i - 1]?.focus());
           }}
           className="-mx-2 flex items-start gap-3 rounded-lg border-b border-transparent px-2 py-3 outline-none [&:not(:last-child)]:border-b-border hover:bg-accent/50 focus-visible:bg-accent/60"
         >

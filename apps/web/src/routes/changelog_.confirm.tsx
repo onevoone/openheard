@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -6,7 +7,7 @@ import { confirmChangelog } from "@/functions/notifications";
 
 export const Route = createFileRoute("/changelog_/confirm")({
   validateSearch: (s: Record<string, unknown>) => ({ t: typeof s.t === "string" ? s.t : "" }),
-  head: () => ({ meta: [{ title: "Confirm subscription" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: m.changelog_confirm_head() }, { name: "robots", content: "noindex" }] }),
   component: ConfirmPage,
 });
 
@@ -22,7 +23,7 @@ function ConfirmPage() {
     confirmChangelog({ data: { t } }).then(setResult, () => setResult({ ok: false }));
   }, [t]);
 
-  if (!result) return <EmailLinkPage title="Confirming" body="One moment." />;
-  if (!result.ok) return <EmailLinkPage title="This link has expired" body="Confirm links last 7 days. Subscribe again from the changelog." />;
-  return <EmailLinkPage title="You are subscribed" body={`One email from ${result.workspaceName} each time something ships. Every email has a link to stop.`} />;
+  if (!result) return <EmailLinkPage title={m.changelog_confirm_title()} body={m.changelog_confirm_wait()} />;
+  if (!result.ok) return <EmailLinkPage title={m.changelog_confirm_expired_title()} body={m.changelog_confirm_expired_text()} />;
+  return <EmailLinkPage title={m.changelog_confirm_done_title()} body={m.changelog_confirm_done_text({ workspace: result.workspaceName })} />;
 }

@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ThumbsDownIcon, ThumbsUpIcon } from "@phosphor-icons/react";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -37,11 +38,11 @@ export const Route = createFileRoute("/help/$slug")({
   errorComponent: ({ error }) => <ErrorState message={(error as Error)?.message} retry="/help" />,
   notFoundComponent: () => (
     <main className="mx-auto max-w-3xl px-8 py-24 text-center">
-      <h1 className="text-xl font-semibold">No article here</h1>
+      <h1 className="text-xl font-semibold">{m.help_article_missing_title()}</h1>
       <p className="mt-2 text-muted-foreground">
-        It may have moved or been unpublished.{" "}
+        {m.help_article_missing_text()}{" "}
         <Link to="/help" className="text-link hover:underline">
-          Search the help center
+          {m.help_article_missing_link()}
         </Link>
       </p>
     </main>
@@ -67,9 +68,9 @@ function ArticlePage() {
       }
     >
       <article className="flex flex-col">
-        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-faint">
+        <nav aria-label={m.help_breadcrumb()} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-faint">
           <Link to="/help" className="hover:text-muted-foreground">
-            Help
+            {m.nav_help()}
           </Link>
           <span aria-hidden>/</span>
           {collection ? (
@@ -86,7 +87,7 @@ function ArticlePage() {
         </nav>
 
         {article.status === "draft" ? (
-          <p className="mt-5 self-start rounded-md border border-dashed border-input px-2 py-0.5 text-[12px] text-faint">Draft · only the team can see this</p>
+          <p className="mt-5 self-start rounded-md border border-dashed border-input px-2 py-0.5 text-[12px] text-faint">{m.help_draft_notice()}</p>
         ) : null}
 
         <h1 className="mt-4 text-[28px] leading-[1.2] font-semibold tracking-[-0.025em] md:text-[32px]">{article.title}</h1>
@@ -98,17 +99,17 @@ function ArticlePage() {
               {article.author.name}
             </span>
           ) : null}
-          <span className="text-[12px] text-faint tabular-nums">Updated {longDate(article.updatedAt)}</span>
-          <span className="text-[12px] text-faint tabular-nums">{readingMinutes(article.body)} min read</span>
+          <span className="text-[12px] text-faint tabular-nums">{m.help_updated({ date: longDate(article.updatedAt) })}</span>
+          <span className="text-[12px] text-faint tabular-nums">{m.help_read_minutes({ minutes: readingMinutes(article.body) })}</span>
         </div>
 
-        {blocks.length ? <Markdown blocks={blocks} className="mt-8" /> : <p className="mt-8 text-muted-foreground">This article has no body yet.</p>}
+        {blocks.length ? <Markdown blocks={blocks} className="mt-8" /> : <p className="mt-8 text-muted-foreground">{m.help_article_empty()}</p>}
 
         {article.status === "published" ? <Helpful articleId={article.id} /> : null}
 
         {article.related.length ? (
           <section className="mt-10">
-            <HelpLabel className="pb-2">Related</HelpLabel>
+            <HelpLabel className="pb-2">{m.help_related()}</HelpLabel>
             <ul className="flex flex-col">
               {article.related.map((r) => (
                 <li key={r.slug}>
@@ -155,7 +156,7 @@ function Helpful({ articleId }: { articleId: number }) {
       if (before === null) delete answers[articleId];
       else answers[articleId] = before;
       localStorage.setItem(ANSWERS_KEY, JSON.stringify(answers));
-      toast.error(err instanceof Error ? err.message : "Could not record that");
+      toast.error(err instanceof Error ? err.message : m.help_helpful_failed());
     });
   }
 
@@ -166,16 +167,16 @@ function Helpful({ articleId }: { articleId: number }) {
     );
 
   return (
-    <section className="mt-12 flex flex-wrap items-center justify-between gap-4 border-y py-5" aria-label="Was this helpful?">
+    <section className="mt-12 flex flex-wrap items-center justify-between gap-4 border-y py-5" aria-label={m.help_helpful_question()}>
       <p className="text-[15px] font-semibold" aria-live="polite">
-        {answer === null ? "Was this helpful?" : answer ? "Glad it helped." : "Thanks. We will make it clearer."}
+        {answer === null ? m.help_helpful_question() : answer ? m.help_helpful_yes_reply() : m.help_helpful_no_reply()}
       </p>
       <div className="flex gap-2">
         <button type="button" aria-pressed={answer === true} onClick={() => vote(true)} className={btn(answer === true)}>
-          <ThumbsUpIcon weight={answer === true ? "fill" : "regular"} className="size-4" /> Yes
+          <ThumbsUpIcon weight={answer === true ? "fill" : "regular"} className="size-4" /> {m.help_helpful_yes()}
         </button>
         <button type="button" aria-pressed={answer === false} onClick={() => vote(false)} className={btn(answer === false)}>
-          <ThumbsDownIcon weight={answer === false ? "fill" : "regular"} className="size-4" /> No
+          <ThumbsDownIcon weight={answer === false ? "fill" : "regular"} className="size-4" /> {m.help_helpful_no()}
         </button>
       </div>
     </section>

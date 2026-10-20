@@ -1,28 +1,29 @@
+import { m } from "@openheard/i18n/messages";
 import { cn } from "@openheard/ui/lib/utils";
 
 import { findStatus, tint, useStatuses } from "@/lib/status";
 
 // Dot + label on a 15% tint of the status colour. Used on the post page and in timelines.
 export function StatusChip({ status, className, showOpen = false }: { status: string; className?: string; showOpen?: boolean }) {
-  const m = findStatus(useStatuses(), status);
+  const meta = findStatus(useStatuses(), status);
   // A new post has no status to announce yet; board rows show nothing either.
   // Timelines pass showOpen, since "moved to" needs somewhere to point.
-  if (m.kind === "open" && !showOpen) return null;
+  if (meta.kind === "open" && !showOpen) return null;
   return (
-    <span className={cn("inline-flex h-[22px] items-center gap-1.5 rounded-full px-2.5 pl-2 text-xs font-semibold", className)} style={{ background: tint(m.color), color: m.color }}>
-      <span className="size-[7px] rounded-full" style={{ background: m.color }} />
-      {m.label}
+    <span className={cn("inline-flex h-[22px] items-center gap-1.5 rounded-full px-2.5 pl-2 text-xs font-semibold", className)} style={{ background: tint(meta.color), color: meta.color }}>
+      <span className="size-[7px] rounded-full" style={{ background: meta.color }} />
+      {meta.label}
     </span>
   );
 }
 
 // Dot + muted label, for list rows.
 export function StatusLabel({ status, className }: { status: string; className?: string }) {
-  const m = findStatus(useStatuses(), status);
+  const meta = findStatus(useStatuses(), status);
   return (
     <span className={cn("inline-flex items-center gap-1.5 font-semibold", className)}>
-      <span className="size-[7px] rounded-full" style={{ background: m.color }} />
-      {m.label}
+      <span className="size-[7px] rounded-full" style={{ background: meta.color }} />
+      {meta.label}
     </span>
   );
 }
@@ -67,7 +68,7 @@ export function Avatar({ name, image, size = 26, className }: { name: string; im
 }
 
 export function TeamBadge() {
-  return <span className="inline-flex h-[18px] items-center rounded-full bg-link/10 px-1.5 text-[11px] font-semibold text-link">team</span>;
+  return <span className="inline-flex h-[18px] items-center rounded-full bg-link/10 px-1.5 text-[11px] font-semibold text-link">{m.common_team()}</span>;
 }
 
 export function Mono({ children, className }: { children: React.ReactNode; className?: string }) {

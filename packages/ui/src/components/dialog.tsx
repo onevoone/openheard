@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "@openheard/i18n/messages";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { cn } from "@openheard/ui/lib/utils";
 import { XIcon } from "@phosphor-icons/react";
@@ -38,7 +39,7 @@ function DialogContent({
         {showClose ? (
           <DialogPrimitive.Close className="absolute top-3.5 right-3.5 inline-flex size-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring">
             <XIcon className="size-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{m.ui_close()}</span>
           </DialogPrimitive.Close>
         ) : null}
       </DialogPrimitive.Popup>

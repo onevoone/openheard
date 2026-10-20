@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Dialog, DialogContent, DialogTitle } from "@openheard/ui/components/dialog";
 import { cn } from "@openheard/ui/lib/utils";
 import { ArrowSquareOutIcon, CaretLeftIcon, CaretRightIcon, ImageIcon, SpinnerGapIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
@@ -12,7 +13,7 @@ export type Draft = { key: string; name: string; preview: string; status: "uploa
 async function upload(file: File): Promise<AttachmentView> {
   const res = await fetch("/api/uploads", { method: "POST", body: file, headers: { "content-type": file.type } });
   const out = (await res.json().catch(() => null)) as { attachment?: AttachmentView; error?: string } | null;
-  if (!res.ok || !out?.attachment) throw new Error(out?.error ?? "Upload failed. Try again.");
+  if (!res.ok || !out?.attachment) throw new Error(out?.error ?? m.attach_upload_failed());
   return out.attachment;
 }
 
@@ -53,7 +54,7 @@ export function useImageDrafts({ blocked, onBlocked }: { blocked?: string | null
         }
         room--;
         const key = crypto.randomUUID();
-        const draft: Draft = { key, name: file.name || "Pasted image", preview: URL.createObjectURL(file), status: "uploading" };
+        const draft: Draft = { key, name: file.name || m.attach_pasted(), preview: URL.createObjectURL(file), status: "uploading" };
         count.current++;
         live.current.add(key);
         setDrafts((d) => [...d, draft]);
@@ -154,7 +155,7 @@ export function useImageDrafts({ blocked, onBlocked }: { blocked?: string | null
 export type ImageDrafts = ReturnType<typeof useImageDrafts>;
 
 // A button that opens the file picker. Everything else about it is the caller's.
-export function AttachButton({ drafts, className, children, title = "Attach images" }: { drafts: ImageDrafts; className?: string; children: React.ReactNode; title?: string }) {
+export function AttachButton({ drafts, className, children, title = m.attach_title() }: { drafts: ImageDrafts; className?: string; children: React.ReactNode; title?: string }) {
   const input = useRef<HTMLInputElement>(null);
   return (
     <>
@@ -180,20 +181,20 @@ export function AttachButton({ drafts, className, children, title = "Attach imag
 export function DraftTray({ drafts, className }: { drafts: ImageDrafts; className?: string }) {
   if (!drafts.drafts.length) return null;
   return (
-    <ul className={cn("flex flex-wrap gap-2", className)} aria-label="Attached images">
+    <ul className={cn("flex flex-wrap gap-2", className)} aria-label={m.attach_attached()}>
       {drafts.drafts.map((d) => (
         <li key={d.key} className="group/draft relative h-14 w-[72px] shrink-0 overflow-hidden rounded-md border border-input bg-secondary">
           <img src={d.preview} alt={d.name} className={cn("size-full object-cover transition-opacity duration-150", d.status === "uploading" && "opacity-50")} />
           {d.status === "uploading" ? (
-            <span className="absolute inset-0 flex items-center justify-center" aria-label="Uploading">
+            <span className="absolute inset-0 flex items-center justify-center" aria-label={m.attach_uploading()}>
               <SpinnerGapIcon className="size-4 animate-spin text-foreground motion-reduce:animate-none" />
             </span>
           ) : null}
           <button
             type="button"
             onClick={() => drafts.remove(d.key)}
-            aria-label={`Remove ${d.name}`}
-            title="Remove"
+            aria-label={m.attach_remove({ name: d.name })}
+            title={m.common_remove()}
             className="absolute top-1 right-1 inline-flex size-5 items-center justify-center rounded-full bg-background/90 text-muted-foreground opacity-0 ring-1 ring-border transition-opacity group-hover/draft:opacity-100 hover:text-foreground focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
           >
             <XIcon className="size-3" />
@@ -220,7 +221,7 @@ export function DropOverlay({ drafts, className }: { drafts: ImageDrafts; classN
   if (!drafts.dragging) return null;
   return (
     <div className={cn("pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-[inherit] border border-dashed border-ring bg-background/85 text-[13px] text-foreground", className)}>
-      <ImageIcon className="size-4 text-link" /> Drop images to attach
+      <ImageIcon className="size-4 text-link" /> {m.attach_drop()}
     </div>
   );
 }
@@ -238,7 +239,7 @@ export function AttachmentGallery({ items, className, size = "md" }: { items: At
             key={a.id}
             type="button"
             onClick={() => setOpen(i)}
-            aria-label={`View image ${i + 1} of ${items.length}`}
+            aria-label={m.attach_view({ index: i + 1, total: items.length })}
             className={cn(
               "overflow-hidden rounded-lg border bg-secondary outline-none transition-[filter] hover:brightness-110 focus-visible:ring-1 focus-visible:ring-ring",
               single ? (size === "md" ? "max-h-[320px] max-w-full" : "max-h-[220px] max-w-full") : size === "md" ? "size-[120px]" : "size-24",
@@ -277,16 +278,16 @@ function Lightbox({ items, index, onIndex }: { items: AttachmentView[]; index: n
   return (
     <Dialog open={a != null} onOpenChange={(o) => !o && onIndex(null)}>
       <DialogContent showClose={false} className="w-max max-w-[min(92vw,1200px)] gap-0 overflow-hidden border-input bg-card p-0 sm:max-w-[min(92vw,1200px)]">
-        <DialogTitle className="sr-only">Image {index === null ? "" : `${index + 1} of ${items.length}`}</DialogTitle>
+        <DialogTitle className="sr-only">{index === null ? m.attach_image() : m.attach_image_of({ index: index + 1, total: items.length })}</DialogTitle>
         {a ? (
           <div className="relative">
             <img src={a.url} alt="" width={a.width ?? undefined} height={a.height ?? undefined} className="block h-auto max-h-[82vh] w-auto max-w-[min(92vw,1200px)] object-contain" />
             {many ? (
               <>
-                <button type="button" aria-label="Previous image" onClick={() => onIndex((index! - 1 + items.length) % items.length)} className={cn(nav, "left-3")}>
+                <button type="button" aria-label={m.attach_previous()} onClick={() => onIndex((index! - 1 + items.length) % items.length)} className={cn(nav, "left-3")}>
                   <CaretLeftIcon className="size-4" />
                 </button>
-                <button type="button" aria-label="Next image" onClick={() => onIndex((index! + 1) % items.length)} className={cn(nav, "right-3")}>
+                <button type="button" aria-label={m.attach_next()} onClick={() => onIndex((index! + 1) % items.length)} className={cn(nav, "right-3")}>
                   <CaretRightIcon className="size-4" />
                 </button>
               </>
@@ -295,16 +296,16 @@ function Lightbox({ items, index, onIndex }: { items: AttachmentView[]; index: n
         ) : null}
         <div className="flex items-center justify-between gap-4 border-t bg-background px-3.5 py-2 text-xs text-faint">
           <span className="tabular-nums">
-            {many && index !== null ? `${index + 1} / ${items.length}` : a?.width && a.height ? `${a.width} × ${a.height}` : "image"}
+            {many && index !== null ? `${index + 1} / ${items.length}` : a?.width && a.height ? `${a.width} × ${a.height}` : m.attach_image_lower()}
           </span>
           <div className="flex items-center gap-1">
             {a ? (
               <a href={a.url} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring">
-                <ArrowSquareOutIcon className="size-3.5" /> Open original
+                <ArrowSquareOutIcon className="size-3.5" /> {m.attach_open_original()}
               </a>
             ) : null}
             <button type="button" onClick={() => onIndex(null)} className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 outline-none hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring">
-              <XIcon className="size-3.5" /> Close
+              <XIcon className="size-3.5" /> {m.common_close()}
             </button>
           </div>
         </div>

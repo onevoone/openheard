@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ArrowLeftIcon, ArrowsMergeIcon, PaperclipIcon } from "@phosphor-icons/react";
 import { Link, createFileRoute, notFound, useLoaderData, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -29,15 +30,15 @@ export const Route = createFileRoute("/p/$id")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData ? loaderData.title : "Post" },
+      { title: loaderData ? loaderData.title : m.post_title_fallback() },
       ...(loaderData
         ? [
             { property: "og:title", content: loaderData.title },
-            { property: "og:description", content: loaderData.body ? loaderData.body.slice(0, 200) : `${loaderData.voteCount} votes` },
+            { property: "og:description", content: loaderData.body ? loaderData.body.slice(0, 200) : m.post_votes_count({ count: loaderData.voteCount }) },
             { property: "og:type", content: "article" },
             { name: "twitter:card", content: "summary" },
             { name: "twitter:title", content: loaderData.title },
-            { name: "twitter:description", content: loaderData.body ? loaderData.body.slice(0, 200) : `${loaderData.voteCount} votes` },
+            { name: "twitter:description", content: loaderData.body ? loaderData.body.slice(0, 200) : m.post_votes_count({ count: loaderData.voteCount }) },
           ]
         : []),
     ],
@@ -72,7 +73,7 @@ function PostPage() {
   const [ready, setReady] = useState(false);
   const [pendingComments, setPendingComments] = useState<OptimisticComment[]>([]);
   const images = useImageDrafts({
-    blocked: isDemo(root.workspace) ? "Image uploads are off in the demo." : null,
+    blocked: isDemo(root.workspace) ? m.post_images_off_demo() : null,
     onBlocked: root.user ? undefined : () => openSignIn({ type: "comment", postId: p.id, body: reply.trim() }),
   });
   useEffect(() => setReady(true), []);
@@ -92,7 +93,7 @@ function PostPage() {
       return;
     }
     if (images.uploading) {
-      toast("Images are still uploading");
+      toast(m.post_images_uploading());
       return;
     }
     if (!reply.trim() && !images.ids.length) return;
@@ -125,7 +126,7 @@ function PostPage() {
           setReply((r) => r || body);
           images.restore(saved);
         }
-        toast.error(err instanceof Error ? err.message : "Could not comment");
+        toast.error(err instanceof Error ? err.message : m.post_comment_failed());
       });
   }
 
@@ -139,26 +140,26 @@ function PostPage() {
   const rail = (
     <>
       <Button full arrow size="lg" onClick={() => router.navigate({ to: "/" })} className="brand-cta">
-        Post idea
+        {m.board_post_idea()}
       </Button>
       <section>
-        <RailLabel>Voters</RailLabel>
+        <RailLabel>{m.post_rail_voters()}</RailLabel>
         <div className="flex items-center px-2.5">
           {p.votes.map((v, i) => (
             <Avatar key={v.user.id} name={v.user.name} image={v.user.image} size={26} className={cn("ring-2 ring-background", i > 0 && "-ml-1.5")} />
           ))}
           {p.voteCount > p.votes.length ? <span className="ml-2.5 text-xs text-muted-foreground">+{p.voteCount - p.votes.length}</span> : null}
-          {p.voteCount === 0 ? <span className="text-xs text-faint">No votes yet</span> : null}
+          {p.voteCount === 0 ? <span className="text-xs text-faint">{m.post_no_votes()}</span> : null}
         </div>
       </section>
       <section>
-        <RailLabel>Details</RailLabel>
+        <RailLabel>{m.post_rail_details()}</RailLabel>
         <dl className="flex flex-col">
           {[
-            ["Status", current.label],
-            ["Board", p.board.name],
-            ["Created", fullDate(p.createdAt)],
-            ["Updated", since(p.updatedAt)],
+            [m.post_detail_status(), current.label],
+            [m.post_detail_board(), p.board.name],
+            [m.post_detail_created(), fullDate(p.createdAt)],
+            [m.post_detail_updated(), since(p.updatedAt)],
           ].map(([k, v]) => (
             <div key={k} className="flex items-center justify-between px-2.5 py-1.5 text-[13px]">
               <dt className="text-faint">{k}</dt>
@@ -166,17 +167,17 @@ function PostPage() {
             </div>
           ))}
           <div className="flex items-center justify-between px-2.5 py-1.5 text-[13px]">
-            <dt className="text-faint">ETA</dt>
-            <dd className="text-muted-foreground">{admin ? <EtaEditor postId={p.id} value={p.eta} /> : (p.eta ?? "not set")}</dd>
+            <dt className="text-faint">{m.post_detail_eta()}</dt>
+            <dd className="text-muted-foreground">{admin ? <EtaEditor postId={p.id} value={p.eta} /> : (p.eta ?? m.post_eta_not_set())}</dd>
           </div>
         </dl>
       </section>
       <div className="px-2.5">
-        <CopyButton value={typeof window !== "undefined" ? window.location.href : ""} label="Copy link" copiedLabel="Copied!" />
+        <CopyButton value={typeof window !== "undefined" ? window.location.href : ""} label={m.post_copy_link()} copiedLabel={m.post_copied()} />
       </div>
       {admin && p.similar.length ? (
         <section>
-          <RailLabel>Also asked for</RailLabel>
+          <RailLabel>{m.post_rail_similar()}</RailLabel>
           <div className="flex flex-col gap-1 px-2.5 text-[13px]">
             {p.similar.map((s) => (
               <div key={s.id} className="flex items-center justify-between gap-2">
@@ -185,11 +186,11 @@ function PostPage() {
                 </Link>
                 <button
                   type="button"
-                  title="Merge into this post"
+                  title={m.post_merge_into_this()}
                   onClick={() =>
                     mergePosts({ data: { from: s.id, into: p.id } })
                       .then(() => router.invalidate())
-                      .then(() => toast.success("Merged"))
+                      .then(() => toast.success(m.post_merged()))
                       .catch((e) => toast.error(e.message))
                   }
                   className="inline-flex size-6 shrink-0 items-center justify-center rounded-sm text-faint hover:bg-accent hover:text-foreground"
@@ -213,7 +214,7 @@ function PostPage() {
         </Link>
         {admin ? (
           <Link to="/dashboard/inbox" search={{ status: p.status, post: p.id }} className="text-xs text-faint hover:text-foreground">
-            Manage in dashboard →
+            {m.post_manage_in_dashboard()}
           </Link>
         ) : null}
       </div>
@@ -221,7 +222,7 @@ function PostPage() {
       {p.mergedInto ? (
         <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-3 text-sm">
           <ArrowsMergeIcon className="size-4 text-muted-foreground" />
-          <span>This post was merged into</span>
+          <span>{m.post_merged_into()}</span>
           <Link to="/p/$id" params={{ id: String(p.mergedInto.id) }} className="font-semibold text-link hover:underline">
             {p.mergedInto.title}
           </Link>
@@ -236,7 +237,7 @@ function PostPage() {
             <span className="text-faint">{p.board.name}</span>
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
               <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={18} />
-              {p.author?.name ?? "someone"}
+              {p.author?.name ?? m.common_someone()}
               <span className="text-faint">· {since(p.createdAt)}</span>
             </span>
           </div>
@@ -270,7 +271,7 @@ function PostPage() {
 
       <section className="flex flex-col gap-5 border-t pt-5">
         <h2 className="flex items-center gap-2 text-[14px] font-semibold">
-          Comments <span className="text-xs font-normal text-faint tabular-nums">{comments}</span>
+          {m.post_comments()} <span className="text-xs font-normal text-faint tabular-nums">{comments}</span>
         </h2>
 
         <form onSubmit={submitReply} onPaste={images.onPaste} {...images.dropProps} className="relative flex flex-col gap-3 rounded-lg border bg-card px-3.5 py-3 transition-colors focus-within:border-input">
@@ -285,8 +286,8 @@ function PostPage() {
               }
               setExpanded(true);
             }}
-            placeholder={root.user ? "Add a comment" : "Sign in to comment"}
-            aria-label="Add a comment"
+            placeholder={root.user ? m.post_comment_add() : m.post_comment_sign_in()}
+            aria-label={m.post_comment_add()}
             rows={1}
             className={cn("w-full resize-none bg-transparent text-sm leading-relaxed text-foreground outline-none transition-[height] duration-150 ease-out placeholder:text-faint motion-reduce:transition-none", expanded || reply || images.drafts.length ? "h-[76px]" : "h-[24px]")}
             onKeyDown={(e) => {
@@ -297,15 +298,15 @@ function PostPage() {
           <DraftError drafts={images} />
           <div className="flex items-center justify-between">
             <AttachButton drafts={images} className="-ml-1.5 inline-flex h-7 items-center gap-1.5 rounded-md px-1.5 text-xs text-faint outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring">
-              <PaperclipIcon className="size-3.5" /> Attach
+              <PaperclipIcon className="size-3.5" /> {m.post_attach()}
             </AttachButton>
             <Button variant="secondary" size="sm" type="submit" disabled={(reply.trim().length === 0 && images.ids.length === 0) || images.uploading}>
-              Comment
+              {m.post_comment_submit()}
             </Button>
           </div>
         </form>
 
-        {mergedTimeline.length === 0 ? <p className="text-sm text-faint">No comments yet. Be the first, it helps the team prioritise.</p> : null}
+        {mergedTimeline.length === 0 ? <p className="text-sm text-faint">{m.post_no_comments()}</p> : null}
         <div className="flex flex-col gap-5">
           {mergedTimeline.map((item) => {
             const team = item.kind === "activity" || (item.author as { role?: string } | null)?.role === "admin";
@@ -315,7 +316,7 @@ function PostPage() {
                 <Avatar name={item.author?.name ?? "?"} image={(item.author as { image?: string | null })?.image} size={28} className={cn(team && "ring-1 ring-link/50")} />
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <div className="flex flex-wrap items-center gap-2 text-[13px]">
-                    <span className="font-semibold">{item.author?.name ?? "someone"}</span>
+                    <span className="font-semibold">{item.author?.name ?? m.common_someone()}</span>
                     {team ? <TeamBadge /> : null}
                     <span className="text-xs text-faint">{ago(item.at)}</span>
                   </div>
@@ -328,10 +329,10 @@ function PostPage() {
                     <div className="text-sm leading-[1.55] text-muted-foreground">
                       {item.type === "status" && item.to ? (
                         <span className="inline-flex items-center gap-2">
-                          moved to <StatusChip status={item.to} showOpen />
+                          {m.post_activity_moved()} <StatusChip status={item.to} showOpen />
                         </span>
                       ) : null}
-                      {item.note ? <div className={cn(item.type === "status" && item.to && "mt-1")}>{item.note}</div> : null}
+                      {item.note ? <div className={cn(item.type === "status" && item.to && "mt-1")}>{activityNote(item)}</div> : null}
                     </div>
                   )}
                 </div>
@@ -345,6 +346,17 @@ function PostPage() {
   );
 }
 
+// Pin events are stored as the words "pinned" / "unpinned"; show those in the
+// reader's language. Other notes (a merge, a changelog line, what the team
+// typed with a status change) are kept as they were written.
+function activityNote(item: { type?: string; note?: string | null }) {
+  if (item.type === "pin") {
+    if (item.note === "pinned") return m.post_activity_pinned();
+    if (item.note === "unpinned") return m.post_activity_unpinned();
+  }
+  return item.note;
+}
+
 function EtaEditor({ postId, value }: { postId: number; value: string | null }) {
   const router = useRouter();
   const [v, setV] = useState(value ?? "");
@@ -353,8 +365,8 @@ function EtaEditor({ postId, value }: { postId: number; value: string | null }) 
       value={v}
       onChange={(e) => setV(e.target.value)}
       onBlur={() => v !== (value ?? "") && setEta({ data: { postId, eta: v } }).then(() => router.invalidate())}
-      placeholder="not set"
-      aria-label="ETA"
+      placeholder={m.post_eta_not_set()}
+      aria-label={m.post_eta_label()}
       className="-mx-1 w-24 rounded-sm border border-transparent bg-transparent px-1 text-right text-[13px] outline-none placeholder:text-faint hover:border-input focus:border-ring"
     />
   );

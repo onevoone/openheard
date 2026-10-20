@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ChatCircleIcon, PushPinIcon } from "@phosphor-icons/react";
 import { Link, createFileRoute, redirect, useLoaderData, useNavigate, useRouter } from "@tanstack/react-router";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
@@ -16,7 +17,10 @@ import { ago } from "@/lib/time";
 import { useKeyNav } from "@/lib/use-key-nav";
 import { cn } from "@openheard/ui/lib/utils";
 
-const Landing = lazy(() => import("../components/landing/page").then((m) => ({ default: m.Landing })));
+const Landing = lazy(() => import("../components/landing/page").then((mod) => ({ default: mod.Landing })));
+
+// The sort keys are URL values; what the visitor reads is the message.
+const SORT_LABEL = { trending: () => m.board_sort_trending(), top: () => m.board_sort_top(), new: () => m.board_sort_new() } as const;
 
 type Search = { board?: string; status?: string; q?: string; sort?: "top" | "new" };
 
@@ -90,7 +94,7 @@ function BoardPage() {
         // Offsets can shift between pages, so a post may come back twice.
         if (page.current === asked) setMore((prev) => [...prev, ...d.posts.filter((p) => !prev.some((q) => q.id === p.id))]);
       })
-      .catch(() => toast.error("Could not load more posts"))
+      .catch(() => toast.error(m.board_load_more_failed()))
       .finally(() => {
         if (page.current === asked) setLoadingMore(false);
       });
@@ -140,17 +144,17 @@ function BoardPage() {
   const rail = (
     <>
       <Button full arrow size="lg" onClick={tryCompose} className="brand-cta">
-        Post idea
+        {m.board_post_idea()}
       </Button>
       <div className="flex flex-col gap-0.5">
-        <RailLabel>Boards</RailLabel>
-        <RailItem active={!search.board} to="/" search={{ ...search, board: undefined }} label="All posts" count={root.total} />
+        <RailLabel>{m.board_rail_boards()}</RailLabel>
+        <RailItem active={!search.board} to="/" search={{ ...search, board: undefined }} label={m.board_rail_all()} count={root.total} />
         {root.boards.map((b) => (
           <RailItem key={b.id} active={search.board === b.id} to="/" search={{ ...search, board: search.board === b.id ? undefined : b.id }} label={b.name} count={b.count} />
         ))}
       </div>
       <div className="flex flex-col gap-0.5">
-        <RailLabel>Roadmap</RailLabel>
+        <RailLabel>{m.board_rail_roadmap()}</RailLabel>
         {roadmapStatuses(root.statuses)
           .filter((s) => s.kind !== "review")
           .map((s) => (
@@ -171,7 +175,7 @@ function BoardPage() {
               onClick={() => set({ sort: s === "trending" ? undefined : s })}
               className={cn("rounded-sm text-[13px] capitalize outline-none focus-visible:ring-2 focus-visible:ring-ring/60", sort === s ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground")}
             >
-              {s}
+              {SORT_LABEL[s]()}
             </button>
           ))}
         </div>
@@ -181,12 +185,10 @@ function BoardPage() {
               “{search.q}” ×
             </button>
           ) : null}
-          <span>
-            {total} {total === 1 ? "post" : "posts"}
-          </span>
+          <span>{m.board_count_posts({ count: total })}</span>
           {/* Below lg the rail drops under the feed, so posting needs its own button up here. */}
           <Button size="sm" arrow onClick={tryCompose} className="brand-cta font-sans lg:hidden">
-            Post idea
+            {m.board_post_idea()}
           </Button>
         </div>
       </div>
@@ -224,7 +226,7 @@ function BoardPage() {
                       </span>
                       <span className="inline-flex items-center gap-1.5 text-faint">
                         <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={16} />
-                        {p.author?.name ?? "someone"}
+                        {p.author?.name ?? m.common_someone()}
                         <span>· {ago(p.createdAt)}</span>
                       </span>
                     </div>
@@ -239,7 +241,7 @@ function BoardPage() {
       {posts.length > 0 && posts.length < total ? (
         <div className="flex justify-center pt-2">
           <Button variant="secondary" onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? "Loading" : `Show more (${total - posts.length})`}
+            {loadingMore ? m.board_loading() : m.board_show_more({ count: total - posts.length })}
           </Button>
         </div>
       ) : null}
@@ -262,16 +264,16 @@ function BoardPage() {
 function EmptyBoard({ filtered, onNew, onClear }: { filtered: boolean; onNew: () => void; onClear: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-20 text-center">
-      <p className="text-[14px] font-semibold">{filtered ? "Nothing matches" : "No posts yet"}</p>
-      <p className="max-w-sm text-sm text-muted-foreground">{filtered ? "Try a different filter, or post the thing you were looking for." : "The first post sets the tone. Say what you wish the product did."}</p>
+      <p className="text-[14px] font-semibold">{filtered ? m.board_empty_filtered_title() : m.board_empty_title()}</p>
+      <p className="max-w-sm text-sm text-muted-foreground">{filtered ? m.board_empty_filtered_text() : m.board_empty_text()}</p>
       <div className="mt-2 flex gap-2">
         {filtered ? (
           <Button variant="secondary" onClick={onClear}>
-            Clear filters
+            {m.board_clear_filters()}
           </Button>
         ) : null}
         <Button arrow onClick={onNew} className="brand-cta">
-          Post idea
+          {m.board_post_idea()}
         </Button>
       </div>
     </div>

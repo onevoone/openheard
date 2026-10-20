@@ -4,6 +4,9 @@
     "jsx": "react-jsx",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": [],
+    // Paraglide's compiled messages are JS with JSDoc types.
+    "allowJs": true,
+    "checkJs": false,
     "paths": {
       "@openheard/ui/*": ["./src/*"]
     }

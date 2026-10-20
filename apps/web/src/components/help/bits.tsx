@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import type { Icon } from "@phosphor-icons/react";
 import { BookOpenIcon, ChatCircleIcon, CodeIcon, CreditCardIcon, GearIcon, InfoIcon, LightbulbIcon, PlugsIcon, RocketIcon, ShieldCheckIcon, UsersIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -48,7 +49,7 @@ export function AskOnBoard({ full }: { full?: boolean }) {
       full={full}
       onClick={() => navigate({ to: "/" }).then(requestComposer)}
     >
-      Ask on the board
+      {m.help_ask_on_board()}
     </Button>
   );
 }

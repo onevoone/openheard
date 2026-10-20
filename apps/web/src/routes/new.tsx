@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute, redirect, useLoaderData } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/new")({
   beforeLoad: async () => {
     if (!(await getUser())) throw redirect({ to: "/login" });
   },
-  head: () => ({ meta: [{ title: "New workspace · openheard" }] }),
+  head: () => ({ meta: [{ title: m.new_head() }] }),
   component: NewWorkspace,
 });
 
@@ -25,7 +26,7 @@ function NewWorkspace() {
   const hasExistingWorkspace = !!ownWorkspaces && ownWorkspaces.length > 0;
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 px-5 py-16">
-      <a href="/" aria-label="openheard home">
+      <a href="/" aria-label={m.new_home_label()}>
         <Logo size={32} />
       </a>
       <WorkspaceForm
@@ -39,7 +40,7 @@ function NewWorkspace() {
             window.location.href = workspaceUrl(id, rootDomain, "/dashboard");
             await new Promise(() => {});
           } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Could not create workspace");
+            toast.error(err instanceof Error ? err.message : m.new_failed());
           }
         }}
       />

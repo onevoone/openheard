@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute, redirect, useLoaderData, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/welcome")({
     if (root.marketing) throw redirect({ to: "/new" });
     if (!isAdmin(root.user)) throw redirect({ to: "/login" });
   },
-  head: () => ({ meta: [{ title: "Welcome · openheard" }] }),
+  head: () => ({ meta: [{ title: m.welcome_head() }] }),
   component: Welcome,
 });
 
@@ -49,7 +50,7 @@ function Welcome() {
             await router.invalidate();
             await router.navigate({ to: "/" });
           } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Could not save");
+            toast.error(err instanceof Error ? err.message : m.common_save_failed());
           }
         }}
       />

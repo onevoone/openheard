@@ -1,6 +1,10 @@
 // Image attachment rules, shared by the composer and the upload route. Pure:
 // no server imports, so the browser can check a file before sending it.
 
+import { m } from "@openheard/i18n/messages";
+
+import { type FormatOptions, formatNumber } from "./format";
+
 export const IMAGE_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"] as const;
 export type ImageType = (typeof IMAGE_TYPES)[number];
 
@@ -23,10 +27,11 @@ export function isPublicImage(r: { claimed: boolean; internal: boolean | null; s
   return r.claimed && !r.internal && !(r.requireApproval && r.statusKind === "review");
 }
 
-export function formatBytes(n: number): string {
-  if (n >= 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1).replace(/\.0$/, "")} MB`;
-  if (n >= 1024) return `${Math.round(n / 1024)} KB`;
-  return `${n} B`;
+// "5 MB" / "5 МБ": the number and the unit both follow the language.
+export function formatBytes(n: number, o: FormatOptions = {}): string {
+  if (n >= 1024 * 1024) return m.unit_mb({ n: formatNumber(n / 1024 / 1024, { ...o, maximumFractionDigits: 1 }) }, o);
+  if (n >= 1024) return m.unit_kb({ n: formatNumber(Math.round(n / 1024), o) }, o);
+  return m.unit_bytes({ n: formatNumber(n, o) }, o);
 }
 
 // Types some systems label images with instead of the standard ones.
@@ -37,19 +42,19 @@ export const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp"] as co
 // The file's type is only a hint (blank or nonstandard on some systems), so a
 // known extension or a nameless paste gets through; the server reads the bytes
 // and has the final say.
-export function checkImage(file: { type: string; size: number; name?: string }): string | null {
+export function checkImage(file: { type: string; size: number; name?: string }, o: FormatOptions = {}): string | null {
   const type = file.type.toLowerCase();
   const name = (file.name ?? "").toLowerCase();
-  if (type === "image/svg+xml" || name.endsWith(".svg")) return "SVG files are not supported. Use PNG, JPEG, GIF or WebP.";
+  if (type === "image/svg+xml" || name.endsWith(".svg")) return m.attach_svg({}, o);
   const knownType = (IMAGE_TYPES as readonly string[]).includes(TYPE_ALIASES[type] ?? type);
   const knownName = IMAGE_EXTENSIONS.some((ext) => name.endsWith(ext));
-  if (!knownType && !knownName && (type || name)) return `${file.name ? `${file.name} is not` : "That is not"} an image we accept. Use PNG, JPEG, GIF or WebP.`;
-  if (file.size > MAX_IMAGE_BYTES) return `${file.name ?? "That image"} is ${formatBytes(file.size)}. Images can be up to ${formatBytes(MAX_IMAGE_BYTES)}.`;
-  if (file.size === 0) return `${file.name ?? "That image"} is empty.`;
+  if (!knownType && !knownName && (type || name)) return file.name ? m.attach_not_image_named({ name: file.name }, o) : m.attach_not_image({}, o);
+  if (file.size > MAX_IMAGE_BYTES) return file.name ? m.attach_too_big_named({ name: file.name, size: formatBytes(file.size, o), max: formatBytes(MAX_IMAGE_BYTES, o) }, o) : m.attach_too_big({ size: formatBytes(file.size, o), max: formatBytes(MAX_IMAGE_BYTES, o) }, o);
+  if (file.size === 0) return file.name ? m.attach_empty_named({ name: file.name }, o) : m.attach_empty({}, o);
   return null;
 }
 
-export const tooManyImages = () => `Up to ${MAX_IMAGES} images each.`;
+export const tooManyImages = (o: FormatOptions = {}) => m.attach_too_many({ max: MAX_IMAGES }, o);
 
 // The type the bytes say they are. The browser's Content-Type is a claim; the
 // server stores and serves this instead.
