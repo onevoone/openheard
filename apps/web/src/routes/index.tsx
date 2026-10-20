@@ -166,7 +166,7 @@ function BoardPage() {
 
   return (
     <Shell rail={rail}>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="flex items-center gap-[18px]">
           {(["trending", "top", "new"] as const).map((s) => (
             <button
