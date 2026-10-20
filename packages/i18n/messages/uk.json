@@ -1,7 +1,7 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "default_board_description": "Що б ви хотіли бачити в продукті",
-  "default_board_name": "Побажання",
+  "default_board_description": "Пропозиції та ідеї для продукту",
+  "default_board_name": "Ідеї",
   "default_status_closed": "Закрито",
   "default_status_done": "Випущено",
   "default_status_open": "Очікує",
@@ -273,7 +273,23 @@
   "time_ago_month": "{count} міс.",
   "time_ago_second": "{count} с",
   "time_ago_week": "{count} тиж.",
-  "time_ago_year": "{count} р.",
+  "time_ago_year": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} рік",
+        "countPlural=few": "{count} роки",
+        "countPlural=many": "{count} років",
+        "countPlural=other": "{count} року"
+      }
+    }
+  ],
   "time_just_now": "щойно",
   "time_now": "зараз",
   "time_since_day": [

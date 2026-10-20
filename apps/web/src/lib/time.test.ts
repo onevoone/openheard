@@ -32,7 +32,7 @@ describe("ago", () => {
     expect(ago(at(2 * DAY), o)).toBe("2 дн.");
     expect(ago(at(21 * DAY), o)).toBe("3 тиж.");
     expect(ago(at(90 * DAY), o)).toBe("3 міс.");
-    expect(ago(at(800 * DAY), o)).toBe("2 р.");
+    expect(ago(at(800 * DAY), o)).toBe("2 роки");
   });
 
   it("takes a string or a number as well as a Date", () => {

@@ -87,7 +87,7 @@ describe("a new workspace starts in its own language", () => {
     expect(ws.locale).toBe("uk");
     expect(ws.tagline).toMatch(/^Голосуйте/);
     expect(statuses).toEqual(["Очікує", "На розгляді", "Заплановано", "У роботі", "Випущено", "Закрито"]);
-    expect(board.name).toBe("Побажання");
+    expect(board.name).toBe("Ідеї");
   });
 
   it("writes the English set for en, and for callers that name no language", async () => {
