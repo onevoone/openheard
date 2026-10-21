@@ -11,9 +11,9 @@ export function isPublicCacheable(pathname: string): boolean {
 }
 
 // Pages that are rendered in the visitor's language. /widget.json is public
-// and cacheable too, but is fetched cross-origin without cookies and today
-// does not depend on the language at all, so it keeps a single copy. (The widget
-// PR puts every language's strings in it, which keeps it that way.)
+// and cacheable too, but is fetched cross-origin without cookies and does not
+// depend on the language: it carries the loader's words for every language
+// and the loader picks one, so it keeps a single copy.
 export function isLocaleKeyed(pathname: string): boolean {
   return isPublicCacheable(pathname) && pathname !== "/widget.json";
 }

@@ -10,6 +10,10 @@ const KEY = "oh_widget_token";
 // The header the widget sends its token in. Only widgetSessionMiddleware reads it.
 export const WIDGET_TOKEN_HEADER = "x-openheard-widget";
 
+// The language the panel was asked to speak, sent with its server function
+// calls so errors come back in it (see localeFromWidget in locale.ts).
+export const WIDGET_LANG_HEADER = "x-openheard-lang";
+
 export function getWidgetToken(): string | null {
   try {
     return sessionStorage.getItem(KEY);
@@ -27,8 +31,13 @@ export function setWidgetToken(token: string | null) {
   }
 }
 
-export function widgetTokenHeaders(token: string | null): Record<string, string> | undefined {
-  return token ? { [WIDGET_TOKEN_HEADER]: token } : undefined;
+// What every server function call from the panel carries: the token when
+// signed in, and the language the panel is showing.
+export function widgetTokenHeaders(token: string | null, locale?: string): Record<string, string> | undefined {
+  const headers: Record<string, string> = {};
+  if (token) headers[WIDGET_TOKEN_HEADER] = token;
+  if (locale) headers[WIDGET_LANG_HEADER] = locale;
+  return Object.keys(headers).length ? headers : undefined;
 }
 
 // A fresh value per sign-in attempt. The popup echoes it back, so the panel

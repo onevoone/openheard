@@ -7,7 +7,7 @@ import { drizzle } from "drizzle-orm/libsql";
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_WIDGET_SETTINGS, readWidgetSettings, widgetMeta, widgetSettingsSchema, widgetSettingsSchemaFor } from "./widget-settings";
+import { DEFAULT_WIDGET_SETTINGS, loaderStrings, readWidgetSettings, widgetMeta, widgetSettingsSchema, widgetSettingsSchemaFor } from "./widget-settings";
 
 const MIGRATIONS = new URL("../../../../packages/db/migrations/", import.meta.url).pathname;
 
@@ -67,6 +67,8 @@ describe("/widget.json payload", () => {
 
     expect(widgetMeta(ws!, 1_700_000_000_000)).toEqual({
       name: "acme",
+      defaultLocale: "uk",
+      strings: { uk: loaderStrings("uk"), en: loaderStrings("en") },
       accent: "#ff8fab",
       theme: "light",
       launcher: "label",
@@ -87,6 +89,39 @@ describe("/widget.json payload", () => {
     const [ws] = await db.select().from(schema.workspace).where(eq(schema.workspace.id, "acme"));
     const meta = widgetMeta(ws!, 42);
     expect(meta).toMatchObject({ accent: "#6e8bff", theme: "dark", launcher: "icon", position: "bottom-right", tabs: ["feedback", "changelog"], changelog: true, latestChangelogAt: 42 });
+    // No label was ever saved, so the loader picks its default in the visitor's language.
+    expect(meta.label).toBeNull();
+  });
+
+  it("names the board's language, and every language's words for the loader", () => {
+    const board = { accent: null, showRoadmap: true, showChangelog: true };
+    expect(widgetMeta({ ...board, name: "acme", locale: "en" }, null).defaultLocale).toBe("en");
+    expect(widgetMeta({ ...board, name: "acme", locale: "de" }, null).defaultLocale).toBe("uk");
+    expect(widgetMeta({ ...board, name: "acme" }, null).strings.en).toEqual({
+      name: "feedback",
+      defaultLabel: "Feedback",
+      panel: "Feedback",
+      badge: "new",
+      open: "Open {name}",
+      openNew: "Open {name}, new updates",
+      close: "Close {name}",
+    });
+    // The placeholder reaches the loader untouched in every language.
+    for (const locale of ["uk", "en"] as const) for (const key of ["open", "openNew", "close"] as const) expect(loaderStrings(locale)[key]).toContain("{name}");
+    expect(loaderStrings("uk").defaultLabel).toBe("Відгуки");
+  });
+
+  it("serves a label that was saved, whatever the language", () => {
+    const meta = widgetMeta({ name: "acme", accent: null, showRoadmap: true, showChangelog: true, locale: "uk", widgetSettings: { label: "Ideas" } }, null);
+    expect(meta.label).toBe("Ideas");
+  });
+
+  it("words the default label in the board's language when asked", () => {
+    expect(readWidgetSettings(null).label).toBe("Feedback");
+    expect(readWidgetSettings(null, "uk").label).toBe("Відгуки");
+    expect(readWidgetSettings(null, "en").label).toBe("Feedback");
+    expect(readWidgetSettings({ label: "Ideas" }, "uk").label).toBe("Ideas");
+    expect(readWidgetSettings({ label: "" }, "uk").label).toBe("Відгуки");
   });
 
   it("never serves an empty tab list", () => {

@@ -1,4 +1,4 @@
-import type { Locale } from "@openheard/i18n/locales";
+import { BASE_LOCALE, LOCALES, type Locale, isLocale } from "@openheard/i18n/locales";
 import { m } from "@openheard/i18n/messages";
 import { z } from "zod";
 
@@ -67,8 +67,9 @@ export const DEFAULT_WIDGET_SETTINGS: WidgetSettings = {
 };
 
 // Whatever is stored, field by field: a bad or missing value falls back to
-// its default instead of throwing away the rest.
-export function readWidgetSettings(stored: unknown): WidgetSettings {
+// its default instead of throwing away the rest. The default label is a word
+// in the board's language, so a caller that knows it passes `locale`.
+export function readWidgetSettings(stored: unknown, locale?: Locale): WidgetSettings {
   const raw = stored && typeof stored === "object" ? (stored as Record<string, unknown>) : {};
   const shape = widgetSettingsSchema.shape;
   const out = { ...DEFAULT_WIDGET_SETTINGS } as Record<string, unknown>;
@@ -77,10 +78,22 @@ export function readWidgetSettings(stored: unknown): WidgetSettings {
     const parsed = shape[key].safeParse(raw[key]);
     if (parsed.success) out[key] = parsed.data;
   }
+  if (locale && !hasLabel(stored)) out.label = defaultLabel(locale);
   return out as WidgetSettings;
 }
 
-type WorkspaceLike = { accent: string | null; showRoadmap: boolean; showChangelog: boolean; widgetSettings?: unknown };
+// The launcher text nobody typed: "Feedback", "Відгуки".
+export function defaultLabel(locale: Locale): string {
+  return m.widget_loader_default_label({}, { locale });
+}
+
+// Whether an admin (or the MCP server) ever saved a launcher label.
+function hasLabel(stored: unknown): boolean {
+  const raw = stored && typeof stored === "object" ? (stored as Record<string, unknown>).label : undefined;
+  return widgetSettingsSchema.shape.label.safeParse(raw).success;
+}
+
+type WorkspaceLike = { accent: string | null; showRoadmap: boolean; showChangelog: boolean; widgetSettings?: unknown; locale?: string | null };
 
 // The tabs a visitor actually gets: the widget's own choice, minus what the
 // workspace hides everywhere. Never empty.
@@ -89,16 +102,40 @@ export function widgetTabs(ws: WorkspaceLike, settings = readWidgetSettings(ws.w
   return tabs.length ? tabs : ["feedback"];
 }
 
-// The public body of /widget.json. Everything here is safe for any origin.
+// The few words the loader says itself (button names for screen readers, the
+// badge, the default label). The loader is a static script with no access to
+// the message runtime, so /widget.json carries them for every language and
+// the loader picks one. `{name}` stays a placeholder for the loader to fill.
+export function loaderStrings(locale: Locale) {
+  const o = { locale };
+  const name = "{name}";
+  return {
+    name: m.widget_loader_name({}, o),
+    defaultLabel: defaultLabel(locale),
+    panel: m.widget_loader_panel({}, o),
+    badge: m.widget_loader_badge({}, o),
+    open: m.widget_loader_open({ name }, o),
+    openNew: m.widget_loader_open_new({ name }, o),
+    close: m.widget_loader_close({ name }, o),
+  };
+}
+
+// The public body of /widget.json. Everything here is safe for any origin, and
+// nothing depends on who asks: the response is cached once per workspace.
 export function widgetMeta(ws: WorkspaceLike & { name: string }, latestChangelogAt: number | null) {
   const s = readWidgetSettings(ws.widgetSettings);
   const tabs = widgetTabs(ws, s);
   return {
     name: ws.name,
+    // The board's language, for visitors whose own the loader has no words for.
+    defaultLocale: isLocale(ws.locale) ? ws.locale : BASE_LOCALE,
+    strings: Object.fromEntries(LOCALES.map((locale) => [locale, loaderStrings(locale)])),
     accent: s.accent ?? ws.accent ?? DEFAULT_ACCENT,
     theme: s.theme,
     launcher: s.launcher,
-    label: s.label,
+    // Null until someone writes one: the loader then uses its default in the
+    // visitor's language rather than a word fixed in the board's.
+    label: hasLabel(ws.widgetSettings) ? s.label : null,
     icon: s.icon,
     position: s.position,
     radius: s.radius,

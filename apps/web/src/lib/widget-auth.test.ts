@@ -23,9 +23,9 @@ vi.mock("@openheard/auth", () => ({
     headers.get("cookie") === "session=owner" ? { user: { id: "owner", name: "Owner", email: "owner@acme.test", image: null } } : null,
 }));
 
-import { edgeCacheKey } from "./cache";
+import { edgeCacheKey, isLocaleKeyed, isPublicCacheable } from "./cache";
 import { getSessionContext, getWidgetSessionContext } from "./session";
-import { MSG, WIDGET_TOKEN_HEADER, newNonce, sessionFromMessage } from "./widget-auth";
+import { MSG, WIDGET_LANG_HEADER, WIDGET_TOKEN_HEADER, newNonce, sessionFromMessage, widgetTokenHeaders } from "./widget-auth";
 import { frameAncestorsFor } from "./widget-frame";
 import { frameAncestors, parseEmbedOrigins } from "./widget-origins";
 import { WIDGET_TOKEN_TTL_MS, mintWidgetToken, revokeWidgetToken, verifyWidgetToken } from "./widget-token";
@@ -251,5 +251,24 @@ describe("widget metadata at the edge", () => {
     expect(edgeCacheKey(new URL("https://acme.openheard.com/widget.json?cb=2&x=y"))).toBe("https://acme.openheard.com/widget.json");
     expect(edgeCacheKey(new URL("http://localhost:3001/widget.json?ws=acme&cb=3"))).toBe("http://localhost:3001/widget.json?ws=acme");
     expect(edgeCacheKey(new URL("https://acme.openheard.com/?q=1"))).toBe("https://acme.openheard.com/?q=1");
+  });
+
+  it("keeps that one copy whatever language the visitor or the loader asks for", () => {
+    const plain = "https://acme.openheard.com/widget.json";
+    expect(edgeCacheKey(new URL(`${plain}?lang=en&__locale=en`), "en")).toBe(plain);
+    expect(edgeCacheKey(new URL(plain), "uk")).toBe(plain);
+    expect(isLocaleKeyed("/widget.json")).toBe(false);
+    // The panel itself is never cached at the edge, so its language does not reach a key.
+    expect(isPublicCacheable("/widget")).toBe(false);
+    expect(isPublicCacheable("/widget/connect")).toBe(false);
+  });
+});
+
+describe("the headers the panel sends with its calls", () => {
+  it("carry the token when signed in and the language it is showing", () => {
+    expect(widgetTokenHeaders(null)).toBeUndefined();
+    expect(widgetTokenHeaders("t0k3n")).toEqual({ [WIDGET_TOKEN_HEADER]: "t0k3n" });
+    expect(widgetTokenHeaders(null, "uk")).toEqual({ [WIDGET_LANG_HEADER]: "uk" });
+    expect(widgetTokenHeaders("t0k3n", "en")).toEqual({ [WIDGET_TOKEN_HEADER]: "t0k3n", [WIDGET_LANG_HEADER]: "en" });
   });
 });

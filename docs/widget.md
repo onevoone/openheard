@@ -37,7 +37,9 @@ every site within a minute without touching the snippet:
 - **Accent**: the launcher, voted pills and links; defaults to your brand accent
 - **Launcher**: a round icon, an icon with a label, or hidden when you open
   the widget from your own button
-- **Label and icon**: up to 24 characters, and one of five icons
+- **Label and icon**: up to 24 characters, and one of five icons. Until you
+  write a label, the launcher says "Feedback" ("Відгуки" for a visitor in
+  Ukrainian); once you do, your text shows as it is, in every language
 - **Position**: bottom right or bottom left
 - **Corner radius**: sharp, soft or round
 - **Tabs**: turn Feedback, Roadmap or Changelog off; the first one left on
@@ -58,6 +60,7 @@ Data attributes on the script tag override the saved settings on that page.
 | `data-position` | `bottom-right`, `bottom-left` | saved setting |
 | `data-radius` | `sharp`, `soft`, `round` | saved setting |
 | `data-tabs` | comma-separated, e.g. `feedback,changelog` | saved setting |
+| `data-lang` | `uk`, `en`: the language of the launcher and the panel | the visitor's browser language, else the board's |
 | `data-open-on-load` | present to open the panel right away | closed |
 
 ```html
@@ -67,6 +70,26 @@ Data attributes on the script tag override the saved settings on that page.
   data-accent="#3ecf8e"
   async
 ></script>
+```
+
+## Language
+
+The widget speaks Ukrainian or English. The launcher and the panel pick a
+language the same way, so they never disagree:
+
+1. `data-lang` on the script tag, if you set it (`uk-UA` counts as `uk`)
+2. the visitor's browser languages, in their order of preference
+3. the board's language (Settings → General → Board language)
+
+A language the widget has no words for is skipped. The loader passes its list
+to the panel as a `lang` parameter, and that list beats the visitor's
+`PARAGLIDE_LOCALE` cookie on the board, which an iframe on another site often
+cannot send anyway. What your team typed, such as post titles, comments,
+status names and the board's name, is never translated, and neither is a
+launcher label you wrote.
+
+```html
+<script src="https://acme.openheard.com/widget.js" data-lang="en" async></script>
 ```
 
 ## Open it from your own UI
@@ -171,4 +194,6 @@ visitors into voting or posting. Clear the list to allow any site again.
   corners, tabs).
 - `/widget.js` and `/widget.json` are public and readable from any origin.
   `/widget.json` is cached at the edge per workspace, whatever its query
-  string, and rate limited per IP.
+  string, and rate limited per IP. It carries the loader's few words (button
+  names, the "new" badge) in every language, so the one cached copy serves all
+  visitors.
