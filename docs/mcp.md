@@ -191,6 +191,8 @@ Every workspace tool also takes `workspace`. Without it a tool acts on the key's
 | `send_test` | Send a sample message to a connected Slack, Discord or webhook destination and report whether it arrived. | write |
 | `disconnect` | Remove a Slack, Discord or webhook connection. | needs `confirm: true` |
 
+Slack and Discord messages are written in the workspace's board language. Webhook JSON and everything these tools return stay English.
+
 ### Team
 
 | Tool | What it does | Kind |
