@@ -1,6 +1,7 @@
 import { ArrowRightIcon, CheckIcon, GlobeSimpleIcon, HashIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
+import { m } from "@openheard/i18n/messages";
 import { cn } from "@openheard/ui/lib/utils";
 import { BlurFade } from "./magic/blur-fade";
 import { Framed, SectionHeader } from "./shared";
@@ -11,15 +12,15 @@ import { Framed, SectionHeader } from "./shared";
 export function Connect() {
   return (
     <Framed id="connect">
-      <SectionHeader title="It tells people, so you don't have to." sub="Your team hears about new posts. Your users hear when their idea moves." />
+      <SectionHeader title={m.landing_connect_title()} sub={m.landing_connect_sub()} />
       <div className="grid grid-cols-1 overflow-hidden md:grid-cols-3">
-        <Cell title="Alerts in Slack and Discord" desc="New posts, comments, status changes and changelog entries, filtered by board. Or a signed webhook to anything else.">
+        <Cell title={m.landing_connect_alerts_title()} desc={m.landing_connect_alerts_desc()}>
           <Alert />
         </Cell>
-        <Cell title="Emails when an idea moves" desc="Verified accounts that voted, commented or posted hear when the idea changes status and when it ships. Every email has a one-click unsubscribe.">
+        <Cell title={m.landing_connect_emails_title()} desc={m.landing_connect_emails_desc()}>
           <Email />
         </Cell>
-        <Cell title="Your brand, from your website" desc="Paste your homepage. openheard reads its logo, name, colours and font, and applies the ones you tick.">
+        <Cell title={m.landing_connect_brand_title()} desc={m.landing_connect_brand_desc()}>
           <Brand />
         </Cell>
       </div>
@@ -60,13 +61,13 @@ function Alert() {
               <span className="font-semibold">openheard</span>
               <span className="text-[11px] text-faint tabular-nums">10:42</span>
             </div>
-            <p className="mt-1 text-[14px] font-medium text-link">Dark mode for the embedded widget</p>
-            <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground tabular-nums">Status changed · by Mara Lindqvist · Planned → In progress · 128 votes</p>
+            <p className="mt-1 text-[14px] font-medium text-link">{m.landing_demo_post_dark()}</p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground tabular-nums">{m.landing_connect_alert_meta({ author: "Mara Lindqvist", from: m.landing_status_planned(), to: m.landing_status_progress() })}</p>
           </div>
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        {["Slack", "Discord", "Webhook"].map((k) => (
+        {["Slack", "Discord", m.landing_connect_alert_webhook()].map((k) => (
           <span key={k} className="rounded-md border border-border bg-background px-2 py-0.5 text-[12px] text-muted-foreground">
             {k}
           </span>
@@ -83,18 +84,18 @@ function Email() {
     <div className="rounded-xl border border-border bg-card">
       <div className="flex flex-col gap-0.5 border-b border-border px-4 py-3 text-[12px]">
         <span className="font-medium">Acme feedback</span>
-        <span className="truncate text-muted-foreground">Dark mode for the embedded widget is now shipped</span>
+        <span className="truncate text-muted-foreground">{m.landing_connect_email_subject({ title: m.landing_demo_post_dark() })}</span>
       </div>
       <div className="p-4">
-        <p className="text-[12px] text-faint">An update from Acme on a post you follow</p>
-        <p className="mt-2 text-[15px] font-semibold tracking-tight">Dark mode for the embedded widget</p>
+        <p className="text-[12px] text-faint">{m.landing_connect_email_intro()}</p>
+        <p className="mt-2 text-[15px] font-semibold tracking-tight">{m.landing_demo_post_dark()}</p>
         <div className="mt-3 flex items-center gap-2 text-[12px]">
-          <Status color="bg-status-progress" label="In progress" />
+          <Status color="bg-status-progress" label={m.landing_status_progress()} />
           <ArrowRightIcon className="size-3 text-faint" />
-          <Status color="bg-status-shipped" label="Shipped" />
+          <Status color="bg-status-shipped" label={m.landing_status_shipped()} />
         </div>
         <div className="mt-4 border-t border-border pt-3 text-[11px] text-faint">
-          <span className="underline underline-offset-2">Stop emails about posts you follow</span>
+          <span className="underline underline-offset-2">{m.landing_connect_email_stop()}</span>
         </div>
       </div>
     </div>
@@ -120,24 +121,24 @@ function Brand() {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-[13px]">
         <GlobeSimpleIcon className="size-3.5 text-faint" />
         <span className="flex-1 truncate">acme.com</span>
-        <span className="text-[12px] text-status-shipped">Found</span>
+        <span className="text-[12px] text-status-shipped">{m.landing_connect_brand_found()}</span>
       </div>
       <div className="flex flex-col divide-y divide-border px-4 text-[13px]">
-        <Found label="Logo" ticked>
+        <Found label={m.landing_connect_brand_logo()} ticked>
           <span className="grid size-6 place-items-center rounded-md bg-[#ff6a3d] text-[12px] font-bold text-[#1d1b2e]">A</span>
         </Found>
-        <Found label="Name" ticked>
+        <Found label={m.landing_connect_brand_name()} ticked>
           <span>Acme</span>
         </Found>
-        <Found label="Accent" ticked>
+        <Found label={m.landing_connect_brand_accent()} ticked>
           <span className="flex gap-1.5">
             {swatches.map((c, i) => (
               <span key={c} className={cn("size-4 rounded-full border border-black/20", i === 0 && "ring-2 ring-foreground ring-offset-2 ring-offset-card")} style={{ background: c }} />
             ))}
           </span>
         </Found>
-        <Found label="Font">
-          <span className="text-muted-foreground">Fraunces, for reference</span>
+        <Found label={m.landing_connect_brand_font()}>
+          <span className="text-muted-foreground">{m.landing_connect_brand_font_note()}</span>
         </Found>
       </div>
     </div>
