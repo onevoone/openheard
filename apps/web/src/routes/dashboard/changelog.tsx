@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { ArrowLeftIcon, ArrowSquareOutIcon, CheckCircleIcon, CircleDashedIcon, ImageIcon, PlusIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
 import { createFileRoute, useLoaderData, useNavigate, useRouter } from "@tanstack/react-router";
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/dashboard/changelog")({
   }),
   loaderDeps: () => ({}),
   loader: () => listChangelog(),
-  head: () => ({ meta: [{ title: "Changelog · openheard" }] }),
+  head: () => ({ meta: [{ title: `${m.nav_changelog()} · openheard` }] }),
   component: ChangelogPage,
   errorComponent: ({ error }) => <DashboardErrorState message={(error as Error)?.message} retry="/dashboard/changelog" />,
   pendingComponent: DashboardPanelSkeleton,
@@ -41,19 +42,19 @@ function ChangelogPage() {
 
   return (
     <Panel
-      title="Changelog"
+      title={m.nav_changelog()}
       actions={
         <Button size="sm" arrow onClick={() => navigate({ search: { entry: "new" } })}>
-          New entry
+          {m.dash_changelog_new_entry()}
         </Button>
       }
     >
       {entries.length === 0 ? (
         <div className="flex flex-col items-center gap-3 px-6 py-24 text-center">
-          <p className="text-[15px] font-semibold">Nothing shipped yet</p>
-          <p className="max-w-sm text-sm text-muted-foreground">Write the first entry when you release something. Linked posts move to Shipped and their voters hear about it.</p>
+          <p className="text-[15px] font-semibold">{m.dash_changelog_empty_title()}</p>
+          <p className="max-w-sm text-sm text-muted-foreground">{m.dash_changelog_empty_text()}</p>
           <Button size="sm" arrow className="mt-2" onClick={() => navigate({ search: { entry: "new" } })}>
-            New entry
+            {m.dash_changelog_new_entry()}
           </Button>
         </div>
       ) : (
@@ -68,14 +69,14 @@ function ChangelogPage() {
               {e.publishedAt ? <CheckCircleIcon weight="fill" className="size-5 shrink-0 text-status-shipped" /> : <CircleDashedIcon className="size-5 shrink-0 text-status-planned" />}
               <span className="min-w-0 truncate text-[16px] font-medium">{e.title}</span>
               {e.version ? <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-[12px] text-muted-foreground tabular-nums">{e.version}</span> : null}
-              {!e.publishedAt ? <span className="shrink-0 rounded-md bg-status-planned/15 px-2 py-0.5 text-[12px] font-medium text-status-planned">Draft</span> : null}
+              {!e.publishedAt ? <span className="shrink-0 rounded-md bg-status-planned/15 px-2 py-0.5 text-[12px] font-medium text-status-planned">{m.dash_draft()}</span> : null}
               {e.posts.length ? (
                 <span className="shrink-0 text-[12px] text-faint">
-                  {e.posts.length} {e.posts.length === 1 ? "post" : "posts"}
+                  {m.dash_changelog_posts_count({ count: e.posts.length })}
                 </span>
               ) : null}
               <span className="flex-1" />
-              <span className="text-[12px] text-faint tabular-nums" title={fullDate(e.publishedAt ?? e.createdAt)}>
+              <span className="text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(e.publishedAt ?? e.createdAt)}>
                 {ago(e.publishedAt ?? e.createdAt)}
               </span>
               <Avatar name={root.user?.name ?? "?"} image={root.user?.image} size={24} />
@@ -108,22 +109,22 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
   }, [q, posts]);
 
   async function save(publish: boolean) {
-    if (title.trim().length < 3) return toast("Give it a title first");
+    if (title.trim().length < 3) return toast(m.dash_need_title());
     setBusy(true);
     try {
       const { id } = await saveChangelog({ data: { id: entry?.id, title, version, body, postIds: posts.map((p) => p.id), publish } });
       await router.invalidate();
-      toast.success(publish ? (published ? "Saved" : "Published. Linked posts are now Shipped.") : published ? "Unpublished" : "Draft saved");
+      toast.success(publish ? (published ? m.dash_saved() : m.dash_changelog_published_toast()) : published ? m.dash_unpublished() : m.dash_draft_saved());
       if (!entry && id) router.navigate({ to: "/dashboard/changelog", search: { entry: id } });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : m.dash_save_failed());
     } finally {
       setBusy(false);
     }
   }
 
   async function remove() {
-    if (!entry || !confirm(`Delete "${entry.title}"?`)) return;
+    if (!entry || !confirm(m.dash_confirm_delete({ title: entry.title }))) return;
     await deleteChangelog({ data: { id: entry.id } });
     await router.invalidate();
     onClose();
@@ -134,36 +135,36 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-background animate-in fade-in-0 duration-150 motion-reduce:animate-none">
         <div className="flex h-[52px] shrink-0 items-center justify-between border-b pr-3 pl-3">
           <div className="flex items-center gap-2">
-            <button type="button" onClick={onClose} className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground" title="Back">
+            <button type="button" onClick={onClose} className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground" title={m.dash_back()}>
               <ArrowLeftIcon className="size-4" />
             </button>
-            <span className="text-[15px] font-semibold">{entry ? entry.title : "New entry"}</span>
+            <span className="text-[15px] font-semibold">{entry ? entry.title : m.dash_changelog_new_entry()}</span>
             <span className={cn("ml-1 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium", published ? "bg-status-shipped/15 text-status-shipped" : "bg-status-planned/15 text-status-planned")}>
-              {published ? `Published ${since(entry!.publishedAt!)}` : "Draft"}
+              {published ? m.dash_changelog_published_since({ since: since(entry!.publishedAt!) }) : m.dash_draft()}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             {entry ? (
-              <Button size="sm" variant="ghost" onClick={remove} title="Delete">
+              <Button size="sm" variant="ghost" onClick={remove} title={m.dash_delete()}>
                 <TrashIcon className="size-3.5" />
               </Button>
             ) : null}
             {published ? (
               <a href="/changelog" target="_blank" rel="noreferrer" className="inline-flex h-[30px] items-center gap-1.5 rounded-md px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
-                <ArrowSquareOutIcon className="size-3.5" /> View
+                <ArrowSquareOutIcon className="size-3.5" /> {m.dash_view()}
               </a>
             ) : null}
             {published ? (
               <Button size="sm" variant="secondary" disabled={busy} onClick={() => save(false)}>
-                Unpublish
+                {m.dash_unpublish()}
               </Button>
             ) : (
               <Button size="sm" variant="secondary" disabled={busy || !dirty} onClick={() => save(false)}>
-                Save draft
+                {m.dash_save_draft()}
               </Button>
             )}
             <Button size="sm" arrow disabled={busy || (published && !dirty)} onClick={() => save(true)}>
-              {published ? "Save" : "Publish"}
+              {published ? m.dash_save() : m.dash_publish()}
             </Button>
           </div>
         </div>
@@ -175,11 +176,11 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
                 value={version}
                 onChange={(e) => setVersion(e.target.value)}
                 placeholder="v1.0"
-                aria-label="Version"
+                aria-label={m.dash_changelog_version_aria()}
                 className="h-7 w-24 rounded-md border border-transparent bg-transparent px-2 text-[12px] text-muted-foreground tabular-nums outline-none placeholder:text-faint hover:border-input focus:border-ring/60"
               />
-              <button type="button" onClick={() => toast("Covers land with image support")} className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-[12px] text-faint hover:bg-accent hover:text-foreground">
-                <ImageIcon className="size-3.5" /> Add cover
+              <button type="button" onClick={() => toast(m.dash_changelog_cover_soon())} className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-[12px] text-faint hover:bg-accent hover:text-foreground">
+                <ImageIcon className="size-3.5" /> {m.dash_changelog_add_cover()}
               </button>
             </div>
             <input
@@ -192,27 +193,27 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
                   bodyRef.current?.focus();
                 }
               }}
-              placeholder="What shipped?"
-              aria-label="Entry title"
+              placeholder={m.dash_changelog_title_placeholder()}
+              aria-label={m.dash_changelog_title_aria()}
               className="w-full bg-transparent text-[32px] font-semibold tracking-[-0.02em] outline-none placeholder:text-faint"
             />
             <textarea
               ref={bodyRef}
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Start writing. What changed, why it matters, what to do about it."
-              aria-label="Entry body"
+              placeholder={m.dash_changelog_body_placeholder()}
+              aria-label={m.dash_changelog_body_aria()}
               className="min-h-[280px] w-full resize-none bg-transparent text-[16px] leading-[1.65] text-foreground/90 outline-none placeholder:text-faint"
             />
 
             <div className="flex flex-col gap-3 border-t pt-6">
-              <div className="text-xs font-medium text-muted-foreground">Ships these posts</div>
+              <div className="text-xs font-medium text-muted-foreground">{m.dash_changelog_ships()}</div>
               <div className="flex flex-wrap items-center gap-1.5">
                 {posts.map((p) => (
                   <span key={p.id} className="inline-flex h-7 items-center gap-1.5 rounded-full border border-input pr-1.5 pl-2.5 text-[13px] text-muted-foreground">
                     <span className="size-1.5 rounded-full bg-status-shipped" />
                     {p.title}
-                    <button type="button" onClick={() => setPosts((ps) => ps.filter((x) => x.id !== p.id))} className="inline-flex size-5 items-center justify-center rounded-full text-faint hover:bg-accent hover:text-foreground" title="Remove">
+                    <button type="button" onClick={() => setPosts((ps) => ps.filter((x) => x.id !== p.id))} className="inline-flex size-5 items-center justify-center rounded-full text-faint hover:bg-accent hover:text-foreground" title={m.dash_changelog_remove_post()}>
                       <XIcon className="size-2.5" />
                     </button>
                   </span>
@@ -225,8 +226,8 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
                       onChange={(e) => setQ(e.target.value)}
                       onBlur={() => setTimeout(() => setLinking(false), 150)}
                       onKeyDown={(e) => e.key === "Escape" && setLinking(false)}
-                      placeholder="Search posts"
-                      aria-label="Search posts to link"
+                      placeholder={m.nav_search_posts()}
+                      aria-label={m.dash_changelog_search_aria()}
                       className="h-7 w-56 rounded-full border border-input bg-card px-3 text-[13px] outline-none placeholder:text-faint focus:border-ring/60"
                     />
                     {results.length ? (
@@ -251,11 +252,11 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
                   </div>
                 ) : (
                   <button type="button" onClick={() => setLinking(true)} className="inline-flex h-7 items-center gap-1 rounded-full border border-dashed border-input px-2.5 text-[13px] text-faint hover:border-foreground/40 hover:text-foreground">
-                    <PlusIcon className="size-3" /> Link a post
+                    <PlusIcon className="size-3" /> {m.dash_changelog_link_post()}
                   </button>
                 )}
               </div>
-              <p className="text-[12px] text-faint">Publishing moves linked posts to Shipped and, once email is on, tells their voters.</p>
+              <p className="text-[12px] text-faint">{m.dash_changelog_publish_note()}</p>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import type { Icon } from "@phosphor-icons/react";
 import {
   CaretDownIcon,
@@ -36,6 +37,7 @@ import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } 
 import { CSS } from "@dnd-kit/utilities";
 
 import { Panel } from "@/components/admin/panel";
+import { dndAccessibility } from "@/components/admin/dnd";
 import { DashboardErrorState, DashboardPanelSkeleton } from "@/components/states";
 import { listRoadmapAdmin } from "@/functions/admin";
 import { setStatus } from "@/functions/posts";
@@ -61,7 +63,7 @@ export const Route = createFileRoute("/dashboard/roadmap")({
   loader: async ({ deps }) => {
     return listRoadmapAdmin({ data: { sort: deps.sort ?? "top", board: deps.board } });
   },
-  head: () => ({ meta: [{ title: "Roadmap · openheard" }] }),
+  head: () => ({ meta: [{ title: `${m.nav_roadmap()} · openheard` }] }),
   component: Roadmap,
   errorComponent: ({ error }) => <DashboardErrorState message={(error as Error)?.message} retry="/dashboard/roadmap" />,
   pendingComponent: DashboardPanelSkeleton,
@@ -191,7 +193,7 @@ function Roadmap() {
       await router.invalidate();
     } catch (err) {
       setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, status: originalStatus } : p)));
-      toast.error(err instanceof Error ? err.message : "Could not move post");
+      toast.error(err instanceof Error ? err.message : m.dash_roadmap_move_failed());
     }
   }
 
@@ -207,10 +209,10 @@ function Roadmap() {
 
   return (
     <Panel
-      title="Roadmap"
+      title={m.nav_roadmap()}
       actions={
         <span className="hidden text-[13px] text-faint lg:inline">
-          Drag cards between columns to change status
+          {m.dash_roadmap_hint()}
         </span>
       }
     >
@@ -221,13 +223,13 @@ function Roadmap() {
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] text-muted-foreground outline-none hover:bg-accent hover:text-foreground">
               <SortAscendingIcon className="size-3.5" />
-              {sort === "top" ? "Most votes" : "Newest"}
+              {sort === "top" ? m.dash_sort_top() : m.dash_sort_new()}
               <CaretDownIcon className="size-2.5 text-faint" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-36">
               {(["top", "new"] as const).map((s) => (
                 <DropdownMenuItem key={s} onClick={() => navigate({ search: (p) => ({ ...p, sort: s === "top" ? undefined : s }) })}>
-                  {s === "top" ? "Most votes" : "Newest"}
+                  {s === "top" ? m.dash_sort_top() : m.dash_sort_new()}
                   {sort === s ? <CheckIcon weight="bold" className="ml-auto size-3" /> : null}
                 </DropdownMenuItem>
               ))}
@@ -236,11 +238,11 @@ function Roadmap() {
           <DropdownMenu>
             <DropdownMenuTrigger className={cn("inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] outline-none hover:bg-accent hover:text-foreground", search.board ? "text-foreground" : "text-muted-foreground")}>
               <FunnelSimpleIcon className="size-3.5" />
-              Filter
+              {m.dash_filter()}
               <CaretDownIcon className="size-2.5 text-faint" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-48">
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Board</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{m.dash_board()}</DropdownMenuLabel>
               {root.boards.map((b) => (
                 <DropdownMenuItem key={b.id} onClick={() => navigate({ search: (p) => ({ ...p, board: p.board === b.id ? undefined : b.id }) })}>
                   <span className="flex-1">{b.name}</span>
@@ -253,7 +255,7 @@ function Roadmap() {
         </div>
 
         {/* Kanban columns */}
-        <DndContext sensors={sensors} collisionDetection={collisionDetection} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} onDragCancel={onDragCancel} accessibility={liveRegionContainer ? { container: liveRegionContainer } : undefined}>
+        <DndContext sensors={sensors} collisionDetection={collisionDetection} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} onDragCancel={onDragCancel} accessibility={{ ...dndAccessibility(), container: liveRegionContainer ?? undefined }}>
           <div className="scrollbar-thin flex flex-1 gap-0 overflow-x-auto px-5 pb-5">
             {columns.map((col) => {
               const items = grouped(col);
@@ -295,7 +297,7 @@ function Column({
           type="button"
           onClick={() => navigate({ to: "/dashboard/inbox", search: { status: status.key } })}
           className="inline-flex size-6 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground"
-          title={`New post in ${status.label}`}
+          title={m.dash_roadmap_new_in({ status: status.label })}
         >
           <PlusIcon className="size-3.5" />
         </button>
@@ -310,7 +312,7 @@ function Column({
         </SortableContext>
         {items.length === 0 ? (
           <div className="flex items-center justify-center rounded-lg border border-dashed border-border py-8 text-[13px] text-faint">
-            Nothing {status.label.toLowerCase()} yet
+            {m.dash_roadmap_column_empty({ status: status.label.toLowerCase() })}
           </div>
         ) : null}
       </DroppableColumn>

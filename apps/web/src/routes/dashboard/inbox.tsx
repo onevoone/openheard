@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@openheard/ui/components/dropdown-menu";
 import type { Icon } from "@phosphor-icons/react";
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/dashboard/inbox")({
   }),
   loaderDeps: ({ search }) => ({ status: search.status, sort: search.sort, board: search.board, tag: search.tag }),
   loader: async ({ deps }) => ({ list: await listInbox({ data: { status: deps.status, sort: deps.sort ?? "new", board: deps.board, tag: deps.tag } }) }),
-  head: () => ({ meta: [{ title: "Posts · openheard" }] }),
+  head: () => ({ meta: [{ title: `${m.dash_nav_posts()} · openheard` }] }),
   component: Inbox,
   errorComponent: ({ error }) => <DashboardErrorState message={(error as Error)?.message} retry="/dashboard/inbox" />,
   pendingComponent: DashboardPanelSkeleton,
@@ -49,6 +50,7 @@ function Inbox() {
   const sort = search.sort ?? "new";
   const filtered = !!(search.status || search.board || search.tag);
   const [q, setQ] = useState("");
+  const sortLabel = { new: m.dash_sort_new(), top: m.dash_sort_top(), old: m.dash_sort_old() };
   const needle = q.trim().toLowerCase();
   const shown = needle ? list.filter((p) => p.title.toLowerCase().includes(needle) || p.board.name.toLowerCase().includes(needle) || (p.author?.name ?? "").toLowerCase().includes(needle)) : list;
   const openIds = shown.map((p) => p.id);
@@ -69,19 +71,19 @@ function Inbox() {
   });
 
   return (
-    <Panel title={meta ? meta.label : "Posts"} className="flex" aside={<FilterColumn />} onSearch={setQ}>
+    <Panel title={meta ? meta.label : m.dash_nav_posts()} className="flex" aside={<FilterColumn />} onSearch={setQ}>
       <div className="flex w-full shrink-0 flex-col overflow-auto scrollbar-thin">
         <div className="flex items-center gap-1.5 px-3 pt-3 pb-2.5">
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] text-muted-foreground outline-none hover:bg-accent hover:text-foreground">
               <SortAscendingIcon className="size-3.5" />
-              {sort === "new" ? "Newest" : sort === "top" ? "Most votes" : "Oldest"}
+              {sortLabel[sort]}
               <CaretDownIcon className="size-2.5 text-faint" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-36">
               {(["new", "top", "old"] as const).map((s) => (
                 <DropdownMenuItem key={s} onClick={() => navigate({ search: (p) => ({ ...p, sort: s === "new" ? undefined : s }) })}>
-                  {s === "new" ? "Newest" : s === "top" ? "Most votes" : "Oldest"}
+                  {sortLabel[s]}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -89,12 +91,12 @@ function Inbox() {
           <DropdownMenu>
             <DropdownMenuTrigger className={cn("inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[13px] outline-none hover:bg-accent hover:text-foreground", filtered ? "text-foreground" : "text-muted-foreground")}>
               <FunnelSimpleIcon className="size-3.5" />
-              Filter
+              {m.dash_filter()}
               <CaretDownIcon className="size-2.5 text-faint" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-48">
               <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Status</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{m.dash_status()}</DropdownMenuLabel>
               {statuses.map((s) => (
                 <DropdownMenuItem key={s.key} onClick={() => navigate({ search: (p) => ({ ...p, status: p.status === s.key ? undefined : s.key, post: undefined }) })}>
                   <span className="size-[7px] rounded-full" style={{ background: s.color }} />
@@ -105,7 +107,7 @@ function Inbox() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Board</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{m.dash_board()}</DropdownMenuLabel>
               {root.boards.map((b) => (
                 <DropdownMenuItem key={b.id} onClick={() => navigate({ search: (p) => ({ ...p, board: p.board === b.id ? undefined : b.id, post: undefined }) })}>
                   <span className="flex-1">{b.name}</span>
@@ -116,7 +118,7 @@ function Inbox() {
               {root.tags.length ? (
                 <DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">Tag</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">{m.dash_tag()}</DropdownMenuLabel>
                   {root.tags.map((t) => (
                     <DropdownMenuItem key={t.id} onClick={() => navigate({ search: (p) => ({ ...p, tag: p.tag === t.id ? undefined : t.id, post: undefined }) })}>
                       <span className="flex-1">{t.name}</span>
@@ -139,15 +141,15 @@ function Inbox() {
         ) : null}
         {list.length === 0 ? (
           <div className="flex flex-col items-center gap-3 px-4 py-12 text-center">
-            <p className="text-sm text-faint">{meta ? `Nothing ${meta.label.toLowerCase()} right now.` : "No posts yet."}</p>
+            <p className="text-sm text-faint">{meta ? m.dash_inbox_empty_status({ status: meta.label.toLowerCase() }) : m.dash_inbox_empty()}</p>
             {!filtered ? (
               <Button variant="secondary" size="sm" onClick={() => window.dispatchEvent(new Event("oh:compose"))}>
-                Create the first post
+                {m.dash_inbox_create_first()}
               </Button>
             ) : null}
           </div>
         ) : null}
-        {needle && shown.length === 0 ? <p className="px-5 py-10 text-center text-sm text-faint">Nothing matches “{q}”.</p> : null}
+        {needle && shown.length === 0 ? <p className="px-5 py-10 text-center text-sm text-faint">{m.dash_inbox_no_match({ query: q })}</p> : null}
         {shown.map((p) => {
           const on = search.post === p.id;
           const st = findStatus(statuses, p.status);
@@ -178,7 +180,7 @@ function Inbox() {
                   <ChatCircleIcon className="size-[13px]" /> {p.commentCount}
                 </span>
               ) : null}
-              <span className="w-9 text-right text-[12px] text-faint tabular-nums">{ago(p.createdAt)}</span>
+              <span className="min-w-9 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums">{ago(p.createdAt)}</span>
               <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={24} />
               <VoteChip n={p.voteCount} />
             </Link>
@@ -256,7 +258,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
   const box = useRef<HTMLTextAreaElement>(null);
   const [optimisticStatus, setOptimisticStatus] = useState<string | null>(null);
   const [pendingComments, setPendingComments] = useState<OptimisticComment[]>([]);
-  const images = useImageDrafts({ blocked: isDemo(root.workspace) ? "Image uploads are off in the demo." : null });
+  const images = useImageDrafts({ blocked: isDemo(root.workspace) ? m.dash_inbox_images_demo() : null });
 
   const prevId = useRef(p.id);
   if (p.id !== prevId.current) {
@@ -287,13 +289,13 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
       await router.invalidate();
       if (ok) toast.success(ok);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "That did not work");
+      toast.error(err instanceof Error ? err.message : m.dash_inbox_run_failed());
     }
   }
 
   function send() {
     if (images.uploading) {
-      toast("Images are still uploading");
+      toast(m.dash_inbox_images_uploading());
       return;
     }
     if (!reply.trim() && !images.ids.length) return;
@@ -327,7 +329,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
           setReply((r) => r || body);
           images.restore(saved);
         }
-        toast.error(err instanceof Error ? err.message : "Could not comment");
+        toast.error(err instanceof Error ? err.message : m.dash_inbox_comment_failed());
       });
   }
 
@@ -350,27 +352,27 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
       <div key={p.id} className="flex min-w-0 flex-1 flex-col overflow-hidden animate-in fade-in-0 duration-100 motion-reduce:animate-none">
         <div className="flex h-12 shrink-0 items-center justify-between border-b pr-3 pl-4">
           <div className="flex items-center gap-1.5">
-            <IconBtn title="Previous (K)" onClick={nav.prev} disabled={!nav.prev}>
+            <IconBtn title={m.dash_inbox_previous()} onClick={nav.prev} disabled={!nav.prev}>
               <CaretUpIcon className="size-[12px]" />
             </IconBtn>
-            <IconBtn title="Next (J)" onClick={nav.next} disabled={!nav.next}>
+            <IconBtn title={m.dash_inbox_next()} onClick={nav.next} disabled={!nav.next}>
               <CaretDownIcon className="size-[12px]" />
             </IconBtn>
-            <span className="ml-1 text-xs text-faint tabular-nums">{nav.idx + 1} of {nav.total}</span>
+            <span className="ml-1 text-xs text-faint tabular-nums">{m.dash_inbox_position({ current: nav.idx + 1, total: nav.total })}</span>
             <span className="mx-1.5 h-4 w-px bg-border" />
             <span className="text-xs text-faint">{p.board.name}</span>
           </div>
           <div className="flex items-center gap-1">
-            <IconBtn title={p.pinned ? "Unpin" : "Pin"} onClick={() => run(() => togglePin({ data: { postId: p.id } }))}>
+            <IconBtn title={p.pinned ? m.dash_inbox_unpin() : m.dash_inbox_pin()} onClick={() => run(() => togglePin({ data: { postId: p.id } }))}>
               <PushPinIcon weight={p.pinned ? "fill" : "regular"} className="size-[14px]" />
             </IconBtn>
-            <IconBtn title="Merge into another post" onClick={() => setMerging(true)}>
+            <IconBtn title={m.dash_inbox_merge()} onClick={() => setMerging(true)}>
               <ArrowsMergeIcon className="size-[14px]" />
             </IconBtn>
-            <Link to="/p/$id" params={{ id: String(p.id) }} title="Open public page" className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
+            <Link to="/p/$id" params={{ id: String(p.id) }} title={m.dash_inbox_open_public()} className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">
               <ArrowSquareOutIcon className="size-[14px]" />
             </Link>
-            <IconBtn title="Close" onClick={onClose}>
+            <IconBtn title={m.dash_close()} onClick={onClose}>
               <XIcon className="size-[14px]" />
             </IconBtn>
           </div>
@@ -389,8 +391,8 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               rows={1}
-              placeholder={internal ? "Internal note, only the team sees this" : "Reply as the team"}
-              aria-label={internal ? "Internal note" : "Reply to post"}
+              placeholder={internal ? m.dash_inbox_internal_placeholder() : m.dash_inbox_reply_placeholder()}
+              aria-label={internal ? m.dash_inbox_internal_note() : m.dash_inbox_reply_aria()}
               className={cn("w-full resize-none bg-transparent text-[13px] leading-relaxed outline-none transition-[height] duration-150 ease-out placeholder:text-faint motion-reduce:transition-none", reply || images.drafts.length ? "h-[72px]" : "h-[22px] focus:h-[44px]")}
               onKeyDown={(e) => (e.metaKey || e.ctrlKey) && e.key === "Enter" && send()}
             />
@@ -400,8 +402,8 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
               <div className="flex items-center gap-1">
                 <div className="mr-1 flex gap-0.5 rounded-md bg-secondary p-0.5">
                   {[
-                    [false, "Public", GlobeSimpleIcon],
-                    [true, "Internal", LockSimpleIcon],
+                    [false, m.dash_inbox_visibility_public(), GlobeSimpleIcon],
+                    [true, m.dash_inbox_visibility_internal(), LockSimpleIcon],
                   ].map(([v, l, I]) => {
                     const Icon = I as typeof GlobeSimpleIcon;
                     return (
@@ -418,22 +420,22 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                 </AttachButton>
               </div>
               <Button size="sm" arrow onClick={send} disabled={(!reply.trim() && !images.ids.length) || images.uploading}>
-                {internal ? "Add note" : "Reply"}
+                {internal ? m.dash_inbox_add_note() : m.dash_inbox_reply()}
               </Button>
             </div>
           </div>
 
           <div className="flex items-center gap-4 border-b">
             {(["comments", "activity"] as const).map((t) => (
-              <button key={t} type="button" onClick={() => setTab(t)} className={cn("-mb-px flex items-center gap-1.5 border-b-2 pb-2 text-[13px] capitalize", tab === t ? "border-foreground font-semibold text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
-                {t}
+              <button key={t} type="button" onClick={() => setTab(t)} className={cn("-mb-px flex items-center gap-1.5 border-b-2 pb-2 text-[13px]", tab === t ? "border-foreground font-semibold text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+                {t === "comments" ? m.dash_inbox_tab_comments() : m.dash_inbox_tab_activity()}
                 <span className="rounded-full bg-secondary px-1.5 text-[10.5px] text-faint tabular-nums">{t === "comments" ? comments.length : activity.length}</span>
               </button>
             ))}
           </div>
 
           <div className="flex flex-col gap-4">
-            {shown.length === 0 ? <p className="text-sm text-faint">{tab === "comments" ? "No comments yet." : "No activity yet."}</p> : null}
+            {shown.length === 0 ? <p className="text-sm text-faint">{tab === "comments" ? m.dash_inbox_no_comments() : m.dash_inbox_no_activity()}</p> : null}
             {shown.map((item) => {
               const team = item.kind === "activity" || (item.author as { role?: string } | null)?.role === "admin";
               const note = item.kind === "comment" && item.internal;
@@ -443,11 +445,11 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                   <Avatar name={item.author?.name ?? "?"} image={(item.author as { image?: string | null })?.image} size={24} className={cn(team && "ring-1 ring-link/50")} />
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-2 text-[13px]">
-                      <span className="font-semibold">{item.author?.name ?? "someone"}</span>
+                      <span className="font-semibold">{item.author?.name ?? m.dash_inbox_someone()}</span>
                       {team ? <TeamBadge /> : null}
                       {note ? (
                         <span className="inline-flex h-[18px] items-center gap-1 rounded-full bg-status-planned/15 px-1.5 text-[11px] font-semibold text-status-planned">
-                          <LockSimpleIcon className="size-[9px]" /> internal
+                          <LockSimpleIcon className="size-[9px]" /> {m.dash_inbox_internal_badge()}
                         </span>
                       ) : null}
                       <span className="text-[12px] text-faint">{ago(item.at)}</span>
@@ -462,7 +464,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                       <div className="text-[13px] leading-[1.5] text-muted-foreground">
                         {item.type === "status" && item.to ? (
                           <span className="inline-flex items-center gap-2">
-                            moved to <StatusChip status={item.to} showOpen />
+                            {m.dash_inbox_moved_to()} <StatusChip status={item.to} showOpen />
                           </span>
                         ) : null}
                         {item.note ? <div className="mt-1">{item.note}</div> : null}
@@ -483,22 +485,22 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                 const open = statuses.find((s) => s.kind === "open");
                 if (!open) return;
                 setOptimisticStatus(open.key);
-                toast.success("Approved");
+                toast.success(m.dash_inbox_approved());
                 setStatus({ data: { postId: p.id, status: open.key } })
                   .then(() => router.invalidate())
                   .catch((err) => {
                     setOptimisticStatus(null);
-                    toast.error(err instanceof Error ? err.message : "Approve failed");
+                    toast.error(err instanceof Error ? err.message : m.dash_inbox_approve_failed());
                   });
               }}
             >
-              Approve
+              {m.dash_inbox_approve()}
             </Button>
           ) : null}
 
           <div className="flex flex-col gap-3 text-[13px]">
             <div className="flex h-8 items-center gap-3">
-              <span className="w-[60px] shrink-0 text-faint">Votes</span>
+              <span className="w-[60px] shrink-0 text-faint">{m.dash_inbox_votes()}</span>
               <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-input px-2 text-[12px] tabular-nums">
                 <CaretUpIcon weight="bold" className="size-[9px] text-muted-foreground" /> {p.voteCount}
               </span>
@@ -509,7 +511,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
               </span>
             </div>
             <div className="flex h-8 items-center gap-3">
-              <span className="w-[60px] shrink-0 text-faint">Status</span>
+              <span className="w-[60px] shrink-0 text-faint">{m.dash_status()}</span>
             <DropdownMenu>
               <DropdownMenuTrigger className={chip}>
                 <G className="size-3.5" style={{ color: current.color }} />
@@ -523,12 +525,12 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                     disabled={s.key === effectiveStatus}
                     onClick={() => {
                       setOptimisticStatus(s.key);
-                      toast.success(`Moved to ${s.label}`);
+                      toast.success(m.dash_inbox_moved_status({ status: s.label }));
                       setStatus({ data: { postId: p.id, status: s.key } })
                         .then(() => router.invalidate())
                         .catch((err) => {
                           setOptimisticStatus(null);
-                          toast.error(err instanceof Error ? err.message : "Could not change status");
+                          toast.error(err instanceof Error ? err.message : m.dash_inbox_status_failed());
                         });
                     }}
                   >
@@ -540,7 +542,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
             </DropdownMenu>
             </div>
             <div className="flex h-8 items-center gap-3">
-              <span className="w-[60px] shrink-0 text-faint">Board</span>
+              <span className="w-[60px] shrink-0 text-faint">{m.dash_board()}</span>
             <DropdownMenu>
               <DropdownMenuTrigger className={chip}>
                 <span className="size-1.5 rounded-full bg-link" />
@@ -549,7 +551,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-44">
                 {root.boards.map((b) => (
-                  <DropdownMenuItem key={b.id} disabled={b.id === p.boardId} onClick={() => run(() => setBoard({ data: { postId: p.id, boardId: b.id } }), "Board changed")}>
+                  <DropdownMenuItem key={b.id} disabled={b.id === p.boardId} onClick={() => run(() => setBoard({ data: { postId: p.id, boardId: b.id } }), m.dash_inbox_board_changed())}>
                     {b.name}
                   </DropdownMenuItem>
                 ))}
@@ -557,7 +559,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
             </DropdownMenu>
             </div>
             <div className="flex min-h-8 items-start gap-3">
-              <span className="w-[60px] shrink-0 pt-1.5 text-faint">Tags</span>
+              <span className="w-[60px] shrink-0 pt-1.5 text-faint">{m.dash_tags()}</span>
               <div className="flex flex-wrap items-center gap-1.5">
             {p.tags.map((t) => (
               <span key={t.id} className="inline-flex h-7 items-center rounded-md border border-input px-2 text-[12px] text-muted-foreground">
@@ -565,11 +567,11 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
               </span>
             ))}
             <DropdownMenu>
-              <DropdownMenuTrigger className={cn(chip, "text-faint")} title="Tags">
+              <DropdownMenuTrigger className={cn(chip, "text-faint")} title={m.dash_tags()}>
                 <PlusIcon className="size-3" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-44">
-                {root.tags.length === 0 ? <div className="px-2 py-1.5 text-xs text-muted-foreground">No tags yet</div> : null}
+                {root.tags.length === 0 ? <div className="px-2 py-1.5 text-xs text-muted-foreground">{m.dash_tags_none()}</div> : null}
                 {root.tags.map((t) => {
                   const on = p.tags.some((x) => x.id === t.id);
                   return (
@@ -584,27 +586,27 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
               </div>
             </div>
             <div className="flex h-8 items-center gap-3">
-              <span className="w-[60px] shrink-0 text-faint">ETA</span>
+              <span className="w-[60px] shrink-0 text-faint">{m.dash_inbox_eta()}</span>
               <input
                 value={eta}
                 onChange={(e) => setEta(e.target.value)}
-                onBlur={() => eta !== (p.eta ?? "") && run(() => setEtaFn({ data: { postId: p.id, eta } }), "ETA saved")}
-                placeholder="none"
-                aria-label="ETA"
+                onBlur={() => eta !== (p.eta ?? "") && run(() => setEtaFn({ data: { postId: p.id, eta } }), m.dash_inbox_eta_saved())}
+                placeholder={m.dash_inbox_eta_none()}
+                aria-label={m.dash_inbox_eta_aria()}
                 className="h-6 w-20 rounded-md border border-transparent bg-transparent px-1.5 text-[12px] text-foreground tabular-nums outline-none placeholder:text-faint hover:border-input focus:border-ring/60"
               />
             </div>
           </div>
           <div className="flex flex-col gap-3 border-t pt-4 text-[13px]">
             <div className="flex items-center gap-3">
-              <span className="w-[60px] shrink-0 text-faint">Created</span>
+              <span className="w-[60px] shrink-0 text-faint">{m.dash_inbox_created()}</span>
               <span title={fullDate(p.createdAt)}>{since(p.createdAt)}</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="w-[60px] shrink-0 text-faint">Author</span>
+              <span className="w-[60px] shrink-0 text-faint">{m.dash_inbox_author()}</span>
               <span className="inline-flex items-center gap-2">
                 <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={20} />
-                {p.author?.name ?? "someone"}
+                {p.author?.name ?? m.dash_inbox_someone()}
               </span>
             </div>
           </div>
@@ -613,7 +615,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
       </div>
 
 
-      <MergeDialog open={merging} onOpenChange={setMerging} postId={p.id} onMerged={() => run(async () => setMerging(false), "Merged")} />
+      <MergeDialog open={merging} onOpenChange={setMerging} postId={p.id} onMerged={() => run(async () => setMerging(false), m.dash_inbox_merged())} />
     </div>
   );
 }
@@ -627,7 +629,7 @@ function VoteChip({ n }: { n: number }) {
 }
 
 function Trending() {
-  return <span className="inline-flex h-5 items-center rounded-md bg-status-shipped/15 px-1.5 text-[11px] font-semibold text-status-shipped">Trending</span>;
+  return <span className="inline-flex h-5 shrink-0 items-center rounded-md bg-status-shipped/15 px-1.5 text-[11px] font-semibold whitespace-nowrap text-status-shipped">{m.dash_inbox_trending()}</span>;
 }
 
 function Reactions({ reactions, onToggle }: { commentId: number; reactions: { emoji: string; count: number; mine: boolean }[]; onToggle: (e: (typeof REACTIONS)[number]) => void }) {
@@ -639,7 +641,7 @@ function Reactions({ reactions, onToggle }: { commentId: number; reactions: { em
         </button>
       ))}
       <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex size-6 items-center justify-center rounded-full border border-dashed border-input text-faint outline-none hover:border-foreground/40 hover:text-foreground" title="React">
+        <DropdownMenuTrigger className="inline-flex size-6 items-center justify-center rounded-full border border-dashed border-input text-faint outline-none hover:border-foreground/40 hover:text-foreground" title={m.dash_inbox_react()}>
           <SmileyIcon className="size-3.5" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="flex min-w-0 gap-0.5 p-1">
@@ -659,7 +661,7 @@ const EMOJI = ["👍", "🙏", "🎉", "❤️", "🔥", "👀", "🚀", "✅", 
 function EmojiPicker({ onPick }: { onPick: (e: string) => void }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-foreground" title="Emoji">
+      <DropdownMenuTrigger className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-accent hover:text-foreground" title={m.dash_inbox_emoji()}>
         <SmileyIcon className="size-[14px]" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="grid w-[184px] grid-cols-8 gap-0.5 p-1">

@@ -1,6 +1,7 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@openheard/ui/components/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@openheard/ui/components/dropdown-menu";
@@ -10,6 +11,7 @@ import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router"
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { dndAccessibility } from "@/components/admin/dnd";
 import { Panel } from "@/components/admin/panel";
 import { HelpIcon, Markdown } from "@/components/help/bits";
 import { DashboardErrorState, DashboardPanelSkeleton } from "@/components/states";
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/dashboard/help")({
   }),
   loaderDeps: () => ({}),
   loader: () => listHelpAdmin(),
-  head: () => ({ meta: [{ title: "Help center · openheard" }] }),
+  head: () => ({ meta: [{ title: `${m.dash_nav_help()} · openheard` }] }),
   component: HelpPage,
   errorComponent: ({ error }) => <DashboardErrorState message={(error as Error)?.message} retry="/dashboard/help" />,
   pendingComponent: DashboardPanelSkeleton,
@@ -62,33 +64,33 @@ function HelpPage() {
 
   return (
     <Panel
-      title="Help center"
+      title={m.dash_nav_help()}
       actions={
         <>
           {published ? (
             <a href="/help" target="_blank" rel="noreferrer" className="hidden h-[30px] items-center gap-1.5 rounded-md px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground sm:inline-flex">
-              <ArrowSquareOutIcon className="size-3.5" /> View
+              <ArrowSquareOutIcon className="size-3.5" /> {m.dash_view()}
             </a>
           ) : null}
           <Button size="sm" variant="secondary" onClick={() => setEditingCollection("new")}>
-            New collection
+            {m.dash_help_collection_new()}
           </Button>
           <Button size="sm" arrow onClick={() => navigate({ search: { article: "new" } })}>
-            New article
+            {m.dash_help_new_article()}
           </Button>
         </>
       }
     >
       {data.articles.length === 0 && data.collections.length === 0 ? (
         <div className="flex flex-col items-center gap-3 px-6 py-24 text-center">
-          <p className="text-[15px] font-semibold">No articles yet</p>
-          <p className="max-w-sm text-sm text-muted-foreground">Answer the questions people ask most. Published articles appear at /help and next to the new-post box, before someone files a request.</p>
+          <p className="text-[15px] font-semibold">{m.dash_help_no_articles()}</p>
+          <p className="max-w-sm text-sm text-muted-foreground">{m.dash_help_empty_text()}</p>
           <div className="mt-2 flex gap-2">
             <Button size="sm" variant="secondary" onClick={() => setEditingCollection("new")}>
-              New collection
+              {m.dash_help_collection_new()}
             </Button>
             <Button size="sm" arrow onClick={() => navigate({ search: { article: "new" } })}>
-              New article
+              {m.dash_help_new_article()}
             </Button>
           </div>
         </div>
@@ -125,14 +127,14 @@ function Groups({ data, onEditCollection }: { data: Data; onEditCollection: (c: 
       await router.invalidate();
     } catch (err) {
       setOrder(before);
-      toast.error(err instanceof Error ? err.message : "Could not reorder");
+      toast.error(err instanceof Error ? err.message : m.dash_help_reorder_failed());
     }
   }
 
   return (
     <div className="flex flex-col pb-10">
       <div ref={setLiveRegion} className="sr-only" />
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} accessibility={liveRegion ? { container: liveRegion } : undefined}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} accessibility={{ ...dndAccessibility(), container: liveRegion ?? undefined }}>
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
           {order.map((id) => {
             const c = byId.get(id);
@@ -144,7 +146,7 @@ function Groups({ data, onEditCollection }: { data: Data; onEditCollection: (c: 
         <section>
           <div className="flex h-11 shrink-0 items-center gap-3 border-b bg-card/40 px-5">
             <span className="w-4" />
-            <span className="text-[13px] font-semibold text-muted-foreground">Not in a collection</span>
+            <span className="text-[13px] font-semibold text-muted-foreground">{m.dash_help_loose()}</span>
             <span className="text-[12px] text-faint tabular-nums">{loose.length}</span>
           </div>
           {loose.map((a) => (
@@ -161,21 +163,21 @@ function CollectionGroup({ collection, articles, onEdit }: { collection: Collect
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: collection.id });
   return (
     <section ref={setNodeRef} style={{ transform: CSS.Translate.toString(transform), transition: transition ?? undefined }} className={cn("bg-background", isDragging && "relative z-10 shadow-[0_12px_32px_rgba(0,0,0,.45)]")}>
-      <div className="group/c flex h-11 shrink-0 cursor-grab items-center gap-3 border-b bg-card/40 pr-3 pl-2 active:cursor-grabbing" {...attributes} {...listeners} aria-label={`${collection.title}, drag to reorder`}>
+      <div className="group/c flex h-11 shrink-0 cursor-grab items-center gap-3 border-b bg-card/40 pr-3 pl-2 active:cursor-grabbing" {...attributes} {...listeners} aria-label={m.dash_help_drag_aria({ title: collection.title })}>
         <DotsSixVerticalIcon className="size-4 shrink-0 text-faint opacity-40 group-hover/c:opacity-100" />
         <HelpIcon name={collection.icon} className="size-4 shrink-0 text-muted-foreground" />
         <span className="min-w-0 truncate text-[14px] font-semibold">{collection.title}</span>
         <span className="text-[12px] text-faint tabular-nums">{articles.length}</span>
         {collection.description ? <span className="hidden min-w-0 truncate text-[12px] text-faint lg:inline">{collection.description}</span> : null}
         <span className="flex-1" />
-        <button type="button" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} onClick={() => navigate({ search: { article: "new", collection: collection.id } })} className="inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground" title="New article in this collection">
+        <button type="button" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} onClick={() => navigate({ search: { article: "new", collection: collection.id } })} className="inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground" title={m.dash_help_new_in_collection()}>
           <PlusIcon className="size-3.5" />
         </button>
-        <button type="button" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} onClick={onEdit} className="inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground" title="Edit collection">
+        <button type="button" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} onClick={onEdit} className="inline-flex size-7 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground" title={m.dash_help_collection_edit()}>
           <PencilSimpleIcon className="size-3.5" />
         </button>
       </div>
-      {articles.length ? articles.map((a) => <ArticleRow key={a.id} article={a} />) : <div className="flex h-11 items-center border-b pl-14 text-[13px] text-faint">No articles yet</div>}
+      {articles.length ? articles.map((a) => <ArticleRow key={a.id} article={a} />) : <div className="flex h-11 items-center border-b pl-14 text-[13px] text-faint">{m.dash_help_no_articles()}</div>}
     </section>
   );
 }
@@ -187,15 +189,15 @@ function ArticleRow({ article: a }: { article: Article }) {
     <button type="button" onClick={() => navigate({ search: { article: a.id } })} className="flex h-12 w-full shrink-0 items-center gap-3.5 border-b pr-5 pl-9 text-left hover:bg-card/60">
       {a.status === "published" ? <CheckCircleIcon weight="fill" className="size-[18px] shrink-0 text-status-shipped" /> : <CircleDashedIcon className="size-[18px] shrink-0 text-status-planned" />}
       <span className="min-w-0 truncate text-[15px] font-medium">{a.title}</span>
-      {a.status === "draft" ? <span className="shrink-0 rounded-md bg-status-planned/15 px-2 py-0.5 text-[12px] font-medium text-status-planned">Draft</span> : null}
+      {a.status === "draft" ? <span className="shrink-0 rounded-md bg-status-planned/15 px-2 py-0.5 text-[12px] font-medium text-status-planned">{m.dash_draft()}</span> : null}
       <span className="hidden shrink-0 text-[12px] text-faint md:inline">/help/{a.slug}</span>
       <span className="flex-1" />
       {votes ? (
-        <span className="shrink-0 text-[12px] text-faint tabular-nums" title={`${a.helpfulCount} helpful, ${a.unhelpfulCount} not helpful`}>
-          {Math.round((a.helpfulCount / votes) * 100)}% helpful
+        <span className="shrink-0 text-[12px] text-faint tabular-nums" title={m.dash_help_helpful_title({ helpful: a.helpfulCount, unhelpful: a.unhelpfulCount })}>
+          {m.dash_help_helpful_percent({ percent: Math.round((a.helpfulCount / votes) * 100) })}
         </span>
       ) : null}
-      <span className="w-10 shrink-0 text-right text-[12px] text-faint tabular-nums" title={fullDate(a.updatedAt)}>
+      <span className="min-w-10 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(a.updatedAt)}>
         {ago(a.updatedAt)}
       </span>
     </button>
@@ -221,24 +223,24 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
     title !== (article?.title ?? "") || excerpt !== (article?.excerpt ?? "") || body !== (article?.body ?? "") || slug !== (article?.slug ?? "") || collectionId !== (article ? article.collectionId : (defaultCollection ?? collections[0]?.id ?? null));
 
   async function save(publish: boolean) {
-    if (title.trim().length < 3) return toast("Give it a title first");
-    if (!slugOk) return toast("The address can only use lowercase letters, numbers and dashes");
+    if (title.trim().length < 3) return toast(m.dash_need_title());
+    if (!slugOk) return toast(m.dash_help_address_invalid());
     setBusy(true);
     try {
       const { id, slug: saved } = await saveHelpArticle({ data: { id: article?.id, title, excerpt, body, slug, collectionId, publish } });
       setSlug(saved);
       await router.invalidate();
-      toast.success(publish ? (published ? "Saved" : "Published at /help/" + saved) : published ? "Unpublished" : "Draft saved");
+      toast.success(publish ? (published ? m.dash_saved() : m.dash_help_published_at({ slug: saved })) : published ? m.dash_unpublished() : m.dash_draft_saved());
       if (!article && id) router.navigate({ to: "/dashboard/help", search: { article: id } });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : m.dash_save_failed());
     } finally {
       setBusy(false);
     }
   }
 
   async function remove() {
-    if (!article || !confirm(`Delete "${article.title}"?`)) return;
+    if (!article || !confirm(m.dash_confirm_delete({ title: article.title }))) return;
     await deleteHelpArticle({ data: { id: article.id } });
     await router.invalidate();
     onClose();
@@ -249,50 +251,50 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-background animate-in fade-in-0 duration-150 motion-reduce:animate-none">
         <div className="flex h-[52px] shrink-0 items-center justify-between gap-3 border-b pr-3 pl-3">
           <div className="flex min-w-0 items-center gap-2">
-            <button type="button" onClick={onClose} className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground" title="Back">
+            <button type="button" onClick={onClose} className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground" title={m.dash_back()}>
               <ArrowLeftIcon className="size-4" />
             </button>
-            <span className="truncate text-[15px] font-semibold">{article ? article.title : "New article"}</span>
+            <span className="truncate text-[15px] font-semibold">{article ? article.title : m.dash_help_new_article()}</span>
             <span className={cn("ml-1 inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium", published ? "bg-status-shipped/15 text-status-shipped" : "bg-status-planned/15 text-status-planned")}>
-              {published ? "Published" : "Draft"}
+              {published ? m.dash_published() : m.dash_draft()}
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <div className="mr-1 hidden h-[30px] items-center rounded-lg border border-input bg-card p-0.5 sm:flex" role="tablist" aria-label="Editor mode">
-              {(["Write", "Preview"] as const).map((m) => (
+            <div className="mr-1 hidden h-[30px] items-center rounded-lg border border-input bg-card p-0.5 sm:flex" role="tablist" aria-label={m.dash_help_editor_mode_aria()}>
+              {([false, true] as const).map((on) => (
                 <button
-                  key={m}
+                  key={String(on)}
                   type="button"
                   role="tab"
-                  aria-selected={preview === (m === "Preview")}
-                  onClick={() => setPreview(m === "Preview")}
-                  className={cn("h-full rounded-md px-2.5 text-xs font-semibold", preview === (m === "Preview") ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}
+                  aria-selected={preview === on}
+                  onClick={() => setPreview(on)}
+                  className={cn("h-full rounded-md px-2.5 text-xs font-semibold", preview === on ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}
                 >
-                  {m}
+                  {on ? m.dash_help_mode_preview() : m.dash_help_mode_write()}
                 </button>
               ))}
             </div>
             {article ? (
-              <Button size="sm" variant="ghost" onClick={remove} title="Delete">
+              <Button size="sm" variant="ghost" onClick={remove} title={m.dash_delete()}>
                 <TrashIcon className="size-3.5" />
               </Button>
             ) : null}
             {article ? (
               <a href={`/help/${article.slug}`} target="_blank" rel="noreferrer" className="inline-flex h-[30px] items-center gap-1.5 rounded-md px-2.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
-                <ArrowSquareOutIcon className="size-3.5" /> View
+                <ArrowSquareOutIcon className="size-3.5" /> {m.dash_view()}
               </a>
             ) : null}
             {published ? (
               <Button size="sm" variant="secondary" disabled={busy} onClick={() => save(false)}>
-                Unpublish
+                {m.dash_unpublish()}
               </Button>
             ) : (
               <Button size="sm" variant="secondary" disabled={busy || (!!article && !dirty)} onClick={() => save(false)}>
-                Save draft
+                {m.dash_save_draft()}
               </Button>
             )}
             <Button size="sm" arrow disabled={busy || (published && !dirty)} onClick={() => save(true)}>
-              {published ? "Save" : "Publish"}
+              {published ? m.dash_save() : m.dash_publish()}
             </Button>
           </div>
         </div>
@@ -303,7 +305,7 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
               <DropdownMenu>
                 <DropdownMenuTrigger className="inline-flex h-7 items-center gap-1.5 rounded-md border border-input bg-secondary pr-2 pl-2.5 text-[12px] text-foreground outline-none hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring">
                   <HelpIcon name={collection?.icon ?? "book"} className="size-3.5 text-muted-foreground" />
-                  {collection?.title ?? "No collection"}
+                  {collection?.title ?? m.dash_help_no_collection()}
                   <CaretDownIcon className="size-2.5 text-faint" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-48">
@@ -313,7 +315,7 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
                     </DropdownMenuItem>
                   ))}
                   {collections.length ? <DropdownMenuSeparator /> : null}
-                  <DropdownMenuItem onClick={() => setCollectionId(null)}>No collection</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setCollectionId(null)}>{m.dash_help_no_collection()}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <label className={cn("flex h-7 items-center rounded-md border border-transparent pl-2 text-[12px] text-faint focus-within:border-ring/60 hover:border-input", !slugOk && "border-destructive/60")}>
@@ -322,7 +324,7 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
                   value={slug}
                   onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
                   placeholder={shownSlug}
-                  aria-label="Article address"
+                  aria-label={m.dash_help_address_aria()}
                   size={Math.max(8, (slug || shownSlug).length)}
                   className="h-full bg-transparent pr-2 text-muted-foreground outline-none placeholder:text-faint"
                 />
@@ -338,16 +340,16 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
                   bodyRef.current?.focus();
                 }
               }}
-              placeholder="Article title"
-              aria-label="Article title"
+              placeholder={m.dash_help_article_title()}
+              aria-label={m.dash_help_article_title()}
               className="w-full bg-transparent text-[32px] font-semibold tracking-[-0.02em] outline-none placeholder:text-faint"
             />
             <input
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
               maxLength={240}
-              placeholder="One line on what this answers. Shown under the title and in search."
-              aria-label="Summary"
+              placeholder={m.dash_help_excerpt_placeholder()}
+              aria-label={m.dash_help_excerpt_aria()}
               className="w-full bg-transparent text-[17px] text-muted-foreground outline-none placeholder:text-faint"
             />
             <div className="border-t pt-6">
@@ -355,7 +357,7 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
                 blocks.length ? (
                   <Markdown blocks={blocks} className="min-h-[320px]" />
                 ) : (
-                  <p className="min-h-[320px] text-faint">Nothing to preview yet.</p>
+                  <p className="min-h-[320px] text-faint">{m.dash_help_preview_empty()}</p>
                 )
               ) : (
                 <textarea
@@ -368,13 +370,13 @@ function Editor({ article, collections, defaultCollection, onClose }: { article:
                       save(true);
                     }
                   }}
-                  placeholder={"Write the answer in markdown.\n\n## A heading for each step\n\n1. Numbered steps\n2. Read well\n\n> A quote becomes a callout."}
-                  aria-label="Article body"
+                  placeholder={m.dash_help_body_placeholder()}
+                  aria-label={m.dash_help_body_aria()}
                   className="min-h-[360px] w-full resize-none bg-transparent text-[14px] leading-[1.7] text-foreground/90 outline-none field-sizing-content placeholder:text-faint"
                 />
               )}
             </div>
-            <p className="text-[12px] text-faint">Markdown: ## headings build the table of contents, &gt; quotes become callouts, ``` fences become code blocks.</p>
+            <p className="text-[12px] text-faint">{m.dash_help_markdown_note()}</p>
           </div>
         </div>
       </div>
@@ -399,22 +401,22 @@ function CollectionDialog({ collection, onClose }: { collection: Collection | "n
   }
 
   async function save() {
-    if (title.trim().length < 2) return toast("Give it a name first");
+    if (title.trim().length < 2) return toast(m.dash_help_collection_name_required());
     setBusy(true);
     try {
       await saveHelpCollection({ data: { id: c?.id, title, description, icon, slug: c?.slug ?? "" } });
       await router.invalidate();
       onClose();
-      toast.success(c ? "Collection saved" : "Collection created");
+      toast.success(c ? m.dash_help_collection_saved() : m.dash_help_collection_created());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : m.dash_save_failed());
     } finally {
       setBusy(false);
     }
   }
 
   async function remove() {
-    if (!c || !confirm(`Delete "${c.title}"? Its articles stay, outside any collection.`)) return;
+    if (!c || !confirm(m.dash_help_confirm_delete_collection({ title: c.title }))) return;
     await deleteHelpCollection({ data: { id: c.id } });
     await router.invalidate();
     onClose();
@@ -424,8 +426,8 @@ function CollectionDialog({ collection, onClose }: { collection: Collection | "n
     <Dialog open={collection !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md rounded-xl border-input bg-card">
         <DialogHeader>
-          <DialogTitle>{c ? "Edit collection" : "New collection"}</DialogTitle>
-          <DialogDescription>Collections group articles on the help center home page.</DialogDescription>
+          <DialogTitle>{c ? m.dash_help_collection_edit() : m.dash_help_collection_new()}</DialogTitle>
+          <DialogDescription>{m.dash_help_collection_dialog_text()}</DialogDescription>
         </DialogHeader>
         <form
           className="flex flex-col gap-3"
@@ -434,7 +436,7 @@ function CollectionDialog({ collection, onClose }: { collection: Collection | "n
             save();
           }}
         >
-          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Icon">
+          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={m.dash_help_collection_icon_aria()}>
             {HELP_ICONS.map((name) => (
               <button
                 key={name}
@@ -449,22 +451,22 @@ function CollectionDialog({ collection, onClose }: { collection: Collection | "n
               </button>
             ))}
           </div>
-          <Input autoFocus placeholder="Getting started" value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Collection name" className="h-10 text-[14px] font-semibold" />
-          <Input placeholder="One line on what is inside" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} aria-label="Collection description" />
+          <Input autoFocus placeholder={m.dash_help_collection_name_placeholder()} value={title} onChange={(e) => setTitle(e.target.value)} aria-label={m.dash_help_collection_name_aria()} className="h-10 text-[14px] font-semibold" />
+          <Input placeholder={m.dash_help_collection_description_placeholder()} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} aria-label={m.dash_help_collection_description_aria()} />
           <div className="flex items-center justify-between gap-2 pt-1">
             {c ? (
               <Button type="button" variant="ghost" size="sm" onClick={remove}>
-                <TrashIcon className="size-3.5" /> Delete
+                <TrashIcon className="size-3.5" /> {m.dash_delete()}
               </Button>
             ) : (
               <span />
             )}
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={onClose}>
-                Cancel
+                {m.dash_cancel()}
               </Button>
               <Button type="submit" arrow disabled={busy || title.trim().length < 2}>
-                {c ? "Save" : "Create"}
+                {c ? m.dash_save() : m.dash_create()}
               </Button>
             </div>
           </div>

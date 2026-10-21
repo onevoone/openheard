@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { BellIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -41,13 +42,13 @@ export function Panel({ title, children, className, actions, aside, onSearch }: 
                     e.currentTarget.blur();
                   }
                 }}
-                placeholder="Search posts"
-                aria-label="Search posts"
+                placeholder={m.nav_search_posts()}
+                aria-label={m.nav_search_posts()}
                 className="h-[30px] w-[220px] rounded-lg border bg-card pr-10 pl-7 text-[13px] outline-none placeholder:text-faint focus:border-ring/60"
               />
               <Kbd className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2">⌘K</Kbd>
             </form>
-            <button type="button" className="inline-flex size-[30px] items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" title="Notifications">
+            <button type="button" className="inline-flex size-[30px] items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" title={m.dash_notifications()}>
               <BellIcon className="size-[15px]" />
             </button>
           </div>

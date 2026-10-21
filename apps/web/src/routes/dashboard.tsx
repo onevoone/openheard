@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ListIcon } from "@phosphor-icons/react";
 import { Outlet, createFileRoute, redirect, useLoaderData, useLocation, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
@@ -74,7 +75,7 @@ function AdminLayout() {
         type="button"
         onClick={() => setMobileOpen(true)}
         className="fixed top-3 left-3 z-40 inline-flex size-9 items-center justify-center rounded-lg bg-[#0a0a0b] text-muted-foreground md:hidden"
-        aria-label="Open menu"
+        aria-label={m.nav_menu_open()}
       >
         <ListIcon className="size-5" />
       </button>
