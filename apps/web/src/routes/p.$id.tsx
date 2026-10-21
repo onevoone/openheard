@@ -164,7 +164,7 @@ function PostPage() {
           ].map(([k, v]) => (
             <div key={k} className="flex items-center justify-between px-2.5 py-1.5 text-[13px]">
               <dt className="text-faint">{k}</dt>
-              <dd className="text-muted-foreground">{v}</dd>
+              <dd className="text-muted-foreground" suppressHydrationWarning>{v}</dd>
             </div>
           ))}
           <div className="flex items-center justify-between px-2.5 py-1.5 text-[13px]">
@@ -239,7 +239,7 @@ function PostPage() {
             <span className="inline-flex items-center gap-1.5 text-muted-foreground">
               <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={18} />
               {p.author?.name ?? m.common_someone()}
-              <span className="text-faint">· {since(p.createdAt)}</span>
+              <span className="text-faint" suppressHydrationWarning>· {since(p.createdAt)}</span>
             </span>
           </div>
         </div>
@@ -319,7 +319,7 @@ function PostPage() {
                   <div className="flex flex-wrap items-center gap-2 text-[13px]">
                     <span className="font-semibold">{item.author?.name ?? m.common_someone()}</span>
                     {team ? <TeamBadge /> : null}
-                    <span className="text-xs text-faint">{ago(item.at)}</span>
+                    <span className="text-xs text-faint" suppressHydrationWarning>{ago(item.at)}</span>
                   </div>
                   {item.kind === "comment" ? (
                     <>

@@ -75,8 +75,8 @@ function ApiKeys() {
               {k.prefix}… · {k.scope === "account" ? m.settings_keys_scope_all() : m.settings_keys_scope_one({ name: workspaceName })}
             </span>
           </div>
-          <span className="text-xs text-faint">{k.lastUsedAt ? m.settings_keys_used({ when: since(k.lastUsedAt) }) : m.settings_keys_never_used()}</span>
-          <span className="text-xs text-faint">{m.settings_keys_created({ when: since(k.createdAt) })}</span>
+          <span className="text-xs text-faint" suppressHydrationWarning>{k.lastUsedAt ? m.settings_keys_used({ when: since(k.lastUsedAt) }) : m.settings_keys_never_used()}</span>
+          <span className="text-xs text-faint" suppressHydrationWarning>{m.settings_keys_created({ when: since(k.createdAt) })}</span>
           <Button size="sm" variant="ghost" onClick={() => confirm(m.settings_keys_revoke_confirm({ name: k.name })) && revokeApiKey({ data: { id: k.id } }).then(() => router.invalidate())}>
             {m.settings_keys_revoke()}
           </Button>
