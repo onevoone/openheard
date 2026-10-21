@@ -25,7 +25,7 @@ async function freshDb(): Promise<Db> {
   return drizzle(client, { schema }) as unknown as Db;
 }
 
-const WS = { id: "acme", name: "Acme", statusEmails: true };
+const WS = { id: "acme", name: "Acme", statusEmails: true, locale: "en" };
 const ADMIN = { id: "admin", email: "admin@acme.test" };
 let db: Db;
 
@@ -137,6 +137,35 @@ describe("status change recipients", () => {
     expect(mail.headers?.["List-Unsubscribe"]).toContain("/api/unsubscribe?t=");
     expect(mail.headers?.["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
   });
+
+  it("writes the email in the workspace's language, unsubscribe label included", async () => {
+    const out = await buildStatusEmails({
+      db,
+      workspace: { ...WS, locale: "uk" },
+      origin: "https://acme.example.com",
+      actor: ADMIN,
+      change: { postId: 1, postTitle: "Dark <mode>", from: { label: "Заплановано", color: "#cdb37a" }, to: { label: "Випущено", color: "#7fb894" }, note: "Вже сьогодні" },
+      key: KEY,
+    });
+    const mail = out.find((m) => m.to === "voter@acme.test")!;
+    expect(mail.subject).toBe("Статус «Dark <mode>» змінено: випущено");
+    expect(mail.html).toContain('<html lang="uk">');
+    expect(mail.html).toContain("Dark &lt;mode&gt;");
+    expect(mail.html).toContain("Не отримувати листи про ідеї, за якими ви стежите");
+    expect(mail.text).toContain("Не отримувати листи про ідеї, за якими ви стежите: https://acme.example.com/unsubscribe?t=");
+  });
+
+  it("falls back to Ukrainian for a locale it does not ship", async () => {
+    const out = await buildStatusEmails({
+      db,
+      workspace: { ...WS, locale: "xx" },
+      origin: "https://acme.example.com",
+      actor: ADMIN,
+      change: { postId: 1, postTitle: "Dark mode", from: { label: "A", color: "#cdb37a" }, to: { label: "B", color: "#7fb894" } },
+      key: KEY,
+    });
+    expect(out[0]!.subject).toBe("Статус «Dark mode» змінено: b");
+  });
 });
 
 describe("changelog recipients", () => {
@@ -173,6 +202,16 @@ describe("changelog recipients", () => {
     const reader = out.find((m) => m.to === "reader@elsewhere.test")!;
     expect(reader.html).not.toContain("Stop emails about posts you follow");
     expect(reader.subject).toBe("Acme shipped: Dark mode");
+  });
+
+  it("builds the changelog email in the workspace's language", async () => {
+    const out = await buildChangelogEmails({ db, workspace: { ...WS, locale: "uk" }, origin: "https://acme.example.com", actor: ADMIN, entry: { title: "Темна тема", version: "v1.2", body: "Вже тут." }, posts: [{ id: 1, title: "Dark mode" }], key: KEY });
+    const mail = out.find((m) => m.to === "voter@acme.test")!;
+    expect(mail.subject).toBe("Acme: випущено — Темна тема");
+    expect(mail.html).toContain("Не отримувати листи журналу змін");
+    expect(mail.html).toContain("Читати журнал змін");
+    const reader = out.find((m) => m.to === "reader@elsewhere.test")!;
+    expect(reader.text).toContain("Ви отримуєте цей лист, бо підписані на журнал змін простору «Acme».");
   });
 
   it("points the one-click unsubscribe at the changelog for someone who is both", async () => {

@@ -1,3 +1,6 @@
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
+
 const DEFAULT_FROM = { email: "hello@openheard.com", name: "openheard" };
 
 // Self-hosters send from their own Email Sending domain via EMAIL_FROM / EMAIL_FROM_NAME.
@@ -13,9 +16,9 @@ export function escapeHtml(s: string): string {
 const TEXT_STYLE = "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;";
 
 // `brand` is the workspace name, already HTML-escaped; it heads the email.
-export function emailLayout(content: string, footer = "", brand?: string) {
+export function emailLayout(content: string, locale: Locale, footer = "", brand?: string) {
   return `<!DOCTYPE html>
-<html>
+<html lang="${locale}">
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
 <body style="margin: 0; padding: 0; background: #f7f7f7;">
   <div style="max-width: 520px; margin: 0 auto; padding: 48px 20px;">
@@ -26,7 +29,7 @@ export function emailLayout(content: string, footer = "", brand?: string) {
       ${content}
     </div>
     <p style="${TEXT_STYLE} font-size: 11px; color: #aaa; text-align: center; margin-top: 24px; line-height: 1.6;">
-      ${brand ? `${brand} &middot; feedback board` : "openheard &middot; open source feedback board"}
+      ${brand ? `${brand} &middot; ${m.email_footer_board({}, { locale })}` : `openheard &middot; ${m.email_footer_openheard({}, { locale })}`}
     </p>${footer}
   </div>
 </body>
@@ -59,46 +62,46 @@ export async function sendEmail(to: string, subject: string, html: string, text:
   }
 }
 
-export async function sendMagicLinkEmail(to: string, url: string) {
+export async function sendMagicLinkEmail(to: string, url: string, locale: Locale) {
   await sendEmail(
     to,
-    "Your sign-in link",
+    m.email_magic_subject({}, { locale }),
     emailLayout(`
-      <h1 style="${TEXT_STYLE} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">Sign in to openheard</h1>
-      <p style="${TEXT_STYLE} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">Click the button below to sign in. This link expires in 5 minutes.</p>
-      ${emailButton(url, "Sign In")}
-      <p style="${TEXT_STYLE} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">If you didn't request this, you can safely ignore this email.</p>
-    `),
-    `Sign in to openheard\n\nClick the link below to sign in. This link expires in 5 minutes.\n\n${url}\n\nIf you didn't request this, ignore this email.`,
+      <h1 style="${TEXT_STYLE} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">${m.email_magic_title({}, { locale })}</h1>
+      <p style="${TEXT_STYLE} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">${m.email_magic_intro({}, { locale })}</p>
+      ${emailButton(url, m.email_magic_button({}, { locale }))}
+      <p style="${TEXT_STYLE} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">${m.email_ignore_html({}, { locale })}</p>
+    `, locale),
+    `${m.email_magic_title({}, { locale })}\n\n${m.email_magic_text_intro({}, { locale })}\n\n${url}\n\n${m.email_ignore_text({}, { locale })}`,
   );
 }
 
-export async function sendPasswordResetEmail(to: string, url: string) {
+export async function sendPasswordResetEmail(to: string, url: string, locale: Locale) {
   await sendEmail(
     to,
-    "Reset your password",
+    m.email_reset_title({}, { locale }),
     emailLayout(`
-      <h1 style="${TEXT_STYLE} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">Reset your password</h1>
-      <p style="${TEXT_STYLE} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">Click the button below to set a new password. This link expires in 1 hour.</p>
-      ${emailButton(url, "Reset Password")}
-      <p style="${TEXT_STYLE} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">If you didn't request this, you can safely ignore this email.</p>
-    `),
-    `Reset your password\n\nClick the link below to set a new password. This link expires in 1 hour.\n\n${url}\n\nIf you didn't request this, ignore this email.`,
+      <h1 style="${TEXT_STYLE} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">${m.email_reset_title({}, { locale })}</h1>
+      <p style="${TEXT_STYLE} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">${m.email_reset_intro({}, { locale })}</p>
+      ${emailButton(url, m.email_reset_button({}, { locale }))}
+      <p style="${TEXT_STYLE} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">${m.email_ignore_html({}, { locale })}</p>
+    `, locale),
+    `${m.email_reset_title({}, { locale })}\n\n${m.email_reset_text_intro({}, { locale })}\n\n${url}\n\n${m.email_ignore_text({}, { locale })}`,
   );
 }
 
-export async function sendInviteEmail(to: string, inviterName: string, workspaceName: string, joinUrl: string) {
+export async function sendInviteEmail(to: string, inviterName: string, workspaceName: string, joinUrl: string, locale: Locale) {
   await sendEmail(
     to,
-    `${inviterName} invited you to ${workspaceName}`,
+    m.email_invite_subject({ inviter: inviterName, workspace: workspaceName }, { locale }),
     emailLayout(`
-      <h1 style="${TEXT_STYLE} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">You've been invited</h1>
+      <h1 style="${TEXT_STYLE} font-size: 20px; font-weight: 700; color: #111; margin: 0 0 12px;">${m.email_invite_title({}, { locale })}</h1>
       <p style="${TEXT_STYLE} font-size: 15px; color: #555; line-height: 1.7; margin: 0 0 4px;">
-        ${escapeHtml(inviterName)} invited you to join <strong>${escapeHtml(workspaceName)}</strong>.
+        ${m.email_invite_body({ inviter: escapeHtml(inviterName), workspace: `<strong>${escapeHtml(workspaceName)}</strong>` }, { locale })}
       </p>
-      ${emailButton(joinUrl, "Accept Invite")}
-      <p style="${TEXT_STYLE} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">This invite link expires in 7 days.</p>
-    `, "", escapeHtml(workspaceName)),
-    `${inviterName} invited you to ${workspaceName}\n\nJoin here: ${joinUrl}\n\nThis invite link expires in 7 days.`,
+      ${emailButton(joinUrl, m.email_invite_button({}, { locale }))}
+      <p style="${TEXT_STYLE} font-size: 13px; color: #999; line-height: 1.6; margin: 0;">${m.email_invite_expires({}, { locale })}</p>
+    `, locale, "", escapeHtml(workspaceName)),
+    `${m.email_invite_subject({ inviter: inviterName, workspace: workspaceName }, { locale })}\n\n${m.email_invite_text_join({ url: joinUrl }, { locale })}\n\n${m.email_invite_expires({}, { locale })}`,
   );
 }

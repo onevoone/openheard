@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { isDemo } from "@/lib/demo";
 import { sendEmail } from "@/lib/email";
+import { emailLocale } from "@/lib/email-locale";
 import { CONFIRM_TTL_MS, signEmailToken, verifyEmailToken } from "@/lib/email-token";
 import { applyUnsubscribe, confirmPending, emailSecret, optIn, optOut, workspaceName } from "@/lib/email-prefs";
 import { invalidate } from "@/lib/kv-cache";
@@ -42,7 +43,7 @@ export const subscribeChangelog = createServerFn({ method: "POST" })
 
 // Starts the double opt-in: a pending row plus a confirm link by email.
 // Nothing happens for an address that is already confirmed.
-async function requestConfirmation(ws: { id: string; name: string }, email: string): Promise<boolean> {
+async function requestConfirmation(ws: { id: string; name: string; locale: string }, email: string): Promise<boolean> {
   const db = createDb();
   const [existing] = await db
     .select({ confirmedAt: changelogSubscriber.confirmedAt })
@@ -52,7 +53,7 @@ async function requestConfirmation(ws: { id: string; name: string }, email: stri
   if (!existing) await db.insert(changelogSubscriber).values({ workspaceId: ws.id, email }).onConflictDoNothing();
   const origin = new URL(getRequest().url).origin;
   const token = await signEmailToken({ k: "confirm", w: ws.id, e: email, x: Date.now() + CONFIRM_TTL_MS }, emailSecret());
-  const mail = confirmSubscriptionEmail({ workspaceName: ws.name, confirmUrl: `${origin}/changelog/confirm?t=${token}` });
+  const mail = confirmSubscriptionEmail({ locale: emailLocale(ws), workspaceName: ws.name, confirmUrl: `${origin}/changelog/confirm?t=${token}` });
   await inBackground("changelog-confirm", () => sendEmail(email, mail.subject, mail.html, mail.text));
   return true;
 }
