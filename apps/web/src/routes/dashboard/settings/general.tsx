@@ -10,7 +10,7 @@ import { saveWorkspace } from "@/functions/settings";
 import { PageHead } from "@/routes/dashboard/settings";
 
 export const Route = createFileRoute("/dashboard/settings/general")({
-  head: () => ({ meta: [{ title: "General · settings" }] }),
+  head: () => ({ meta: [{ title: m.settings_general_meta() }] }),
   component: General,
 });
 
@@ -29,18 +29,18 @@ function General() {
   function save() {
     saveWorkspace({ data: { name, tagline, theme: ws.theme === "light" ? "light" : "dark", poweredBy: ws.poweredBy, requireApproval: ws.requireApproval, accent: ws.accent, locale } })
       .then(() => router.invalidate())
-      .catch((err) => toast.error(err instanceof Error ? err.message : "Could not save"));
+      .catch((err) => toast.error(err instanceof Error ? err.message : m.settings_save_failed()));
   }
 
   return (
     <>
-      <PageHead title="General" sub="What visitors see at the top of every public page." />
-      <SectionHead title="Workspace" />
-      <Row label="Name" help="Shown next to the logo and in the page title.">
-        <input value={name} onChange={(e) => setName(e.target.value)} aria-label="Workspace name" className={input} />
+      <PageHead title={m.settings_general_title()} sub={m.settings_general_sub()} />
+      <SectionHead title={m.settings_general_section()} />
+      <Row label={m.settings_general_name_label()} help={m.settings_general_name_help()}>
+        <input value={name} onChange={(e) => setName(e.target.value)} aria-label={m.settings_general_name_aria()} className={input} />
       </Row>
-      <Row label="Tagline" help="One line under the board title. Leave empty to hide.">
-        <input value={tagline} onChange={(e) => setTagline(e.target.value)} aria-label="Tagline" className={input} />
+      <Row label={m.settings_general_tagline_label()} help={m.settings_general_tagline_help()}>
+        <input value={tagline} onChange={(e) => setTagline(e.target.value)} aria-label={m.settings_general_tagline_label()} className={input} />
       </Row>
       <Row label={m.settings_board_language_label()} help={m.settings_board_language_help()}>
         <select value={locale} onChange={(e) => isLocale(e.target.value) && setLocale(e.target.value)} aria-label={m.settings_board_language_label()} className={input}>
@@ -52,9 +52,9 @@ function General() {
         </select>
       </Row>
       <div className="flex items-center justify-end gap-3 border-t pt-4">
-        <span className="text-xs text-faint">{dirty ? "Unsaved changes" : "Saved"}</span>
-        <LoadingButton onAction={save} disabled={!dirty} successLabel="Saved" onError={(err) => toast.error(err instanceof Error ? err.message : "Could not save")}>
-          Save
+        <span className="text-xs text-faint">{dirty ? m.settings_unsaved() : m.settings_saved()}</span>
+        <LoadingButton onAction={save} disabled={!dirty} successLabel={m.settings_saved()} onError={(err) => toast.error(err instanceof Error ? err.message : m.settings_save_failed())}>
+          {m.settings_save()}
         </LoadingButton>
       </div>
     </>

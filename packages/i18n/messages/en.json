@@ -780,8 +780,584 @@
   "roadmap_progress": "{value}% along",
   "root_description": "Open source feedback board.",
   "root_title": "{workspace} · feedback",
+  "settings_accent": "Accent",
+  "settings_access_anon_help": "Visitors vote once per browser and can claim it when they sign in. Lands with the next release.",
+  "settings_access_anon_label": "Anonymous voting",
+  "settings_access_approval_help": "New posts stay hidden until an admin approves them.",
+  "settings_access_approval_label": "Require approval",
+  "settings_access_changelog_aria": "Show changelog",
+  "settings_access_changelog_help": "Hide it until you have shipped something.",
+  "settings_access_meta": "Access · settings",
+  "settings_access_posting": "Posting",
+  "settings_access_roadmap_aria": "Show roadmap",
+  "settings_access_roadmap_help": "Hide it if you do not want to promise order.",
+  "settings_access_sub": "Who can do what on the public board.",
+  "settings_access_tabs": "Public tabs",
+  "settings_access_title": "Access",
+  "settings_access_who_anyone": "Anyone signed in",
+  "settings_access_who_help": "Members are people on the Team page. Anyone means any signed-in user.",
+  "settings_access_who_label": "Who can post",
+  "settings_access_who_members": "Team members only",
+  "settings_action_failed": "That did not work",
+  "settings_add": "Add",
+  "settings_appearance": "Appearance",
+  "settings_billing_current": "Current plan",
+  "settings_billing_current_badge": "Current",
+  "settings_billing_f_api": "API and MCP server",
+  "settings_billing_f_everything": "Everything in Free",
+  "settings_billing_f_public": "Public roadmap and changelog",
+  "settings_billing_f_support": "Priority support",
+  "settings_billing_f_unlimited": "Unlimited posts and votes",
+  "settings_billing_forever": "forever",
+  "settings_billing_history": "Billing history",
+  "settings_billing_manage": "Manage subscription",
+  "settings_billing_meta": "Billing · settings",
+  "settings_billing_monthly": "Monthly",
+  "settings_billing_per_month": "per month",
+  "settings_billing_per_year": "per year",
+  "settings_billing_renews": "renews {date}",
+  "settings_billing_soon": "Pro is coming soon.",
+  "settings_billing_sub": "Plans are per account. Every workspace you own counts against the limit.",
+  "settings_billing_title": "Billing",
+  "settings_billing_upgrade": "Upgrade",
+  "settings_billing_upgrade_title": "Upgrade to Pro",
+  "settings_billing_usage": [
+    {
+      "declarations": [
+        "input owned",
+        "input limit",
+        "local limitPlural = limit: plural"
+      ],
+      "selectors": [
+        "limitPlural"
+      ],
+      "match": {
+        "limitPlural=one": "{owned} of {limit} workspace used",
+        "limitPlural=other": "{owned} of {limit} workspaces used"
+      }
+    }
+  ],
+  "settings_billing_workspaces": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} workspace",
+        "countPlural=other": "{count} workspaces"
+      }
+    }
+  ],
+  "settings_billing_yearly": "Yearly, save 33%",
   "settings_board_language_help": "The language visitors see until they pick their own. They can switch it from the footer.",
   "settings_board_language_label": "Board language",
+  "settings_boards": "Boards",
+  "settings_boards_added": "Board added",
+  "settings_boards_delete_confirm": "Delete \"{name}\"?",
+  "settings_boards_deleted": "Board deleted",
+  "settings_boards_description_placeholder": "One-line description",
+  "settings_boards_meta": "Boards & tags · settings",
+  "settings_boards_name_placeholder": "Board name",
+  "settings_boards_new": "New board",
+  "settings_boards_no_description": "No description",
+  "settings_boards_sub": "Boards group posts. Tags cut across them.",
+  "settings_boards_title": "Boards & tags",
+  "settings_boards_updated": "Board updated",
+  "settings_brand_accent_aria": "Accent color",
+  "settings_brand_accent_help": "Voted pills, the active nav dot, links and focus rings on the public board.",
+  "settings_brand_applied": "Applied",
+  "settings_brand_applied_no_logo": "Applied. The logo could not be stored, so it was left out.",
+  "settings_brand_apply": "Apply selected",
+  "settings_brand_apply_failed": "Could not apply",
+  "settings_brand_applying": "Applying…",
+  "settings_brand_background": "Background",
+  "settings_brand_background_dark": "Dark",
+  "settings_brand_background_light": "Light",
+  "settings_brand_font": "Font",
+  "settings_brand_font_note": "For reference. Boards are set in Geist.",
+  "settings_brand_found": "Found on {host}. Untick anything you want to keep as it is.",
+  "settings_brand_found_lightened": "Lightened from {original} so it reads on the dark board.",
+  "settings_brand_found_name": "Name",
+  "settings_brand_found_no_colour": "No brand colour found. Your current accent stays.",
+  "settings_brand_found_rename": "Tick to rename {name}.",
+  "settings_brand_logo_help": "Shown in the board header and the widget.",
+  "settings_brand_logo_help_empty": "Match your website above to bring in your logo.",
+  "settings_brand_logo_label": "Logo",
+  "settings_brand_logo_remove": "Remove",
+  "settings_brand_logo_remove_failed": "Could not remove the logo",
+  "settings_brand_match_button": "Match my website",
+  "settings_brand_match_section": "Match my website",
+  "settings_brand_meta": "Branding · settings",
+  "settings_brand_nothing_found": "Nothing reliable found on {host}. Your board keeps its current look.",
+  "settings_brand_preview_help": "A voted pill in your accent.",
+  "settings_brand_read_failed": "Could not read that website",
+  "settings_brand_reading": "Reading…",
+  "settings_brand_sub": "How the public board looks to your users. The dashboard stays the same for everyone.",
+  "settings_brand_title": "Branding",
+  "settings_brand_use_color": "Use {color}",
+  "settings_brand_website_help": "We read your homepage for its colours, logo and name. Nothing changes until you apply.",
+  "settings_brand_website_label": "Website",
+  "settings_cancel": "Cancel",
+  "settings_changelog": "Changelog",
+  "settings_copied": "Copied",
+  "settings_copy": "Copy",
+  "settings_delete": "Delete",
+  "settings_demo_locked": "Not available in the demo workspace.",
+  "settings_dismiss": "Dismiss",
+  "settings_done": "Done",
+  "settings_edit": "Edit",
+  "settings_export_authors": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} author",
+        "countPlural=other": "{count} authors"
+      }
+    }
+  ],
+  "settings_export_boards": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} board",
+        "countPlural=other": "{count} boards"
+      }
+    }
+  ],
+  "settings_export_choose": "Choose CSV",
+  "settings_export_csv_download": "Download CSV",
+  "settings_export_csv_help": "One row per post, for spreadsheets. Comments are not included.",
+  "settings_export_exported": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Exported {count} post",
+        "countPlural=other": "Exported {count} posts"
+      }
+    }
+  ],
+  "settings_export_failed": "Export failed",
+  "settings_export_from_csv": "From a CSV",
+  "settings_export_from_csv_help": "Exports from other feedback tools work as they are. Votes come over as counts, authors as members they can claim by signing up.",
+  "settings_export_import": "Import",
+  "settings_export_import_failed": "Import failed",
+  "settings_export_import_posts": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Import {count} post",
+        "countPlural=other": "Import {count} posts"
+      }
+    }
+  ],
+  "settings_export_imported": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Imported {count} post",
+        "countPlural=other": "Imported {count} posts"
+      }
+    }
+  ],
+  "settings_export_importing": "Importing",
+  "settings_export_json_download": "Download JSON",
+  "settings_export_json_help": "Every post with body, status, board, tags, votes, author and public comments.",
+  "settings_export_meta": "Export · settings",
+  "settings_export_more": "and {count} more",
+  "settings_export_no_rows": "No posts found. Expected a Title column.",
+  "settings_export_posts": "Posts",
+  "settings_export_preparing": "Preparing",
+  "settings_export_ready_posts": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} post ready",
+        "countPlural=other": "{count} posts ready"
+      }
+    }
+  ],
+  "settings_export_statuses": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} status",
+        "countPlural=other": "{count} statuses"
+      }
+    }
+  ],
+  "settings_export_sub": "Your data is yours. Bring it in, take it out.",
+  "settings_export_title": "Import & export",
+  "settings_export_votes": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} vote",
+        "countPlural=other": "{count} votes"
+      }
+    }
+  ],
+  "settings_feedback": "Feedback",
+  "settings_general_meta": "General · settings",
+  "settings_general_name_aria": "Workspace name",
+  "settings_general_name_help": "Shown next to the logo and in the page title.",
+  "settings_general_name_label": "Name",
+  "settings_general_section": "Workspace",
+  "settings_general_sub": "What visitors see at the top of every public page.",
+  "settings_general_tagline_help": "One line under the board title. Leave empty to hide.",
+  "settings_general_tagline_label": "Tagline",
+  "settings_general_title": "General",
+  "settings_int_all_boards": "All boards",
+  "settings_int_boards_note": "Changelog releases are sent whatever boards you pick.",
+  "settings_int_delivered": "Delivered {when}",
+  "settings_int_disconnect": "Disconnect",
+  "settings_int_disconnect_confirm": "Disconnect {title}?",
+  "settings_int_discord_help": "In the channel settings, open Integrations, create a webhook and copy its URL.",
+  "settings_int_event_changelog_published": "Changelog published",
+  "settings_int_event_comment_created": "New comment",
+  "settings_int_event_post_created": "New post",
+  "settings_int_event_status_changed": "Status change",
+  "settings_int_failed": "Failed {when}: {error}",
+  "settings_int_idle": "Connected, nothing sent yet",
+  "settings_int_meta": "Integrations · settings",
+  "settings_int_not_connected": "Not connected",
+  "settings_int_paused": "Paused",
+  "settings_int_saved": "{title} saved",
+  "settings_int_secret_title": "Copy the signing secret now. It is shown once.",
+  "settings_int_send_test": "Send test",
+  "settings_int_send_when": "Send when",
+  "settings_int_sending_on": "Sending on",
+  "settings_int_signed_after": "with your secret.",
+  "settings_int_signed_before": "Each request carries",
+  "settings_int_signed_middle": ", an HMAC-SHA256 of",
+  "settings_int_slack_help": "Create an incoming webhook for the channel in Slack, then paste it here.",
+  "settings_int_sub": "Send new posts, comments, status changes and releases to the places your team already reads.",
+  "settings_int_test_failed": "Test failed: {error}",
+  "settings_int_test_ok": "Test message delivered",
+  "settings_int_title": "Integrations",
+  "settings_int_unknown_error": "unknown error",
+  "settings_int_url_label": "Webhook URL",
+  "settings_int_url_saved": "Saved, ending in {hint}. Paste a new URL to replace it.",
+  "settings_int_webhook_help": "Any https endpoint. We POST JSON and sign it so you can check it came from us.",
+  "settings_int_webhook_title": "Webhook",
+  "settings_keys_active": "Active keys",
+  "settings_keys_agent_aria": "Agent",
+  "settings_keys_agent_other": "Other",
+  "settings_keys_claude_manual": "Or connect it yourself",
+  "settings_keys_claude_manual_help": "Run in a terminal, then restart Claude Code.",
+  "settings_keys_claude_send": "Send this to Claude Code",
+  "settings_keys_claude_send_help": "Paste it into a new chat in your project. Claude connects openheard and walks you through setup.",
+  "settings_keys_codex_config": "Add to ~/.codex/config.toml",
+  "settings_keys_codex_config_help": "Then restart Codex.",
+  "settings_keys_codex_send": "Then send this to Codex",
+  "settings_keys_codex_send_help": "Paste it into Codex in your project.",
+  "settings_keys_connect_title": "Connect your AI agent",
+  "settings_keys_copy_failed": "Could not copy. Select the text and copy it by hand.",
+  "settings_keys_create": "Create key",
+  "settings_keys_create_failed": "Could not create key",
+  "settings_keys_created": "created {when}",
+  "settings_keys_cursor_add": "Add to Cursor",
+  "settings_keys_cursor_add_help": "Opens Cursor and installs the openheard server with your key.",
+  "settings_keys_cursor_send": "Then send this to Cursor",
+  "settings_keys_cursor_send_help": "Paste it into Agent chat in your project.",
+  "settings_keys_empty": "No keys yet.",
+  "settings_keys_footnote": "Send a key as a Bearer token to call the HTTP API or connect the MCP server at /api/mcp.",
+  "settings_keys_fresh_sub": "Pick your agent, then paste the prompt. It connects itself and sets openheard up.",
+  "settings_keys_fresh_title": "Your key is ready. Copy what you need now; it is shown once.",
+  "settings_keys_idle_account": "Create a key above and it fills in here. One key reaches all your workspaces.",
+  "settings_keys_idle_workspace": "Create a key above and it fills in here. This key reaches only this workspace.",
+  "settings_keys_key_help": "For the HTTP API or other tools.",
+  "settings_keys_key_label": "API key",
+  "settings_keys_limit": "Limit to this workspace",
+  "settings_keys_limit_help": "Use it for a key you share with a teammate or a script.",
+  "settings_keys_meta": "API keys · settings",
+  "settings_keys_name_placeholder": "Key name, e.g. Claude on my laptop",
+  "settings_keys_never_used": "never used",
+  "settings_keys_other_header": "Header",
+  "settings_keys_other_header_help": "Send it with every request.",
+  "settings_keys_other_send": "Then send this to your agent",
+  "settings_keys_other_send_help": "Any agent with MCP support.",
+  "settings_keys_other_url": "Server URL",
+  "settings_keys_other_url_help": "Streamable HTTP MCP server.",
+  "settings_keys_prompt": "Connect openheard, our feedback board, and set it up for this project.\n\n1. {connect}\n   If the openheard tools do not show up yet, tell me to restart you, then continue from step 2.\n2. {step2}\n3. Set it up: ask me for our website, then match_website and apply_branding. Suggest boards and statuses and create the ones I agree to. configure_widget to match our brand. get_widget_snippet for this codebase's framework and add it once to the root layout; show me the diff.\n4. Ask me before anything public or emailed, and never write this key into a committed file.",
+  "settings_keys_prompt_account": "Call list_workspaces. This key reaches every workspace I run. If there is more than one, ask me which to use for this project and pass it as workspace on every call; create_workspace can make a new one.",
+  "settings_keys_prompt_claude": "Add the openheard MCP server: run  {command}",
+  "settings_keys_prompt_codex": "The openheard MCP server is in ~/.codex/config.toml. Check its tools are available.",
+  "settings_keys_prompt_cursor": "The openheard MCP server is installed in Cursor. Check its tools are available.",
+  "settings_keys_prompt_other": "Add an HTTP MCP server named openheard with URL {url} and the header {header}",
+  "settings_keys_prompt_workspace": "Call get_workspace to check the connection.",
+  "settings_keys_revoke": "Revoke",
+  "settings_keys_revoke_confirm": "Revoke \"{name}\"?",
+  "settings_keys_scope_all": "All your workspaces",
+  "settings_keys_scope_one": "Only {name}",
+  "settings_keys_sub": "Keys for the HTTP API, the MCP server and the CLI. A key acts as you in every workspace you administer, and can create new ones.",
+  "settings_keys_title": "API keys",
+  "settings_keys_used": "used {when}",
+  "settings_kind_closed": "closed",
+  "settings_kind_closed_help": "Will not do, or merged",
+  "settings_kind_done": "done",
+  "settings_kind_done_help": "Shipped",
+  "settings_kind_open": "open",
+  "settings_kind_open_help": "New posts land here",
+  "settings_kind_planned": "planned",
+  "settings_kind_planned_help": "Committed, not started",
+  "settings_kind_progress": "progress",
+  "settings_kind_progress_help": "Being built",
+  "settings_kind_review": "review",
+  "settings_kind_review_help": "Being looked at",
+  "settings_nav_access": "Access",
+  "settings_nav_api_keys": "API keys",
+  "settings_nav_billing": "Billing",
+  "settings_nav_boards": "Boards & tags",
+  "settings_nav_branding": "Branding",
+  "settings_nav_developers": "Developers",
+  "settings_nav_export": "Import & export",
+  "settings_nav_general": "General",
+  "settings_nav_integrations": "Integrations",
+  "settings_nav_notifications": "Notifications",
+  "settings_nav_personal": "Personal",
+  "settings_nav_product": "Product",
+  "settings_nav_profile": "Profile",
+  "settings_nav_public_board": "Public board",
+  "settings_nav_statuses": "Statuses",
+  "settings_nav_team": "Team",
+  "settings_nav_title": "Settings",
+  "settings_nav_widget": "Widget",
+  "settings_nav_workspace": "Workspace",
+  "settings_notif_comment_aria": "New comment",
+  "settings_notif_comment_help": "A public comment on any post.",
+  "settings_notif_comment_label": "Someone comments",
+  "settings_notif_confirm_sent": "Check your inbox to confirm changelog emails",
+  "settings_notif_followed_aria": "Posts I follow",
+  "settings_notif_followed_help": "Posts you voted on, commented on or wrote change status.",
+  "settings_notif_followed_label": "A post I follow moves",
+  "settings_notif_meta": "Notifications · settings",
+  "settings_notif_post_aria": "New post",
+  "settings_notif_post_help": "A new post lands in Pending.",
+  "settings_notif_post_label": "Someone posts",
+  "settings_notif_section": "Email me when",
+  "settings_notif_ships_help": "Each new changelog entry.",
+  "settings_notif_ships_label": "Something ships",
+  "settings_notif_status_aria": "Status change",
+  "settings_notif_status_help": "Another admin moves a post.",
+  "settings_notif_status_label": "A status changes",
+  "settings_notif_sub": "What lands in your inbox for this workspace.",
+  "settings_notif_title": "Notifications",
+  "settings_notif_users_aria": "Status emails to users",
+  "settings_notif_users_help": "Voters, commenters and the author hear when their post changes status, with your note.",
+  "settings_notif_users_label": "Status updates",
+  "settings_notif_users_section": "Emails to your users",
+  "settings_posts_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} post",
+        "countPlural=other": "{count} posts"
+      }
+    }
+  ],
+  "settings_preview": "Preview",
+  "settings_profile_email_help": "Used to sign in. Changing it lands with email support.",
+  "settings_profile_email_label": "Email",
+  "settings_profile_meta": "Profile · settings",
+  "settings_profile_name_aria": "Display name",
+  "settings_profile_name_help": "Shown on your comments and in the team list.",
+  "settings_profile_name_label": "Name",
+  "settings_profile_picture_help": "Upload lands with image support.",
+  "settings_profile_picture_label": "Picture",
+  "settings_profile_section": "You",
+  "settings_profile_sub": "How you appear on posts and replies.",
+  "settings_profile_title": "Profile",
+  "settings_public_footer": "Footer",
+  "settings_public_meta": "Public board · settings",
+  "settings_public_powered_aria": "Powered by",
+  "settings_public_powered_help": "Small credit in the footer.",
+  "settings_public_powered_label": "Powered by openheard",
+  "settings_public_sub": "How the board behaves for visitors.",
+  "settings_public_theme_help": "Dark or light for every visitor.",
+  "settings_public_theme_label": "Theme",
+  "settings_public_title": "Public board",
+  "settings_roadmap": "Roadmap",
+  "settings_save": "Save",
+  "settings_save_failed": "Could not save",
+  "settings_saved": "Saved",
+  "settings_saving": "Saving…",
+  "settings_sending": "Sending…",
+  "settings_something_wrong": "Something went wrong",
+  "settings_statuses_added": "Status added",
+  "settings_statuses_delete_confirm": "Delete \"{name}\"?",
+  "settings_statuses_deleted": "Status deleted",
+  "settings_statuses_footnote": "Each status has a kind that tells openheard what it means. New posts land in the first \"open\" kind, merges go to \"closed\", shipping from the changelog uses \"done\".",
+  "settings_statuses_kind": "kind",
+  "settings_statuses_label_placeholder": "Label",
+  "settings_statuses_meta": "Statuses · settings",
+  "settings_statuses_new": "New status",
+  "settings_statuses_on_roadmap": "Show on roadmap",
+  "settings_statuses_roadmap_chip": "roadmap",
+  "settings_statuses_sub": "Where a post can be. The order here is the order on the roadmap and the timeline.",
+  "settings_statuses_title": "Statuses",
+  "settings_tags_added": "Tag added",
+  "settings_tags_deleted": "Tag deleted",
+  "settings_tags_empty": "No tags yet.",
+  "settings_tags_name_placeholder": "Tag name",
+  "settings_tags_new": "New tag",
+  "settings_tags_title": "Tags",
+  "settings_team_admins": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} admin",
+        "countPlural=other": "{count} admins"
+      }
+    }
+  ],
+  "settings_team_invite_failed": "Failed to send invite",
+  "settings_team_invite_revoked": "Invite revoked",
+  "settings_team_invite_send": "Send invite",
+  "settings_team_invite_sent": "Invite sent to {email}",
+  "settings_team_invites": "Pending invites",
+  "settings_team_joined": "joined {when}",
+  "settings_team_meta": "Team · settings",
+  "settings_team_people": "People",
+  "settings_team_remove": "Remove",
+  "settings_team_removed": "{name} removed",
+  "settings_team_role_admin": "Admin",
+  "settings_team_role_changed": "{name} is now {role}",
+  "settings_team_role_member": "Member",
+  "settings_team_sub": "Admins run the board and see internal notes. Members are everyone else who signed up.",
+  "settings_team_title": "Team",
+  "settings_team_you": "you",
+  "settings_theme_auto": "Auto",
+  "settings_theme_dark": "Dark",
+  "settings_theme_light": "Light",
+  "settings_unsaved": "Unsaved changes",
+  "settings_widget_accent_aria": "Accent colour",
+  "settings_widget_accent_help": "Launcher, voted pills and links. Defaults to your brand colour.",
+  "settings_widget_copy_failed": "Could not copy. Select the snippet and copy it by hand.",
+  "settings_widget_demo_status": "The demo's widget stays as it is",
+  "settings_widget_discard": "Discard",
+  "settings_widget_icon_aria": "Launcher icon",
+  "settings_widget_icon_chat": "Chat",
+  "settings_widget_icon_lightbulb": "Light bulb",
+  "settings_widget_icon_megaphone": "Megaphone",
+  "settings_widget_icon_question": "Question",
+  "settings_widget_icon_sparkle": "Sparkle",
+  "settings_widget_label_aria": "Launcher label",
+  "settings_widget_label_help": "Shown on the launcher.",
+  "settings_widget_label_label": "Label and icon",
+  "settings_widget_launcher_help": "The button that opens the widget.",
+  "settings_widget_launcher_hidden": "Hidden",
+  "settings_widget_launcher_icon": "Icon",
+  "settings_widget_launcher_label": "Launcher",
+  "settings_widget_launcher_label_option": "Icon + label",
+  "settings_widget_launcher_own": "Your own button",
+  "settings_widget_meta": "Widget · settings",
+  "settings_widget_nav_aria": "Widget settings",
+  "settings_widget_open_a": "Any element with a",
+  "settings_widget_open_b": "attribute opens the widget, or call",
+  "settings_widget_open_c": ". Pass a tab to land on it. Set the launcher to Hidden under Appearance if your button is the only way in.",
+  "settings_widget_open_example": "What's new",
+  "settings_widget_open_title": "Open it from your own button",
+  "settings_widget_origins_a": "The sites that may show the widget, one origin per line, like",
+  "settings_widget_origins_any": "Any site can embed the widget",
+  "settings_widget_origins_b": "or",
+  "settings_widget_origins_c": ". Leave it empty to allow any site. Other sites get a blank frame, so nobody can dress up your board inside their page.",
+  "settings_widget_origins_demo": "Fixed in the demo.",
+  "settings_widget_origins_invalid": "Not an origin: {value}",
+  "settings_widget_origins_placeholder": "Any site",
+  "settings_widget_origins_restricted": "Only those sites can embed the widget now",
+  "settings_widget_origins_title": "Allowed sites",
+  "settings_widget_page_content": "Content",
+  "settings_widget_page_install": "Install",
+  "settings_widget_position_bottom_left": "Bottom left",
+  "settings_widget_position_bottom_right": "Bottom right",
+  "settings_widget_position_help": "Which corner it sits in.",
+  "settings_widget_position_label": "Position",
+  "settings_widget_preview_note": "Live, against this workspace. Votes and posts are real.",
+  "settings_widget_preview_title": "Widget preview",
+  "settings_widget_radius_help": "Match your app's buttons and cards.",
+  "settings_widget_radius_label": "Corner radius",
+  "settings_widget_radius_round": "Round",
+  "settings_widget_radius_sharp": "Sharp",
+  "settings_widget_radius_soft": "Soft",
+  "settings_widget_saved": "Saved. Sites with the snippet pick it up within a minute.",
+  "settings_widget_snippet": "Snippet",
+  "settings_widget_snippet_copy_aria": "Copy snippet",
+  "settings_widget_snippet_help": "Paste this before the closing body tag on every page that should show the launcher. It loads after your page and never blocks it. Appearance changes reach it on their own; you never edit the snippet again.",
+  "settings_widget_sub": "Put feedback, your roadmap and the changelog inside your own app with one script tag.",
+  "settings_widget_summary_icon": "icon",
+  "settings_widget_summary_icon_label": "icon + label",
+  "settings_widget_summary_none": "no launcher",
+  "settings_widget_tab_hidden": "Hidden on your public board too, so the widget skips it. Turn it on under Access.",
+  "settings_widget_tab_last": "Keep at least one tab on.",
+  "settings_widget_tabs": "Tabs",
+  "settings_widget_tabs_help": "Turn off what you do not use. The first one on opens by default.",
+  "settings_widget_theme_help": "Auto follows the visitor's system setting.",
+  "settings_widget_theme_label": "Theme",
+  "settings_widget_title": "Widget",
   "start_access_question": "Who can see your board?",
   "start_back": "Back",
   "start_continue": "Continue",
