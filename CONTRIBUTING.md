@@ -48,6 +48,12 @@ workspace's board language, then Ukrainian.
   `defaultTagline(locale)` in `packages/db/src/defaults.ts` and are written
   to the database in the workspace's language; they are not translated on read.
   The demo workspace stays English.
+- **Shared components.** `packages/ui` depends on `@openheard/i18n` for the few
+  words it renders itself (the dialog's close label, copy and loading button
+  states, the message scroller). Those are `ui_*` keys read at render time as
+  default props, so a caller can still pass its own label.
+- **Sentences around a link or bold part** are split into `_before`, `_link` and
+  `_after` messages; a count that sits in a sentence is a plural message.
 - **Not translated:** the REST API, MCP, CSV export and the generic webhook,
   and anything the team typed (statuses, boards, tags, posts).
 

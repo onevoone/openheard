@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Link, createFileRoute, useLoaderData, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -14,8 +15,8 @@ export const Route = createFileRoute("/roadmap")({
   loader: ({ deps }) => getRoadmap({ data: deps }),
   head: () => ({
     meta: [
-      { title: "Roadmap" },
-      { property: "og:title", content: "Roadmap" },
+      { title: m.nav_roadmap() },
+      { property: "og:title", content: m.nav_roadmap() },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -40,7 +41,7 @@ function RoadmapPage() {
       {root.boards.length > 1 ? (
         <div className="flex items-center gap-[18px] text-[13px]">
           <button type="button" onClick={() => navigate({ search: { board: undefined } })} className={cn(!search.board ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground")}>
-            All boards
+            {m.roadmap_all_boards()}
           </button>
           {root.boards.map((b) => (
             <button
@@ -57,11 +58,11 @@ function RoadmapPage() {
 
       {posts.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Nothing planned yet.{" "}
+          {m.roadmap_empty_before()}{" "}
           <Link to="/" className="text-link hover:underline">
-            Post an idea and vote
+            {m.roadmap_empty_link()}
           </Link>{" "}
-          on the ones you want.
+          {m.roadmap_empty_after()}
         </p>
       ) : null}
 
@@ -76,7 +77,7 @@ function RoadmapPage() {
                 {meta.label}
                 <span className="ml-auto text-xs font-normal text-faint tabular-nums">{items.length}</span>
               </header>
-              {items.length === 0 ? <p className="px-1 py-4 text-xs text-faint">Nothing here yet</p> : null}
+              {items.length === 0 ? <p className="px-1 py-4 text-xs text-faint">{m.roadmap_column_empty()}</p> : null}
               {items.map((p) => (
                 <Link
                   key={p.id}
@@ -109,7 +110,7 @@ function RoadmapPage() {
 function Ticks({ value, color }: { value: number; color: string }) {
   const filled = Math.round(value / 10);
   return (
-    <span className="mt-1 flex gap-[3px]" aria-label={`${value}% along`}>
+    <span className="mt-1 flex gap-[3px]" aria-label={m.roadmap_progress({ value })}>
       {Array.from({ length: 10 }, (_, i) => (
         <span key={i} className={cn("h-2.5 w-[3px] rounded-[1px]", i >= filled && "bg-input")} style={i < filled ? { background: color } : undefined} />
       ))}

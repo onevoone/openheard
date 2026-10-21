@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@openheard/ui/components/dialog";
 import { Input } from "@openheard/ui/components/input";
 import { useEffect, useState } from "react";
@@ -19,13 +20,13 @@ export function MergeDialog({ open, onOpenChange, postId, onMerged }: { open: bo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Merge into another post</DialogTitle>
-          <DialogDescription>Votes are added up, one per person. Comments move over. This post keeps its URL and points at the survivor.</DialogDescription>
+          <DialogTitle>{m.merge_title()}</DialogTitle>
+          <DialogDescription>{m.merge_description()}</DialogDescription>
         </DialogHeader>
-        <Input autoFocus placeholder="Search by title" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input autoFocus placeholder={m.merge_search()} value={q} onChange={(e) => setQ(e.target.value)} />
         <div className="flex flex-col overflow-hidden rounded-md border">
           {results.length === 0 ? (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">{q ? "No matches" : "Type to search"}</div>
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">{q ? m.common_no_matches() : m.merge_type_to_search()}</div>
           ) : (
             results.map((r) => (
               <button

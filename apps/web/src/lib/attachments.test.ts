@@ -13,41 +13,53 @@ const GIF = Uint8Array.from([...Buffer.from("GIF89a"), 37, 0, 21, 0, 0, 0, 0]);
 const WEBP = bytes("UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==");
 const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
 
+const EN = { locale: "en" } as const;
+
 describe("checkImage", () => {
   it("accepts the four image types under the cap", () => {
-    for (const type of ["image/png", "image/jpeg", "image/gif", "image/webp"]) expect(checkImage({ type, size: 1000, name: "a" })).toBeNull();
+    for (const type of ["image/png", "image/jpeg", "image/gif", "image/webp"]) expect(checkImage({ type, size: 1000, name: "a" }, EN)).toBeNull();
   });
 
   it("rejects SVG by type and by name", () => {
-    expect(checkImage({ type: "image/svg+xml", size: 100 })).toMatch(/SVG files are not supported/);
-    expect(checkImage({ type: "", size: 100, name: "logo.SVG" })).toMatch(/SVG files are not supported/);
+    expect(checkImage({ type: "image/svg+xml", size: 100 }, EN)).toMatch(/SVG files are not supported/);
+    expect(checkImage({ type: "", size: 100, name: "logo.SVG" }, EN)).toMatch(/SVG files are not supported/);
   });
 
   it("rejects other types with the accepted list", () => {
-    expect(checkImage({ type: "application/pdf", size: 100, name: "spec.pdf" })).toBe("spec.pdf is not an image we accept. Use PNG, JPEG, GIF or WebP.");
-    expect(checkImage({ type: "image/heic", size: 100 })).toMatch(/Use PNG, JPEG, GIF or WebP/);
+    expect(checkImage({ type: "application/pdf", size: 100, name: "spec.pdf" }, EN)).toBe("spec.pdf is not an image we accept. Use PNG, JPEG, GIF or WebP.");
+    expect(checkImage({ type: "image/heic", size: 100 }, EN)).toMatch(/Use PNG, JPEG, GIF or WebP/);
   });
 
   it("lets a blank or nonstandard type through when the name or the paste says image", () => {
-    expect(checkImage({ type: "", size: 100, name: "photo.JPG" })).toBeNull();
-    expect(checkImage({ type: "", size: 100 })).toBeNull();
-    expect(checkImage({ type: "image/jpg", size: 100, name: "photo" })).toBeNull();
-    expect(checkImage({ type: "image/pjpeg", size: 100 })).toBeNull();
-    expect(checkImage({ type: "application/octet-stream", size: 100, name: "shot.webp" })).toBeNull();
+    expect(checkImage({ type: "", size: 100, name: "photo.JPG" }, EN)).toBeNull();
+    expect(checkImage({ type: "", size: 100 }, EN)).toBeNull();
+    expect(checkImage({ type: "image/jpg", size: 100, name: "photo" }, EN)).toBeNull();
+    expect(checkImage({ type: "image/pjpeg", size: 100 }, EN)).toBeNull();
+    expect(checkImage({ type: "application/octet-stream", size: 100, name: "shot.webp" }, EN)).toBeNull();
   });
 
   it("still rejects a blank type whose name is not an image", () => {
-    expect(checkImage({ type: "", size: 100, name: "notes.txt" })).toMatch(/not an image we accept/);
-    expect(checkImage({ type: "application/octet-stream", size: 100, name: "blob" })).toMatch(/not an image we accept/);
+    expect(checkImage({ type: "", size: 100, name: "notes.txt" }, EN)).toMatch(/not an image we accept/);
+    expect(checkImage({ type: "application/octet-stream", size: 100, name: "blob" }, EN)).toMatch(/not an image we accept/);
   });
 
   it("rejects files over 5 MB and names the size", () => {
-    expect(checkImage({ type: "image/png", size: MAX_IMAGE_BYTES })).toBeNull();
-    expect(checkImage({ type: "image/png", size: 10 * 1024 * 1024, name: "shot.png" })).toBe("shot.png is 10 MB. Images can be up to 5 MB.");
+    expect(checkImage({ type: "image/png", size: MAX_IMAGE_BYTES }, EN)).toBeNull();
+    expect(checkImage({ type: "image/png", size: 10 * 1024 * 1024, name: "shot.png" }, EN)).toBe("shot.png is 10 MB. Images can be up to 5 MB.");
   });
 
   it("rejects empty files", () => {
-    expect(checkImage({ type: "image/png", size: 0 })).toMatch(/empty/);
+    expect(checkImage({ type: "image/png", size: 0 }, EN)).toMatch(/empty/);
+  });
+});
+
+describe("checkImage in Ukrainian", () => {
+  const UK = { locale: "uk" } as const;
+
+  it("words the problem in the visitor's language, units included", () => {
+    expect(checkImage({ type: "image/png", size: 10 * 1024 * 1024, name: "shot.png" }, UK)).toBe("shot.png займає 10 МБ. Зображення можуть бути до 5 МБ.");
+    expect(checkImage({ type: "image/svg+xml", size: 100 }, UK)).toMatch(/Файли SVG/);
+    expect(formatBytes(1.5 * 1024 * 1024, UK)).toBe("1,5 МБ");
   });
 });
 
@@ -89,9 +101,9 @@ describe("toAttachmentView", () => {
 });
 
 it("formats sizes the way the errors read", () => {
-  expect(formatBytes(512)).toBe("512 B");
-  expect(formatBytes(2048)).toBe("2 KB");
-  expect(formatBytes(10.24 * 1024 * 1024)).toBe("10.2 MB");
+  expect(formatBytes(512, EN)).toBe("512 B");
+  expect(formatBytes(2048, EN)).toBe("2 KB");
+  expect(formatBytes(10.24 * 1024 * 1024, EN)).toBe("10.2 MB");
 });
 
 describe("isPublicImage", () => {

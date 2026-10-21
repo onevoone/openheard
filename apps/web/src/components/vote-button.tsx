@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { CaretUpIcon } from "@phosphor-icons/react";
 import { useRouter } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -71,7 +72,7 @@ export function VoteButton({
       }
       router.invalidate();
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Could not vote"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : m.vote_failed()),
   });
 
   const flash = useValueFlash(like.count, { hold: 600 });
@@ -187,7 +188,7 @@ export function VoteButton({
       onClick={onClick}
       aria-pressed={on}
       aria-busy={like.pending}
-      aria-label={on ? "Remove vote" : "Vote"}
+      aria-label={on ? m.vote_remove() : m.vote_add()}
       data-vote
       whileTap={reduced ? undefined : { scale: 0.96 }}
       animate={reduced ? undefined : { scale: 1 }}
@@ -208,7 +209,7 @@ export function VoteButton({
       </motion.span>
       {countCell(cn(lg ? "text-sm" : "text-[13px]", on ? "text-[var(--link-foreground,#0d0d0f)]" : "text-foreground"))}
       <span role="status" aria-live="polite" className="sr-only">
-        {`${shown} votes, ${on ? "voted" : "not voted"}`}
+        {on ? m.vote_status_voted({ count: like.count, shown }) : m.vote_status_not_voted({ count: like.count, shown })}
       </span>
     </motion.button>
   );

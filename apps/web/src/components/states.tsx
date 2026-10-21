@@ -1,17 +1,18 @@
+import { m } from "@openheard/i18n/messages";
 import { Skeleton } from "@openheard/ui/components/skeleton";
 
 export function ErrorState({ message, retry }: { message?: string; retry?: string }) {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-3 px-6 py-24 text-center">
-      <h2 className="text-lg font-semibold">Something went wrong</h2>
-      <p className="text-sm text-muted-foreground">{message ?? "An unexpected error occurred."}</p>
+      <h2 className="text-lg font-semibold">{m.state_error_title()}</h2>
+      <p className="text-sm text-muted-foreground">{message ?? m.state_error_text()}</p>
       {retry ? (
         <a href={retry} className="mt-1 text-sm font-medium text-link hover:underline">
-          Try again
+          {m.common_try_again()}
         </a>
       ) : (
         <a href="/" className="mt-1 text-sm font-medium text-link hover:underline">
-          Go home
+          {m.state_go_home()}
         </a>
       )}
     </div>
@@ -22,15 +23,15 @@ export function DashboardErrorState({ message, retry }: { message?: string; retr
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-3 py-3 pr-3">
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center rounded-xl border bg-background px-6">
-        <h2 className="text-lg font-semibold">Something went wrong</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{message ?? "An unexpected error occurred."}</p>
+        <h2 className="text-lg font-semibold">{m.state_error_title()}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{message ?? m.state_error_text()}</p>
         {retry ? (
           <a href={retry} className="mt-3 text-sm font-medium text-link hover:underline">
-            Try again
+            {m.common_try_again()}
           </a>
         ) : (
           <a href="/dashboard" className="mt-3 text-sm font-medium text-link hover:underline">
-            Back to dashboard
+            {m.state_back_to_dashboard()}
           </a>
         )}
       </div>

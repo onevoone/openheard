@@ -52,7 +52,7 @@ export async function storeUpload(db: Db, input: { workspaceId: string; uploader
   const o = { locale };
   const bucket = uploadsBucket();
   if (!bucket) throw new UploadError(503, m.err_upload_not_set_up({}, o));
-  if (input.bytes.byteLength > MAX_IMAGE_BYTES) throw new UploadError(413, m.err_upload_too_large({ max: formatBytes(MAX_IMAGE_BYTES) }, o));
+  if (input.bytes.byteLength > MAX_IMAGE_BYTES) throw new UploadError(413, m.err_upload_too_large({ max: formatBytes(MAX_IMAGE_BYTES, o) }, o));
   const type = sniffImageType(input.bytes);
   if (!type) throw new UploadError(415, m.err_upload_bad_type({}, o));
   const size = imageSize(input.bytes, type);
@@ -67,7 +67,7 @@ export async function storeUpload(db: Db, input: { workspaceId: string; uploader
     WHERE (SELECT coalesce(sum(size), 0) FROM attachment WHERE uploader_id = ${input.uploaderId} AND created_at > ${since}) + ${input.bytes.byteLength} <= ${DAILY_UPLOAD_BYTES}
     RETURNING id
   `);
-  if (!inserted.length) throw new UploadError(429, m.err_upload_daily_limit({ limit: formatBytes(DAILY_UPLOAD_BYTES) }, o));
+  if (!inserted.length) throw new UploadError(429, m.err_upload_daily_limit({ limit: formatBytes(DAILY_UPLOAD_BYTES, o) }, o));
   try {
     await bucket.put(key, input.bytes, { httpMetadata: { contentType: type } });
   } catch (err) {

@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute, redirect, useLoaderData, useRouter } from "@tanstack/react-router";
 
 import { AuthForm } from "@/components/auth-form";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/login")({
     throw redirect({ to: "/new" });
   },
   loader: () => getWorkspaceMemberCount(),
-  head: () => ({ meta: [{ title: "Sign in · feedback" }] }),
+  head: () => ({ meta: [{ title: m.login_head() }] }),
   component: LoginPage,
 });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "@openheard/i18n/messages";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -129,9 +130,9 @@ export type CopyButtonProps = {
 
 export function CopyButton({
   value,
-  label = "Copy",
-  copiedLabel = "Copied",
-  errorLabel = "Failed",
+  label = m.ui_copy(),
+  copiedLabel = m.ui_copied(),
+  errorLabel = m.ui_copy_failed(),
   timeout = 2000,
   onCopy,
   onError,

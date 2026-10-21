@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { EnvelopeSimpleIcon, LockSimpleIcon, MagicWandIcon, UserIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -72,9 +73,9 @@ export function AuthForm({
     <div className="flex w-full flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-1.5 text-center">
         <h1 className="text-[22px] font-semibold tracking-[-0.02em]">
-          {mode === "up" ? "Create your account" : `Sign in to ${wsName}`}
+          {mode === "up" ? m.auth_title_sign_up() : m.auth_title_sign_in({ workspace: wsName })}
         </h1>
-        <p className="text-sm text-muted-foreground">Vote and comment as yourself.</p>
+        <p className="text-sm text-muted-foreground">{m.auth_subtitle()}</p>
       </div>
 
       {hasGoogle ? (
@@ -91,11 +92,11 @@ export function AuthForm({
               authClient.signIn.social({ provider: "google", callbackURL });
             }}
           >
-            <GoogleIcon className="mr-1.5 size-4" /> Continue with Google
+            <GoogleIcon className="mr-1.5 size-4" /> {m.auth_google()}
           </Button>
           <div className="flex w-full items-center gap-3">
             <span className="h-px flex-1 bg-border" />
-            <span className="text-xs text-faint">or</span>
+            <span className="text-xs text-faint">{m.auth_or()}</span>
             <span className="h-px flex-1 bg-border" />
           </div>
         </>
@@ -105,9 +106,9 @@ export function AuthForm({
         magicSent ? (
           <div className="flex w-full flex-col items-center gap-3 rounded-lg border bg-card px-5 py-6 text-center">
             <MagicWandIcon className="size-6 text-faint" />
-            <p className="text-sm">Check your email for a sign-in link.</p>
+            <p className="text-sm">{m.auth_magic_sent()}</p>
             <button type="button" onClick={() => { setMagicSent(false); setMode("in"); }} className="text-xs text-faint hover:text-foreground">
-              Back to password sign-in
+              {m.auth_back_to_password()}
             </button>
           </div>
         ) : (
@@ -117,10 +118,10 @@ export function AuthForm({
             </Field>
             {error ? <p role="alert" className="text-[13px] text-red-400">{error}</p> : null}
             <Button type="submit" full arrow size="lg" disabled={busy} className="mt-1">
-              {busy ? "Sending…" : "Email me a link"}
+              {busy ? m.auth_sending() : m.auth_send_link()}
             </Button>
             <button type="button" onClick={() => { setError(""); setMode("in"); }} className="self-center text-xs text-faint hover:text-foreground">
-              Sign in with password
+              {m.auth_use_password()}
             </button>
           </form>
         )
@@ -128,7 +129,7 @@ export function AuthForm({
         <form onSubmit={submit} className="flex w-full flex-col gap-2.5">
           {mode === "up" ? (
             <Field icon={<UserIcon className="size-[15px]" />}>
-              <input value={name} onChange={(e) => setName(e.target.value)} required disabled={busy} autoComplete="name" placeholder="Your name" className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-faint disabled:opacity-60" />
+              <input value={name} onChange={(e) => setName(e.target.value)} required disabled={busy} autoComplete="name" placeholder={m.auth_name_placeholder()} className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-faint disabled:opacity-60" />
             </Field>
           ) : null}
           <Field icon={<EnvelopeSimpleIcon className="size-[15px]" />} invalid={!!error}>
@@ -143,22 +144,22 @@ export function AuthForm({
               disabled={busy}
               minLength={8}
               autoComplete={mode === "in" ? "current-password" : "new-password"}
-              placeholder="Password"
+              placeholder={m.auth_password_placeholder()}
               className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-faint disabled:opacity-60"
             />
           </Field>
           {error ? <p role="alert" className="text-[13px] text-red-400">{error}</p> : null}
           <Button type="submit" full arrow size="lg" disabled={busy} className="mt-1">
-            {busy ? (mode === "in" ? "Signing in…" : "Creating account…") : mode === "in" ? "Sign in" : "Create account"}
+            {busy ? (mode === "in" ? m.auth_signing_in() : m.auth_creating()) : mode === "in" ? m.nav_sign_in() : m.auth_create_account()}
           </Button>
           <div className="flex items-center justify-between">
             {mode === "in" ? (
               <Link to="/reset-password" className="text-xs text-faint hover:text-foreground">
-                Forgot password?
+                {m.auth_forgot_password()}
               </Link>
             ) : <span />}
             <button type="button" onClick={() => { setError(""); setMode("magic"); }} className="text-xs text-faint hover:text-foreground">
-              Email me a link instead
+              {m.auth_link_instead()}
             </button>
           </div>
         </form>
@@ -169,11 +170,11 @@ export function AuthForm({
         onClick={() => { setError(""); setMode(mode === "up" ? "in" : "up"); }}
         className="text-xs text-faint hover:text-foreground"
       >
-        {mode === "up" ? "I already have an account" : "Create an account"}
+        {mode === "up" ? m.auth_have_account() : m.auth_no_account()}
       </button>
 
       {showFirstAccountHint ? (
-        <p className="text-center text-xs text-faint">You're setting up this install. This account will be the admin.</p>
+        <p className="text-center text-xs text-faint">{m.auth_first_account()}</p>
       ) : null}
     </div>
   );

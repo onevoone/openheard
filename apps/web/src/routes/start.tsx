@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ArrowLeftIcon, CheckCircleIcon, GlobeSimpleIcon, LockSimpleIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { createFileRoute, useLoaderData, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/start")({
     }
     return { user };
   },
-  head: () => ({ meta: [{ title: "Get started · openheard" }] }),
+  head: () => ({ meta: [{ title: m.start_head() }] }),
   component: StartPage,
 });
 
@@ -132,7 +133,7 @@ function StartPage() {
       finishOnboarding(stored as OnboardingData, rootDomain).catch((err) => {
         creating.current = false;
         setBusy(false);
-        toast.error(err instanceof Error ? err.message : "Could not create workspace");
+        toast.error(err instanceof Error ? err.message : m.new_failed());
         clearOnboarding();
       });
     }
@@ -157,7 +158,7 @@ function StartPage() {
         setBusy(true);
         finishOnboarding({ name: name.trim(), slug, whoCanPost, website: websiteUrl }, rootDomain).catch((err) => {
           setBusy(false);
-          toast.error(err instanceof Error ? err.message : "Could not create workspace");
+          toast.error(err instanceof Error ? err.message : m.new_failed());
         });
       } else {
         setStep(3);
@@ -184,7 +185,7 @@ function StartPage() {
       await finishOnboarding(data, rootDomain);
     } catch (err) {
       setBusy(false);
-      toast.error(err instanceof Error ? err.message : "Could not create workspace");
+      toast.error(err instanceof Error ? err.message : m.new_failed());
     }
   }
 
@@ -198,7 +199,7 @@ function StartPage() {
       <main className="flex flex-1 items-center justify-center px-5 py-16">
         <div className="flex flex-col items-center gap-4">
           <Logo size={32} />
-          <p className="text-sm text-muted-foreground">Creating your workspace…</p>
+          <p className="text-sm text-muted-foreground">{m.start_creating()}</p>
         </div>
       </main>
     );
@@ -213,7 +214,7 @@ function StartPage() {
           <div className="flex w-full flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-1.5 text-center">
               <h1 className="text-[22px] font-semibold tracking-[-0.02em]">
-                What is your company or product called?
+                {m.start_name_question()}
               </h1>
             </div>
             <div className="flex w-full flex-col gap-2.5">
@@ -256,17 +257,18 @@ function StartPage() {
                 ) : null}
               </div>
               {slug.length > 0 && slug.length < 5 && (
-                <p className="text-[13px] text-red-400">Slug must be at least 5 characters</p>
+                <p className="text-[13px] text-red-400">{m.start_slug_short()}</p>
               )}
               {slugStatus?.available === true && (
-                <p className="text-[13px] text-emerald-500">Available</p>
+                <p className="text-[13px] text-emerald-500">{m.start_slug_available()}</p>
               )}
               {slugStatus && !slugStatus.available && slug.length >= 5 && (
                 <p className="text-[13px] text-red-400">
-                  That slug is taken
+                  {m.start_slug_taken()}
                   {slugStatus.suggestion && (
                     <>
-                      {" — try "}
+                      {" "}
+                      {m.start_slug_try()}{" "}
                       <button
                         type="button"
                         className="underline hover:text-foreground"
@@ -285,7 +287,7 @@ function StartPage() {
             </div>
             <label className="flex w-full flex-col gap-1.5">
               <span className="text-[13px] text-muted-foreground">
-                Website <span className="text-faint">(optional, we match your colours and logo)</span>
+                {m.start_website()} <span className="text-faint">{m.start_website_hint()}</span>
               </span>
               <span className="flex h-10 items-center gap-2.5 rounded-lg border border-input bg-card px-3 text-faint transition-colors focus-within:border-ring/60 focus-within:ring-1 focus-within:ring-ring/40">
                 <GlobeSimpleIcon className="size-[15px]" />
@@ -301,7 +303,7 @@ function StartPage() {
               </span>
             </label>
             <Button full arrow size="lg" disabled={!slugReady} onClick={next}>
-              Continue
+              {m.start_continue()}
             </Button>
           </div>
         )}
@@ -310,34 +312,34 @@ function StartPage() {
           <div className="flex w-full flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-1.5 text-center">
               <h1 className="text-[22px] font-semibold tracking-[-0.02em]">
-                Who can see your board?
+                {m.start_access_question()}
               </h1>
             </div>
             <div className="flex w-full flex-col gap-3">
               <AccessCard
                 icon={<GlobeSimpleIcon className="size-5" />}
-                title="Public"
-                description="Anyone can view, vote and post"
+                title={m.start_public()}
+                description={m.start_public_text()}
                 selected={whoCanPost === "anyone"}
                 onClick={() => setWhoCanPost("anyone")}
               />
               <AccessCard
                 icon={<LockSimpleIcon className="size-5" />}
-                title="Private"
-                description="Only people you invite"
+                title={m.start_private()}
+                description={m.start_private_text()}
                 selected={whoCanPost === "members"}
                 onClick={() => setWhoCanPost("members")}
               />
             </div>
             <Button full arrow size="lg" onClick={next}>
-              {user ? "Create workspace" : "Continue"}
+              {user ? m.start_create() : m.start_continue()}
             </Button>
           </div>
         )}
 
         {step === 3 && !user && (
           <div className="flex w-full flex-col items-center gap-6">
-            <p className="text-sm text-muted-foreground">All done, now sign up to continue</p>
+            <p className="text-sm text-muted-foreground">{m.start_sign_up()}</p>
             <AuthForm
               wsName={wsName}
               hasGoogle={hasGoogle}
@@ -352,7 +354,7 @@ function StartPage() {
         <div className="flex items-center gap-4">
           {step > 1 && (
             <button type="button" onClick={back} className="flex items-center gap-1 text-xs text-faint hover:text-foreground">
-              <ArrowLeftIcon className="size-3" /> Back
+              <ArrowLeftIcon className="size-3" /> {m.start_back()}
             </button>
           )}
           <div className="flex items-center gap-1.5">

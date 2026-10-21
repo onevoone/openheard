@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -6,13 +7,11 @@ import { unsubscribe } from "@/functions/notifications";
 
 export const Route = createFileRoute("/unsubscribe")({
   validateSearch: (s: Record<string, unknown>) => ({ t: typeof s.t === "string" ? s.t : "" }),
-  head: () => ({ meta: [{ title: "Unsubscribe" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: m.unsub_head() }, { name: "robots", content: "noindex" }] }),
   component: UnsubscribePage,
 });
 
 type Result = Awaited<ReturnType<typeof unsubscribe>>;
-
-const WHAT = { status: "updates on posts you voted on, commented on or wrote", changelog: "changelog emails" } as const;
 
 // Runs from the browser, not the loader, so a mail scanner that fetches the
 // link without running scripts does not unsubscribe anyone.
@@ -25,12 +24,12 @@ function UnsubscribePage() {
     unsubscribe({ data: { t } }).then(setResult, () => setResult({ ok: false }));
   }, [t]);
 
-  if (!result) return <EmailLinkPage title="Unsubscribing" body="One moment." />;
-  if (!result.ok) return <EmailLinkPage title="This link does not work" body="It may have been copied incompletely. Use the link from the latest email." />;
+  if (!result) return <EmailLinkPage title={m.unsub_title()} body={m.changelog_confirm_wait()} />;
+  if (!result.ok) return <EmailLinkPage title={m.unsub_broken_title()} body={m.unsub_broken_text()} />;
   return (
     <EmailLinkPage
-      title="You are unsubscribed"
-      body={`${result.workspaceName} will stop emailing you ${WHAT[result.kind]}. Changed your mind? Turn it back on in your notification settings or the changelog page.`}
+      title={m.unsub_done_title()}
+      body={result.kind === "status" ? m.unsub_done_status({ workspace: result.workspaceName }) : m.unsub_done_changelog({ workspace: result.workspaceName })}
     />
   );
 }

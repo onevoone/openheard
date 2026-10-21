@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { CheckCircleIcon, GlobeSimpleIcon, LinkSimpleIcon, MonitorIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
@@ -13,7 +14,17 @@ export const slugify = (s: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 32);
 
-const HEARD_OPTIONS = ["Twitter / X", "Product Hunt", "GitHub", "Blog post", "Search engine", "Friend or colleague", "Other"];
+// The value is what gets stored (English, so answers stay comparable); only the
+// label follows the reader's language.
+const HEARD_OPTIONS: { value: string; label: () => string }[] = [
+  { value: "Twitter / X", label: () => "Twitter / X" },
+  { value: "Product Hunt", label: () => "Product Hunt" },
+  { value: "GitHub", label: () => "GitHub" },
+  { value: "Blog post", label: () => m.workspace_heard_blog() },
+  { value: "Search engine", label: () => m.workspace_heard_search() },
+  { value: "Friend or colleague", label: () => m.workspace_heard_friend() },
+  { value: "Other", label: () => m.workspace_heard_other() },
+];
 
 export type WorkspaceFormValues = { name: string; slug: string; website: string; heardAboutUs: string };
 
@@ -70,12 +81,12 @@ export function WorkspaceForm({
   return (
     <form onSubmit={submit} onKeyDown={handleKeyDown} className="flex w-full max-w-[480px] flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-[22px] font-semibold tracking-[-0.02em]">Create your workspace</h1>
-        <p className="text-sm text-muted-foreground">Set up a space to collect feedback, plan your roadmap, and share updates.</p>
+        <h1 className="text-[22px] font-semibold tracking-[-0.02em]">{m.workspace_title()}</h1>
+        <p className="text-sm text-muted-foreground">{m.workspace_text()}</p>
       </div>
 
       <div className="flex flex-col gap-5">
-        <Field label="Website" optional>
+        <Field label={m.workspace_website()} optional>
           <div className="flex items-center gap-2.5">
             <FieldBox icon={<GlobeSimpleIcon className="size-[15px]" />}>
               <input type="text" inputMode="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="example.com" className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-faint" />
@@ -84,7 +95,7 @@ export function WorkspaceForm({
           </div>
         </Field>
 
-        <Field label="Workspace name">
+        <Field label={m.workspace_name()}>
           <div className="flex items-center gap-2.5">
             <FieldBox icon={<MonitorIcon className="size-[15px]" />}>
               <input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} maxLength={60} placeholder="Acme" className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-faint" />
@@ -94,7 +105,7 @@ export function WorkspaceForm({
         </Field>
 
         {mode === "create" ? (
-          <Field label="Subdomain">
+          <Field label={m.workspace_subdomain()}>
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-2.5">
                 <FieldBox icon={<LinkSimpleIcon className="size-[15px]" />}>
@@ -112,18 +123,18 @@ export function WorkspaceForm({
                 </FieldBox>
                 {slugValid && finalSlug ? <CheckCircleIcon weight="fill" className="size-5 shrink-0 text-emerald-500" /> : slugTooShort && slugBlurred ? <WarningCircleIcon weight="fill" className="size-5 shrink-0 text-red-500" /> : null}
               </div>
-              {slugTooShort && slugBlurred ? <p className="text-[13px] text-red-400">Must be at least 5 characters long</p> : null}
+              {slugTooShort && slugBlurred ? <p className="text-[13px] text-red-400">{m.workspace_slug_short()}</p> : null}
             </div>
           </Field>
         ) : null}
 
         {showHeardAbout ? (
-          <Field label="Where did you hear about us?" optional>
+          <Field label={m.workspace_heard()} optional>
             <select value={heardAboutUs} onChange={(e) => setHeardAboutUs(e.target.value)} className="h-10 w-full appearance-none rounded-lg border border-input bg-card px-3 text-sm text-foreground outline-none focus:border-ring/60 [&:not(:valid)]:text-faint">
-              <option value="">Select an option</option>
+              <option value="">{m.workspace_heard_select()}</option>
               {HEARD_OPTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {o}
+                <option key={o.value} value={o.value}>
+                  {o.label()}
                 </option>
               ))}
             </select>
@@ -133,7 +144,7 @@ export function WorkspaceForm({
 
       <div className="flex items-center gap-3">
         <Button type="submit" size="lg" disabled={busy || !nameValid || !slugValid}>
-          {busy ? "Creating…" : "Create Workspace"}
+          {busy ? m.workspace_creating() : m.workspace_create()}
           <kbd className="ml-2 inline-flex items-center gap-0.5 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-faint">⌘↵</kbd>
         </Button>
       </div>
@@ -146,7 +157,7 @@ function Field({ label, optional, children }: { label: string; optional?: boolea
     <div className="flex flex-col gap-1.5">
       <span className="text-sm font-medium">
         {label}
-        {optional ? <span className="ml-2 text-xs font-normal text-faint">(optional)</span> : null}
+        {optional ? <span className="ml-2 text-xs font-normal text-faint">{m.workspace_optional()}</span> : null}
       </span>
       {children}
     </div>

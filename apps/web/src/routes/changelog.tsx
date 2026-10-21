@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@openheard/ui/components/dialog";
 import { Input } from "@openheard/ui/components/input";
 import { Textarea } from "@openheard/ui/components/textarea";
@@ -20,8 +21,8 @@ export const Route = createFileRoute("/changelog")({
   loader: () => listChangelog(),
   head: () => ({
     meta: [
-      { title: "Changelog" },
-      { property: "og:title", content: "Changelog" },
+      { title: m.nav_changelog() },
+      { property: "og:title", content: m.nav_changelog() },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -51,20 +52,20 @@ function ChangelogPage() {
     <>
       {admin ? (
         <Button full arrow size="lg" onClick={() => setEditing("new")}>
-          New entry
+          {m.changelog_new_entry()}
         </Button>
       ) : (
         <Button full arrow size="lg" onClick={() => router.navigate({ to: "/" })} className="brand-cta">
-          Post idea
+          {m.board_post_idea()}
         </Button>
       )}
       {entries.length > 0 ? (
       <section className="flex flex-col gap-2.5 px-2.5">
-        <RailLabel>Get updates</RailLabel>
-        <p className="-mt-1 text-[13px] leading-[1.5] text-muted-foreground">One email when something ships. No digest, no marketing.</p>
+        <RailLabel>{m.changelog_get_updates()}</RailLabel>
+        <p className="-mt-1 text-[13px] leading-[1.5] text-muted-foreground">{m.changelog_updates_text()}</p>
         <SubscribeBox />
         <a href="/changelog.rss" className="inline-flex items-center gap-1.5 text-xs text-faint hover:text-muted-foreground">
-          <RssIcon className="size-3.5" /> RSS feed
+          <RssIcon className="size-3.5" /> {m.changelog_rss()}
         </a>
       </section>
       ) : null}
@@ -75,16 +76,14 @@ function ChangelogPage() {
     <SkeletonSwap ready={ready} skeleton={<ChangelogSkeleton />}>
     <Shell rail={rail}>
       <div className="flex items-end justify-between">
-        <h1 className="text-xl font-semibold tracking-[-0.02em]">What shipped</h1>
-        <span className="text-xs text-faint tabular-nums">
-          {published} {published === 1 ? "release" : "releases"}
-        </span>
+        <h1 className="text-xl font-semibold tracking-[-0.02em]">{m.changelog_heading()}</h1>
+        <span className="text-xs text-faint tabular-nums">{m.changelog_releases({ count: published })}</span>
       </div>
 
       {entries.length === 0 ? (
         <div className="px-6 py-20 text-center">
-          <p className="text-[14px] font-semibold">Nothing shipped yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">{admin ? "Write the first entry when you release something." : "Check back after the next release."}</p>
+          <p className="text-[14px] font-semibold">{m.changelog_empty_title()}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{admin ? m.changelog_empty_admin() : m.changelog_empty_visitor()}</p>
         </div>
       ) : (
         <div className="flex flex-col">
@@ -93,7 +92,7 @@ function ChangelogPage() {
               <div className="flex shrink-0 items-center gap-2.5 md:w-24 md:flex-col md:items-start md:pt-1">
                 <span className="text-[12px] text-faint tabular-nums">{shortDate(e.publishedAt ?? e.createdAt)}</span>
                 {e.version ? <span className="inline-flex h-5 items-center rounded-md border border-input bg-secondary px-1.5 text-[12px] text-foreground tabular-nums">{e.version}</span> : null}
-                {!e.publishedAt ? <span className="inline-flex h-5 items-center rounded-md border border-dashed border-input px-1.5 text-[11px] text-faint">Draft</span> : null}
+                {!e.publishedAt ? <span className="inline-flex h-5 items-center rounded-md border border-dashed border-input px-1.5 text-[11px] text-faint">{m.changelog_draft()}</span> : null}
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-3">
                 <div className="flex items-start justify-between gap-3">
@@ -101,12 +100,12 @@ function ChangelogPage() {
                   {admin ? (
                     <span className="flex shrink-0 gap-1">
                       <button type="button" onClick={() => setEditing(e)} className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
-                        Edit
+                        {m.changelog_edit()}
                       </button>
                       <button
                         type="button"
-                        title="Delete"
-                        onClick={() => confirm("Delete this entry?") && deleteChangelog({ data: { id: e.id } }).then(() => router.invalidate())}
+                        title={m.changelog_delete()}
+                        onClick={() => confirm(m.changelog_delete_confirm()) && deleteChangelog({ data: { id: e.id } }).then(() => router.invalidate())}
                         className="inline-flex size-6 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground"
                       >
                         <TrashIcon className="size-3.5" />
@@ -117,7 +116,7 @@ function ChangelogPage() {
                 {e.body ? <div className="whitespace-pre-wrap text-[14px] leading-[1.6] text-muted-foreground">{e.body}</div> : null}
                 {e.posts.length ? (
                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    <span className="mr-1 text-xs text-faint">Shipped from</span>
+                    <span className="mr-1 text-xs text-faint">{m.changelog_shipped_from()}</span>
                     {e.posts.map((p) => (
                       <Link
                         key={p.id}
@@ -149,7 +148,7 @@ function SubscribeBox() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (sent) return <p className="text-[13px] leading-[1.5] text-foreground" aria-live="polite">Check your inbox for a link to confirm.</p>;
+  if (sent) return <p className="text-[13px] leading-[1.5] text-foreground" aria-live="polite">{m.changelog_subscribe_sent()}</p>;
   return (
     <>
       <form
@@ -162,7 +161,7 @@ function SubscribeBox() {
             setSent(true);
           } catch (err) {
             const msg = err instanceof Error ? err.message : "";
-            setError(msg.includes("valid email") ? "Enter a valid email" : msg || "Could not subscribe");
+            setError(msg.includes(m.err_email_enter()) ? m.err_email_enter() : msg || m.changelog_subscribe_failed());
           } finally {
             setBusy(false);
           }
@@ -175,11 +174,11 @@ function SubscribeBox() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
-          aria-label="Email address"
+          aria-label={m.changelog_email_label()}
           aria-invalid={error ? true : undefined}
           className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-faint"
         />
-        <button type="submit" disabled={busy} className="inline-flex size-[26px] items-center justify-center rounded-md bg-accent text-foreground hover:bg-input disabled:opacity-50" aria-label="Subscribe">
+        <button type="submit" disabled={busy} className="inline-flex size-[26px] items-center justify-center rounded-md bg-accent text-foreground hover:bg-input disabled:opacity-50" aria-label={m.changelog_subscribe()}>
           <ArrowRightIcon weight="bold" className="size-3" />
         </button>
       </form>
@@ -219,9 +218,9 @@ function EntryDialog({ entry, onClose }: { entry: Entry | null | "new"; onClose:
       await saveChangelog({ data: { id: e?.id, title, version, body, postIds: posts.map((p) => p.id), publish } });
       await router.invalidate();
       onClose();
-      toast.success(publish ? "Published. Linked posts are marked shipped." : "Saved as draft");
+      toast.success(publish ? m.changelog_published() : m.changelog_saved_draft());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : m.common_save_failed());
     } finally {
       setBusy(false);
     }
@@ -231,24 +230,24 @@ function EntryDialog({ entry, onClose }: { entry: Entry | null | "new"; onClose:
     <Dialog open={entry !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl rounded-xl border-input bg-card">
         <DialogHeader>
-          <DialogTitle>{e ? "Edit entry" : "New changelog entry"}</DialogTitle>
-          <DialogDescription>Publishing marks every linked post as shipped and notifies its voters.</DialogDescription>
+          <DialogTitle>{e ? m.changelog_dialog_edit() : m.changelog_dialog_new()}</DialogTitle>
+          <DialogDescription>{m.changelog_dialog_description()}</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-[minmax(0,1fr)_120px] gap-2">
-          <Input placeholder="What shipped" value={title} onChange={(ev) => setTitle(ev.target.value)} aria-label="Entry title" className="h-10 text-[14px] font-semibold" />
-          <Input placeholder="v0.4.0" value={version} onChange={(ev) => setVersion(ev.target.value)} aria-label="Version" className="h-10 tabular-nums" />
+          <Input placeholder={m.changelog_title_placeholder()} value={title} onChange={(ev) => setTitle(ev.target.value)} aria-label={m.changelog_title_label()} className="h-10 text-[14px] font-semibold" />
+          <Input placeholder="v0.4.0" value={version} onChange={(ev) => setVersion(ev.target.value)} aria-label={m.changelog_version_label()} className="h-10 tabular-nums" />
         </div>
-        <Textarea placeholder="Why it matters, in a few sentences." value={body} onChange={(ev) => setBody(ev.target.value)} aria-label="Entry body" className="min-h-36" />
+        <Textarea placeholder={m.changelog_body_placeholder()} value={body} onChange={(ev) => setBody(ev.target.value)} aria-label={m.changelog_body_label()} className="min-h-36" />
         <div className="flex flex-col gap-2">
-          <span className="text-xs text-muted-foreground">Posts this closes</span>
+          <span className="text-xs text-muted-foreground">{m.changelog_posts_closed()}</span>
           <div className="flex flex-wrap gap-1.5">
             {posts.map((p) => (
-              <button key={p.id} type="button" onClick={() => setPosts((ps) => ps.filter((x) => x.id !== p.id))} className="inline-flex h-6 items-center gap-1 rounded-md border bg-accent px-2 text-xs" title="Remove">
+              <button key={p.id} type="button" onClick={() => setPosts((ps) => ps.filter((x) => x.id !== p.id))} className="inline-flex h-6 items-center gap-1 rounded-md border bg-accent px-2 text-xs" title={m.common_remove()}>
                 {p.title} <span className="text-muted-foreground">×</span>
               </button>
             ))}
           </div>
-          <Input placeholder="Search posts to link" value={q} onChange={(ev) => setQ(ev.target.value)} aria-label="Search posts to link" />
+          <Input placeholder={m.changelog_search_posts()} value={q} onChange={(ev) => setQ(ev.target.value)} aria-label={m.changelog_search_posts()} />
           {results.length ? (
             <div className="flex max-h-40 flex-col overflow-auto rounded-md border">
               {results
@@ -271,13 +270,13 @@ function EntryDialog({ entry, onClose }: { entry: Entry | null | "new"; onClose:
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {m.common_cancel()}
           </Button>
           <Button variant="secondary" disabled={busy || title.trim().length < 3} onClick={() => save(false)}>
-            Save draft
+            {m.changelog_save_draft()}
           </Button>
           <Button arrow disabled={busy || title.trim().length < 3} onClick={() => save(true)}>
-            Publish
+            {m.changelog_publish()}
           </Button>
         </div>
       </DialogContent>

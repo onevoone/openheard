@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -14,7 +15,7 @@ export type NavCollection = { slug: string; title: string; icon: string | null; 
 export function HelpLayout({ nav, rail, mobileNav, children }: { nav: ReactNode; rail: ReactNode; mobileNav?: ReactNode; children: ReactNode }) {
   return (
     <div className="mx-auto grid w-full max-w-[1072px] flex-1 grid-cols-1 gap-10 px-4 pt-8 pb-12 md:px-8 md:pt-12 lg:grid-cols-[200px_minmax(0,1fr)_200px] lg:gap-12">
-      <nav aria-label="Help collections" className="hidden lg:block">
+      <nav aria-label={m.help_nav_label()} className="hidden lg:block">
         <div className="sticky top-24 flex max-h-[calc(100dvh-7rem)] flex-col overflow-y-auto [scrollbar-width:none]">{nav}</div>
       </nav>
       <main className="flex min-w-0 flex-col">
@@ -61,7 +62,7 @@ export function CollectionNav({ nav, collection, article }: { nav: NavCollection
       ) : null}
       {others.length ? (
         <>
-          <HelpLabel className={cn("px-2.5 pb-2", current ? "pt-7" : "")}>{current ? "Collections" : "Browse"}</HelpLabel>
+          <HelpLabel className={cn("px-2.5 pb-2", current ? "pt-7" : "")}>{current ? m.help_collections() : m.help_browse()}</HelpLabel>
           <ul className="flex flex-col gap-0.5">
             {others.map((c) => (
               <li key={c.slug}>
@@ -86,7 +87,7 @@ export function MobileNav({ nav, value, current }: { nav: NavCollection[]; value
   const listed = value === "home" || nav.some((c) => `c:${c.slug}` === value || c.articles.some((a) => `a:${a.slug}` === value));
   return (
     <label className="relative block">
-      <span className="sr-only">Jump to an article</span>
+      <span className="sr-only">{m.help_jump_to()}</span>
       <select
         value={value}
         onChange={(e) => {
@@ -97,11 +98,11 @@ export function MobileNav({ nav, value, current }: { nav: NavCollection[]; value
         }}
         className="h-10 w-full appearance-none rounded-lg border border-input bg-card pr-9 pl-3 text-[14px] text-foreground outline-none focus:border-ring/60"
       >
-        <option value="home">All collections</option>
+        <option value="home">{m.help_all_collections()}</option>
         {!listed && current ? <option value={value}>{current}</option> : null}
         {nav.map((c) => (
           <optgroup key={c.slug} label={c.title}>
-            <option value={`c:${c.slug}`}>{c.title}: overview</option>
+            <option value={`c:${c.slug}`}>{m.help_collection_overview({ title: c.title })}</option>
             {c.articles.map((a) => (
               <option key={a.slug} value={`a:${a.slug}`}>
                 {a.title}
@@ -143,7 +144,7 @@ export function Toc({ items }: { items: TocItem[] }) {
   if (items.length < 2) return null;
   return (
     <div className="hidden lg:block">
-      <HelpLabel className="pb-3 pl-4">On this page</HelpLabel>
+      <HelpLabel className="pb-3 pl-4">{m.help_on_this_page()}</HelpLabel>
       <ul className="flex flex-col border-l">
         {items.map((i) => (
           <li key={i.id}>
@@ -176,8 +177,8 @@ export function Toc({ items }: { items: TocItem[] }) {
 export function StillStuck() {
   return (
     <div className="flex flex-col gap-2 rounded-xl border bg-card p-4">
-      <p className="text-[14px] font-semibold">Still stuck?</p>
-      <p className="text-[13px] leading-[1.55] text-muted-foreground">Post it on the board. The team answers there.</p>
+      <p className="text-[14px] font-semibold">{m.help_still_stuck()}</p>
+      <p className="text-[13px] leading-[1.55] text-muted-foreground">{m.help_still_stuck_text()}</p>
       <div className="pt-2">
         <AskOnBoard full />
       </div>

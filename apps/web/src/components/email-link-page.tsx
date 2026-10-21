@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -15,7 +16,7 @@ export function EmailLinkPage({ title, body, children }: { title: string; body: 
         </div>
         {children}
         <Link to="/" className="text-sm text-faint hover:text-foreground">
-          Go to the board
+          {m.common_go_board()}
         </Link>
       </div>
     </main>

@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ArrowRightIcon } from "@phosphor-icons/react";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 
@@ -15,10 +16,10 @@ export const Route = createFileRoute("/help/collections/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) return {};
     const { title, description } = loaderData.collection;
-    const desc = description ?? `Help articles about ${title.toLowerCase()}.`;
+    const desc = description ?? m.help_collection_description({ title: title.toLowerCase() });
     return {
       meta: [
-        { title: `${title} · Help center` },
+        { title: m.help_collection_head({ title }) },
         { name: "description", content: desc },
         { property: "og:title", content: title },
         { property: "og:description", content: desc },
@@ -37,9 +38,9 @@ function CollectionPage() {
   const n = collection.articles.length;
   return (
     <HelpLayout nav={<CollectionNav nav={nav} collection={collection.slug} />} mobileNav={nav.length ? <MobileNav nav={nav} value={`c:${collection.slug}`} /> : null} rail={<StillStuck />}>
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-faint">
+      <nav aria-label={m.help_breadcrumb()} className="flex items-center gap-2 text-[13px] text-faint">
         <Link to="/help" className="hover:text-muted-foreground">
-          Help
+          {m.nav_help()}
         </Link>
         <span aria-hidden>/</span>
         <span className="text-muted-foreground" aria-current="page">
@@ -51,9 +52,7 @@ function CollectionPage() {
         <div className="flex min-w-0 flex-col">
           <h1 className="text-[28px] leading-[1.2] font-semibold tracking-[-0.025em]">{collection.title}</h1>
           {collection.description ? <p className="mt-2 text-[16px] text-muted-foreground">{collection.description}</p> : null}
-          <span className="mt-3 text-[12px] text-faint tabular-nums">
-            {n} {n === 1 ? "article" : "articles"}
-          </span>
+          <span className="mt-3 text-[12px] text-faint tabular-nums">{m.help_articles_count({ count: n })}</span>
         </div>
       </div>
       {n ? (
@@ -71,7 +70,7 @@ function CollectionPage() {
           ))}
         </ul>
       ) : (
-        <p className="py-16 text-center text-sm text-muted-foreground">Nothing published in this collection yet.</p>
+        <p className="py-16 text-center text-sm text-muted-foreground">{m.help_collection_empty()}</p>
       )}
     </HelpLayout>
   );

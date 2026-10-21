@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Dialog, DialogContent, DialogTitle } from "@openheard/ui/components/dialog";
 import { cn } from "@openheard/ui/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@openheard/ui/components/dropdown-menu";
@@ -67,7 +68,7 @@ export function NewPostDialog({
   const board = boards.find((b) => b.id === boardId) ?? boards[0];
   const root = useLoaderData({ from: "__root__" });
   const images = useImageDrafts({
-    blocked: isDemo(root.workspace) ? "Image uploads are off in the demo." : null,
+    blocked: isDemo(root.workspace) ? m.post_images_off_demo() : null,
     onBlocked: signedIn ? undefined : () => submit(),
   });
 
@@ -97,11 +98,11 @@ export function NewPostDialog({
       return;
     }
     if (title.trim().length < 4) {
-      toast("Give it a title first");
+      toast(m.newpost_title_first());
       return;
     }
     if (images.uploading) {
-      toast("Images are still uploading");
+      toast(m.post_images_uploading());
       return;
     }
     const postTitle = title.trim();
@@ -141,7 +142,7 @@ export function NewPostDialog({
       .then((result) => {
         onOptimisticPost?.(null);
         router.invalidate();
-        toast.success(result.pending ? "Submitted! An admin will review it shortly." : "Posted. You are the first vote.");
+        toast.success(result.pending ? m.newpost_submitted() : m.newpost_posted());
         navigate({ to: "/p/$id", params: { id: String(result.id) } });
       })
       .catch((err) => {
@@ -150,7 +151,7 @@ export function NewPostDialog({
         setTitle((t) => t || postTitle);
         setBody((b) => b || postBody);
         images.restore(saved);
-        toast.error(err instanceof Error ? err.message : "Could not post");
+        toast.error(err instanceof Error ? err.message : m.newpost_failed());
       });
   }
 
@@ -166,8 +167,8 @@ export function NewPostDialog({
       <DialogContent showClose={false} onPaste={images.onPaste} {...images.dropProps} className="max-w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-xl border-input bg-card p-0 shadow-[0_24px_64px_rgba(0,0,0,.6)] sm:max-w-[560px]">
         <DropOverlay drafts={images} />
         <div className="flex items-center justify-between pt-3.5 pr-3.5 pl-4 sm:pl-5">
-          <DialogTitle className="text-[13px] font-semibold text-muted-foreground">New post</DialogTitle>
-          <button type="button" onClick={() => onOpenChange(false)} className="inline-flex size-10 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground sm:size-[26px]">
+          <DialogTitle className="text-[13px] font-semibold text-muted-foreground">{m.newpost_title()}</DialogTitle>
+          <button type="button" onClick={() => onOpenChange(false)} aria-label={m.common_close()} className="inline-flex size-10 items-center justify-center rounded-md text-faint hover:bg-accent hover:text-foreground sm:size-[26px]">
             <XIcon className="size-[13px]" />
           </button>
         </div>
@@ -185,8 +186,8 @@ export function NewPostDialog({
               onKey(e);
             }}
             maxLength={140}
-            placeholder="What would make this better?"
-            aria-label="Post title"
+            placeholder={m.newpost_title_placeholder()}
+            aria-label={m.newpost_title_label()}
             className="w-full bg-transparent text-xl font-semibold tracking-[-0.02em] text-foreground outline-none placeholder:text-faint"
           />
           <textarea
@@ -195,8 +196,8 @@ export function NewPostDialog({
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={onKey}
             rows={3}
-            placeholder="What are you trying to do? Any workaround you use today?"
-            aria-label="Post details"
+            placeholder={m.newpost_body_placeholder()}
+            aria-label={m.newpost_body_label()}
             className="w-full resize-none bg-transparent text-[14px] leading-[1.55] text-muted-foreground outline-none placeholder:text-faint"
           />
         </div>
@@ -204,7 +205,7 @@ export function NewPostDialog({
         {similar.length ? (
           <div className="flex flex-col gap-1 px-4 pb-3 sm:px-5">
             <div className="flex items-center gap-1.5 pt-1 pb-1.5 text-xs font-medium text-muted-foreground">
-              <LightningIcon weight="fill" className="size-3 text-status-planned" /> Looks similar · vote instead?
+              <LightningIcon weight="fill" className="size-3 text-status-planned" /> {m.newpost_similar()}
             </div>
             {similar.slice(0, 3).map((s) => (
               <Link
@@ -234,7 +235,7 @@ export function NewPostDialog({
 
         {articles.length ? (
           <div className="flex flex-col gap-1 px-4 pb-3 sm:px-5">
-            <div className="pt-1 pb-1.5 text-xs font-medium text-muted-foreground">From the help center</div>
+            <div className="pt-1 pb-1.5 text-xs font-medium text-muted-foreground">{m.newpost_from_help()}</div>
             {articles.map((a) => (
               <Link key={a.id} to="/help/$slug" params={{ slug: a.slug }} onClick={() => onOpenChange(false)} className="flex min-h-11 items-center gap-2.5 rounded-lg bg-secondary px-2.5 py-2 text-[13px] transition-colors hover:bg-accent">
                 <FileTextIcon className="size-4 shrink-0 text-faint" />
@@ -260,12 +261,12 @@ export function NewPostDialog({
                   <PlusIcon className="size-3.5" />
                 ) : (
                   <>
-                    <ImageIcon className="size-3.5" /> Add images
+                    <ImageIcon className="size-3.5" /> {m.newpost_add_images()}
                   </>
                 )}
               </AttachButton>
             )}
-            {images.drafts.length ? null : <span className="ml-1 text-xs text-faint">or paste and drop, up to {MAX_IMAGES}</span>}
+            {images.drafts.length ? null : <span className="ml-1 text-xs text-faint">{m.newpost_images_hint({ max: MAX_IMAGES })}</span>}
           </div>
           <DraftError drafts={images} />
         </div>
@@ -275,7 +276,7 @@ export function NewPostDialog({
             <DropdownMenu>
               <DropdownMenuTrigger className="inline-flex h-7 items-center gap-1.5 rounded-md border border-input bg-secondary pr-2 pl-2.5 text-[13px] text-foreground outline-none hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring">
                 <span className="size-1.5 rounded-full bg-link" />
-                {board?.name ?? "Board"}
+                {board?.name ?? m.post_detail_board()}
                 <CaretDownIcon className="size-2.5 text-faint" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-40">
@@ -287,11 +288,11 @@ export function NewPostDialog({
               </DropdownMenuContent>
             </DropdownMenu>
             <span className="hidden items-center gap-1.5 text-xs text-faint sm:inline-flex">
-              <Kbd>⌘ ↵</Kbd> to post
+              <Kbd>⌘ ↵</Kbd> {m.newpost_to_post()}
             </span>
           </div>
-          <LoadingButton className="brand-cta" onAction={submit} pendingLabel="Posting" onError={(err) => toast.error(err instanceof Error ? err.message : "Could not post")}>
-            Post idea
+          <LoadingButton className="brand-cta" onAction={submit} pendingLabel={m.newpost_posting()} onError={(err) => toast.error(err instanceof Error ? err.message : m.newpost_failed())}>
+            {m.board_post_idea()}
           </LoadingButton>
         </div>
       </DialogContent>
