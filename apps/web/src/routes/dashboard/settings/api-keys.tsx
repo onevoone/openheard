@@ -133,9 +133,17 @@ function apiOrigin(scope: Scope, rootDomain: string | null) {
   return origin;
 }
 
-// What an agent does once connected. Step 1 differs per agent.
+// What an agent does once connected. Step 1 differs per agent. This text is
+// pasted into an AI coding agent, not read by the visitor, so it stays English
+// in every language, like the tool names it mentions (the MCP server is English too).
 function setupPrompt(connect: string, scope: Scope) {
-  return m.settings_keys_prompt({ connect, step2: scope === "account" ? m.settings_keys_prompt_account() : m.settings_keys_prompt_workspace() });
+  return `Connect openheard, our feedback board, and set it up for this project.
+
+1. ${connect}
+   If the openheard tools do not show up yet, tell me to restart you, then continue from step 2.
+2. ${scope === "account" ? "Call list_workspaces. This key reaches every workspace I run. If there is more than one, ask me which to use for this project and pass it as workspace on every call; create_workspace can make a new one." : "Call get_workspace to check the connection."}
+3. Set it up: ask me for our website, then match_website and apply_branding. Suggest boards and statuses and create the ones I agree to. configure_widget to match our brand. get_widget_snippet for this codebase's framework and add it once to the root layout; show me the diff.
+4. Ask me before anything public or emailed, and never write this key into a committed file.`;
 }
 
 // Connecting an agent, per agent. A new key fills in here and is shown once.
@@ -190,7 +198,7 @@ function Connect({ fresh, scope, rootDomain, onDone }: { fresh: string | null; s
       <div className="flex flex-col gap-4 px-4 py-3.5">
         {agent === "claude" ? (
           <>
-            <CopyBlock label={m.settings_keys_claude_send()} help={m.settings_keys_claude_send_help()} text={setupPrompt(m.settings_keys_prompt_claude({ command: claudeCommand }), scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_claude_send()} help={m.settings_keys_claude_send_help()} text={setupPrompt(`Add the openheard MCP server: run  ${claudeCommand}`, scope)} disabled={off} />
             <CopyBlock label={m.settings_keys_claude_manual()} help={m.settings_keys_claude_manual_help()} text={claudeCommand} disabled={off} />
           </>
         ) : null}
@@ -205,20 +213,20 @@ function Connect({ fresh, scope, rootDomain, onDone }: { fresh: string | null; s
                 <CursorLogo className="size-3.5" /> {m.settings_keys_cursor_add()}
               </Button>
             </div>
-            <CopyBlock label={m.settings_keys_cursor_send()} help={m.settings_keys_cursor_send_help()} text={setupPrompt(m.settings_keys_prompt_cursor(), scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_cursor_send()} help={m.settings_keys_cursor_send_help()} text={setupPrompt("The openheard MCP server is installed in Cursor. Check its tools are available.", scope)} disabled={off} />
           </>
         ) : null}
         {agent === "codex" ? (
           <>
             <CopyBlock label={m.settings_keys_codex_config()} help={m.settings_keys_codex_config_help()} text={codexConfig} disabled={off} />
-            <CopyBlock label={m.settings_keys_codex_send()} help={m.settings_keys_codex_send_help()} text={setupPrompt(m.settings_keys_prompt_codex(), scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_codex_send()} help={m.settings_keys_codex_send_help()} text={setupPrompt("The openheard MCP server is in ~/.codex/config.toml. Check its tools are available.", scope)} disabled={off} />
           </>
         ) : null}
         {agent === "other" ? (
           <>
             <CopyBlock label={m.settings_keys_other_url()} help={m.settings_keys_other_url_help()} text={url} />
             <CopyBlock label={m.settings_keys_other_header()} help={m.settings_keys_other_header_help()} text={header} disabled={off} />
-            <CopyBlock label={m.settings_keys_other_send()} help={m.settings_keys_other_send_help()} text={setupPrompt(m.settings_keys_prompt_other({ url, header }), scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_other_send()} help={m.settings_keys_other_send_help()} text={setupPrompt(`Add an HTTP MCP server named openheard with URL ${url} and the header ${header}`, scope)} disabled={off} />
           </>
         ) : null}
         {fresh ? <CopyBlock label={m.settings_keys_key_label()} help={m.settings_keys_key_help()} text={fresh} /> : null}
