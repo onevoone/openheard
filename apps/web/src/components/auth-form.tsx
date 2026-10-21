@@ -7,6 +7,7 @@ import { cn } from "@openheard/ui/lib/utils";
 import { Button } from "@openheard/ui/components/button";
 import { GoogleIcon } from "@/components/icons";
 import { authClient } from "@/lib/auth-client";
+import { type AuthClientError, authErrorMessage } from "@/lib/auth-errors";
 
 function Field({ icon, children, invalid }: { icon: React.ReactNode; children: React.ReactNode; invalid?: boolean }) {
   return (
@@ -40,8 +41,8 @@ export function AuthForm({
   const [error, setError] = useState("");
   const [magicSent, setMagicSent] = useState(false);
 
-  function onError(err: { error: { message?: string; statusText: string } }) {
-    setError(err.error.message || err.error.statusText);
+  function onError(err: AuthClientError) {
+    setError(authErrorMessage(err));
     setBusy(false);
   }
 

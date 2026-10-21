@@ -2,6 +2,7 @@ import { m } from "@openheard/i18n/messages";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
 import Loader from "./components/loader";
+import { ErrorState } from "./components/states";
 import { registerClientLocaleStrategy } from "./lib/locale-client";
 import { routeTree } from "./routeTree.gen";
 
@@ -20,6 +21,7 @@ export const getRouter = () => {
     defaultViewTransition: true,
     context: { user: null },
     defaultPendingComponent: () => <Loader />,
+    defaultErrorComponent: ({ error }) => <ErrorState message={(error as Error)?.message} />,
     defaultNotFoundComponent: () => (
       <main className="mx-auto max-w-3xl px-8 py-24 text-center">
         <h1 className="text-xl font-semibold">{m.not_found_title()}</h1>

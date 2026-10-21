@@ -1,4 +1,5 @@
-import { localeFromRequest } from "@openheard/i18n/locales";
+import { BASE_LOCALE, localeFromRequest } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { paraglideMiddleware } from "@openheard/i18n/server";
 import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/server";
 import { edgeCacheKey, hasSessionCookie, isImmutableAsset, isPrivatePath, isPublicCacheable } from "./lib/cache";
@@ -164,7 +165,8 @@ function bounded(request: Request, url: URL): Promise<Response> {
   return new Promise<Response>((resolve, reject) => {
     const timer = setTimeout(() => {
       console.error(`request timeout: ${request.method} ${url.host}${url.pathname}`);
-      resolve(new Response("Service temporarily unavailable", {
+      // Outside the middleware, so the language comes from the request itself.
+      resolve(new Response(m.err_service_unavailable({}, { locale: localeFromRequest(request) ?? BASE_LOCALE }), {
         status: 503,
         headers: { "content-type": "text/plain" },
       }));
