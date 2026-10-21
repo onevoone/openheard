@@ -3,6 +3,7 @@ import { Link, useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion, useScroll } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { cn } from "@openheard/ui/lib/utils";
 import { DEMO_WORKSPACE_ID } from "@/lib/demo";
@@ -15,11 +16,11 @@ import { Framed, SectionHeader } from "./shared";
 
 export const GITHUB = "https://github.com/Heilonng23/openheard";
 
-const links = [
-  { href: "#product", label: "Product" },
-  { href: "#agents", label: "Agents" },
-  { href: "#own", label: "Self-host" },
-  { href: "#pricing", label: "Pricing" },
+const links = () => [
+  { href: "#product", label: m.landing_nav_product() },
+  { href: "#agents", label: m.landing_nav_agents() },
+  { href: "#own", label: m.landing_nav_selfhost() },
+  { href: "#pricing", label: m.landing_nav_pricing() },
   { href: GITHUB, label: "GitHub" },
 ];
 
@@ -36,7 +37,8 @@ export function Nav() {
     if (root?.user) return "/new";
     return "/start";
   }, [root, own]);
-  const cta = root?.user ? "Go to dashboard" : "Start for free";
+  const cta = root?.user ? m.landing_cta_dashboard() : m.landing_cta_start();
+  const navLinks = links();
 
   useEffect(() => {
     if (drawerOpen) document.body.style.overflow = "hidden";
@@ -54,7 +56,7 @@ export function Nav() {
               openheard
             </Link>
             <nav className="hidden items-center gap-1 md:flex">
-              {links.map((n) => (
+              {navLinks.map((n) => (
                 <a key={n.label} href={n.href} className="rounded-full px-3 py-1.5 text-[14px] text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground">
                   {n.label}
                 </a>
@@ -64,7 +66,7 @@ export function Nav() {
               <Button variant="secondary" size="sm" nativeButton={false} render={ctaHref.startsWith("/") ? <Link to={ctaHref} /> : <a href={ctaHref} />} className="hidden sm:inline-flex">
                 {cta}
               </Button>
-              <button type="button" onClick={() => setDrawerOpen((o) => !o)} className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-border md:hidden" aria-label="Menu">
+              <button type="button" onClick={() => setDrawerOpen((o) => !o)} className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-border md:hidden" aria-label={m.landing_nav_menu()}>
                 {drawerOpen ? <XIcon className="size-5" /> : <ListIcon className="size-5" />}
               </button>
             </div>
@@ -83,12 +85,12 @@ export function Nav() {
                     <Logo size={26} />
                     openheard
                   </Link>
-                  <button type="button" onClick={() => setDrawerOpen(false)} className="cursor-pointer rounded-md border border-border p-1" aria-label="Close menu">
+                  <button type="button" onClick={() => setDrawerOpen(false)} className="cursor-pointer rounded-md border border-border p-1" aria-label={m.landing_nav_close()}>
                     <XIcon className="size-5" />
                   </button>
                 </div>
                 <ul className="flex flex-col rounded-md border border-border text-sm">
-                  {links.map((n) => (
+                  {navLinks.map((n) => (
                     <li key={n.label} className="border-b border-border p-2.5 last:border-b-0">
                       <a href={n.href} onClick={(e) => { setDrawerOpen(false); if (!n.href.startsWith("#")) return; e.preventDefault(); document.getElementById(n.href.substring(1))?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); }} className="text-muted-foreground transition-colors hover:text-foreground">
                         {n.label}
@@ -127,7 +129,7 @@ function DemoButton() {
   if (href === "/demo") return null;
   return (
     <Button size="lg" variant="secondary" nativeButton={false} render={<a href={href} />}>
-      Try the demo
+      {m.landing_hero_demo()}
     </Button>
   );
 }
@@ -142,22 +144,22 @@ export function Hero() {
         <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-8 pt-24 md:gap-10 md:pt-32">
           <div className="flex flex-col items-center justify-center gap-5">
             <BlurFade delay={0}>
-              <h1 className="text-center text-[28px] font-medium tracking-tighter text-balance sm:text-4xl md:text-5xl lg:text-6xl xl:text-[68px] xl:leading-[1.02]">The open source Canny alternative</h1>
+              <h1 className="text-center text-[28px] font-medium tracking-tighter text-balance sm:text-4xl md:text-5xl lg:text-6xl xl:text-[68px] xl:leading-[1.02]">{m.landing_hero_title()}</h1>
             </BlurFade>
             <BlurFade delay={0.08}>
-              <p className="max-w-[54ch] text-center text-base leading-relaxed font-medium tracking-tight text-balance text-muted-foreground md:text-lg">Users post and vote. Your agents read the top requests, move the roadmap and draft the changelog. Self-host on your own Cloudflare account, or use the cloud.</p>
+              <p className="max-w-[54ch] text-center text-base leading-relaxed font-medium tracking-tight text-balance text-muted-foreground md:text-lg">{m.landing_hero_sub()}</p>
             </BlurFade>
           </div>
           <BlurFade delay={0.16}>
             <div className="flex flex-col items-center gap-6">
               <div className="flex items-center justify-center gap-3">
                 <Button size="lg" arrow nativeButton={false} render={<Link to="/start" />}>
-                  Get started
+                  {m.landing_hero_start()}
                 </Button>
                 <DemoButton />
               </div>
               <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-                <span className="text-xs font-medium text-muted-foreground">Works with</span>
+                <span className="text-xs font-medium text-muted-foreground">{m.landing_hero_works_with()}</span>
                 {agents.map(([name, mark]) => (
                   <span key={name} className="inline-flex items-center gap-2 text-[13px] text-muted-foreground">
                     <span aria-hidden className="size-3.5 shrink-0 bg-current [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]" style={{ maskImage: `url(/landing/logos/${mark}.svg)` }} />
@@ -179,7 +181,7 @@ export function Hero() {
           </div>
           <picture>
             <source srcSet="/landing/board.webp" type="image/webp" />
-            <img src="/landing/board.png" alt="The openheard public board: a list of feature requests with vote counts" width={1920} height={1080} className="block aspect-[4/3] w-full object-cover object-top sm:aspect-[1920/1000]" fetchPriority="high" />
+            <img src="/landing/board.png" alt={m.landing_hero_shot_alt()} width={1920} height={1080} className="block aspect-[4/3] w-full object-cover object-top sm:aspect-[1920/1000]" fetchPriority="high" />
           </picture>
           <BorderBeam size={260} duration={10} colorFrom="#6e8bff" colorTo="#6e8bff00" />
         </div>
@@ -189,20 +191,20 @@ export function Hero() {
   );
 }
 
-const bullets = [
-  ["Ask in plain English", "“What are the five most-voted requests that are still open?”"],
-  ["Act, not just read", "Move a post to Planned, merge duplicates, reply to a voter."],
-  ["Draft the changelog", "Closed posts become a ready-to-edit entry. Followers get an email on publish."],
-  ["Your keys, your scope", "One key reaches every workspace you administer, or limit it to one. Hashed, shown once, revoke any time."],
+const bullets = () => [
+  [m.landing_agents_ask_title(), m.landing_agents_ask_text()],
+  [m.landing_agents_act_title(), m.landing_agents_act_text()],
+  [m.landing_agents_draft_title(), m.landing_agents_draft_text()],
+  [m.landing_agents_keys_title(), m.landing_agents_keys_text()],
 ];
 
 export function Agents() {
   return (
     <Framed id="agents">
-      <SectionHeader title="Run it through the agent you already use." sub="An MCP server and an HTTP API ship with it. Connect Claude Code, Cursor or Codex from the API keys page, then triage feedback, update the roadmap and draft the changelog from where you already work." />
+      <SectionHeader title={m.landing_agents_title()} sub={m.landing_agents_sub()} />
       <div className="grid md:grid-cols-[380px_1fr]">
         <dl className="flex flex-col gap-6 border-b border-border p-6 md:border-r md:border-b-0">
-          {bullets.map(([t, d]) => (
+          {bullets().map(([t, d]) => (
             <div key={t}>
               <dt className="text-[15px] font-medium">{t}</dt>
               <dd className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{d}</dd>
@@ -211,14 +213,14 @@ export function Agents() {
         </dl>
         <div className="min-w-0 p-6">
           <Terminal title="claude — openheard-mcp" className="min-h-[320px] md:min-h-[400px]">
-            <TypingAnimation delay={300}>› Publish a changelog for what shipped this week. Keep it concise.</TypingAnimation>
-            <AnimatedSpan delay={2400} className="text-muted-foreground">● I&apos;ll pull this week&apos;s shipped posts, draft an entry and show it before publishing.</AnimatedSpan>
-            <AnimatedSpan delay={3000} className="pl-4 text-link">└ openheard.list_posts status=shipped sort=new → 4 posts</AnimatedSpan>
-            <AnimatedSpan delay={3500} className="pl-4 text-link">└ openheard.draft_changelog → draft ready, 3 linked posts</AnimatedSpan>
-            <AnimatedSpan delay={4100} className="text-muted-foreground">● Draft: “Dark mode for the widget, merge without losing votes, Slack status alerts.”</AnimatedSpan>
-            <TypingAnimation delay={4800}>› Looks good. Publish and email the followers.</TypingAnimation>
-            <AnimatedSpan delay={6400} className="pl-4 text-status-shipped">└ openheard.publish_changelog → published, 128 followers emailed</AnimatedSpan>
-            <AnimatedSpan delay={7000} className="text-muted-foreground">● Done. Live at acme.openheard.com/changelog/this-week</AnimatedSpan>
+            <TypingAnimation delay={300}>{`› ${m.landing_agents_term_1()}`}</TypingAnimation>
+            <AnimatedSpan delay={2400} className="text-muted-foreground">{`● ${m.landing_agents_term_2()}`}</AnimatedSpan>
+            <AnimatedSpan delay={3000} className="pl-4 text-link">{`└ openheard.list_posts status=shipped sort=new ${m.landing_agents_term_3()}`}</AnimatedSpan>
+            <AnimatedSpan delay={3500} className="pl-4 text-link">{`└ openheard.draft_changelog ${m.landing_agents_term_4()}`}</AnimatedSpan>
+            <AnimatedSpan delay={4100} className="text-muted-foreground">{`● ${m.landing_agents_term_5()}`}</AnimatedSpan>
+            <TypingAnimation delay={4800}>{`› ${m.landing_agents_term_6()}`}</TypingAnimation>
+            <AnimatedSpan delay={6400} className="pl-4 text-status-shipped">{`└ openheard.publish_changelog ${m.landing_agents_term_7()}`}</AnimatedSpan>
+            <AnimatedSpan delay={7000} className="text-muted-foreground">{`● ${m.landing_agents_term_8({ url: "acme.openheard.com/changelog/this-week" })}`}</AnimatedSpan>
           </Terminal>
         </div>
       </div>

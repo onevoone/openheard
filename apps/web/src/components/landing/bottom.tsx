@@ -3,9 +3,11 @@ import { Link } from "@tanstack/react-router";
 import { useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { cn } from "@openheard/ui/lib/utils";
 import { Collapsible } from "../collapsible";
+import { LanguageSwitch } from "../language-switch";
 import Logo from "../logo";
 import { AnimatedList } from "./magic/animated-list";
 import { BlurFade } from "./magic/blur-fade";
@@ -16,11 +18,11 @@ import { GITHUB } from "./top";
 
 /* ---------------------------------------------------------------- product */
 
-const products = [
-  { id: "board", eyebrow: "Board", title: "A board users actually use.", sub: "Post, vote, comment. Duplicates merge without losing votes. Keyboard first, one accent colour, no clutter.", points: ["Several boards, posts held for approval if you want", "One vote per user, anonymous voting optional", "Tags, search, trending and top sorts"], shot: "/landing/board.png", alt: "Public feedback board showing feature requests ranked by votes", center: true },
-  { id: "roadmap", eyebrow: "Roadmap", title: "A roadmap that stays honest.", sub: "Statuses are data. Drag a card in the dashboard and the public roadmap, the board and the changelog all agree.", points: ["Columns come from your statuses", "Vote counts on every card", "Hide it until you are ready"], shot: "/landing/dashboard-roadmap.png", alt: "Dashboard roadmap view with kanban columns for Planned, In Progress and Shipped", center: false },
-  { id: "changelog", eyebrow: "Changelog", title: "Close the loop.", sub: "Write what shipped, link the posts, publish. People who voted or commented get an email. RSS for the rest.", points: ["Entries link back to the requests", "Followers emailed on publish", "RSS feed, version tags, drafts"], shot: "/landing/changelog.png", alt: "Changelog page with published entries linked to shipped requests", center: true },
-  { id: "dashboard", eyebrow: "Dashboard", title: "An inbox, not a CRM.", sub: "Every post in one list with status, board, tags and votes. Filter, pin, merge, add an internal note, move on.", points: ["Quick filters by status, board and tag", "Internal notes and reactions", "CSV import and export"], shot: "/landing/dashboard-inbox.png", alt: "Dashboard inbox showing all posts with status filters and vote counts", center: false },
+const products = () => [
+  { id: "board", eyebrow: m.landing_product_board_eyebrow(), title: m.landing_product_board_title(), sub: m.landing_product_board_sub(), points: [m.landing_product_board_point_1(), m.landing_product_board_point_2(), m.landing_product_board_point_3()], shot: "/landing/board.png", alt: m.landing_product_board_alt(), center: true },
+  { id: "roadmap", eyebrow: m.landing_product_roadmap_eyebrow(), title: m.landing_product_roadmap_title(), sub: m.landing_product_roadmap_sub(), points: [m.landing_product_roadmap_point_1(), m.landing_product_roadmap_point_2(), m.landing_product_roadmap_point_3()], shot: "/landing/dashboard-roadmap.png", alt: m.landing_product_roadmap_alt(), center: false },
+  { id: "changelog", eyebrow: m.landing_product_changelog_eyebrow(), title: m.landing_product_changelog_title(), sub: m.landing_product_changelog_sub(), points: [m.landing_product_changelog_point_1(), m.landing_product_changelog_point_2(), m.landing_product_changelog_point_3()], shot: "/landing/changelog.png", alt: m.landing_product_changelog_alt(), center: true },
+  { id: "dashboard", eyebrow: m.landing_product_dashboard_eyebrow(), title: m.landing_product_dashboard_title(), sub: m.landing_product_dashboard_sub(), points: [m.landing_product_dashboard_point_1(), m.landing_product_dashboard_point_2(), m.landing_product_dashboard_point_3()], shot: "/landing/dashboard-inbox.png", alt: m.landing_product_dashboard_alt(), center: false },
 ];
 
 // Template growth section: Framed, SectionHeader, then a 2-col grid with
@@ -28,8 +30,8 @@ const products = [
 export function Products() {
   return (
     <Framed id="product">
-      <SectionHeader title="Post. Vote. Ship. Tell them." sub="Four screens. Each one does its job and stays out of the way." />
-      {products.map((p, i) => (
+      <SectionHeader title={m.landing_products_title()} sub={m.landing_products_sub()} />
+      {products().map((p, i) => (
         <div key={p.id} className={cn("grid divide-y divide-border border-b border-border last:border-b-0 md:grid-cols-2 md:divide-x md:divide-y-0", i % 2 === 1 && "md:divide-x-reverse md:[&>*:first-child]:order-2")}>
           <div className="flex flex-col justify-center gap-2 p-6">
             <Eyebrow className="mb-1">{p.eyebrow}</Eyebrow>
@@ -57,19 +59,19 @@ export function Products() {
 
 /* ------------------------------------------------------------------ bento */
 
-const inboxRows = [
-  { title: "Dark mode for the embedded widget", meta: "In progress · Mara Lindqvist · 2d", votes: 128, hot: true },
-  { title: "Merge duplicate posts without losing votes", meta: "Planned · Tomás Ferreira · 5d", votes: 86 },
-  { title: "Sync planned posts with GitHub issues", meta: "Under review · Aiko Tanaka · 1w", votes: 47 },
-  { title: "Custom fields on the post form", meta: "Devraj Patel · 1w", votes: 41 },
+const inboxRows = () => [
+  { title: m.landing_demo_post_dark(), meta: [m.landing_status_progress(), "Mara Lindqvist", m.landing_bento_ago_2d()], votes: 128, hot: true },
+  { title: m.landing_bento_row_2_title(), meta: [m.landing_status_planned(), "Tomás Ferreira", m.landing_bento_ago_5d()], votes: 86 },
+  { title: m.landing_bento_row_3_title(), meta: [m.landing_status_review(), "Aiko Tanaka", m.landing_bento_ago_1w()], votes: 47 },
+  { title: m.landing_bento_row_4_title(), meta: ["Devraj Patel", m.landing_bento_ago_1w()], votes: 41 },
 ];
 
-function PostRow({ title, meta, votes, hot }: (typeof inboxRows)[number]) {
+function PostRow({ title, meta, votes, hot }: ReturnType<typeof inboxRows>[number]) {
   return (
     <div className={cn("flex w-full items-center gap-4 rounded-xl border px-5 py-4", hot ? "border-input bg-secondary" : "border-border bg-card")}>
       <div className="min-w-0 flex-1">
         <div className="truncate text-[15px] font-medium">{title}</div>
-        <div className="mt-1 text-[12px] text-faint">{meta}</div>
+        <div className="mt-1 text-[12px] text-faint">{meta.join(" · ")}</div>
       </div>
       <div className={cn("flex w-12 shrink-0 flex-col items-center rounded-lg py-1.5 text-[14px] font-medium tabular-nums", hot ? "bg-link text-white" : "border border-input bg-accent text-foreground")}>
         <CaretUpIcon weight="bold" className="size-3" />
@@ -79,10 +81,10 @@ function PostRow({ title, meta, votes, hot }: (typeof inboxRows)[number]) {
   );
 }
 
-const columns = [
-  ["Planned", "bg-status-planned", ["GitHub sync", "SAML sign-in"]],
-  ["In progress", "bg-status-progress", ["Merge duplicates"]],
-  ["Shipped", "bg-status-shipped", ["Dark mode widget"]],
+const columns = () => [
+  [m.landing_status_planned(), "bg-status-planned", [[m.landing_bento_card_github(), 77], [m.landing_bento_card_saml(), 84]]],
+  [m.landing_status_progress(), "bg-status-progress", [[m.landing_bento_card_merge(), 112]]],
+  [m.landing_status_shipped(), "bg-status-shipped", [[m.landing_bento_card_dark(), 112]]],
 ] as const;
 
 // Template bento: Framed, SectionHeader, grid md:grid-cols-2 overflow-hidden,
@@ -91,29 +93,29 @@ const columns = [
 export function Bento() {
   return (
     <Framed>
-      <SectionHeader title="Small tool. Whole loop." sub="Four things a feedback board has to get right. Nothing else." />
+      <SectionHeader title={m.landing_bento_title()} sub={m.landing_bento_sub()} />
       <div className="grid grid-cols-1 overflow-hidden md:grid-cols-2">
-        <Cell title="Votes that rank the inbox" desc="One vote per user, no anonymous pile-ons unless you allow it. The board sorts itself.">
+        <Cell title={m.landing_bento_votes_title()} desc={m.landing_bento_votes_desc()}>
           <div className="relative w-full max-w-[440px]">
             <AnimatedList delay={1600} className="w-full">
-              {inboxRows.map((r) => (
+              {inboxRows().map((r) => (
                 <PostRow key={r.title} {...r} />
               ))}
             </AnimatedList>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-background to-transparent" />
           </div>
         </Cell>
-        <Cell title="Close the loop" desc="Publish what shipped, link the posts, and the people who asked get an email. That is the whole point.">
+        <Cell title={m.landing_bento_loop_title()} desc={m.landing_bento_loop_desc()}>
           <div className="w-full max-w-[440px] rounded-xl border border-border bg-card p-5">
             <div className="flex items-center gap-2.5">
               <span className="grid size-5 place-items-center rounded-full bg-status-shipped text-[#0d0d0f]">
                 <CheckIcon weight="bold" className="size-3" />
               </span>
-              <span className="text-[15px] font-medium">This week: widget dark mode, merge, Slack alerts</span>
+              <span className="text-[15px] font-medium">{m.landing_bento_loop_entry()}</span>
             </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">Three shipped requests, 268 votes between them. Linked below.</p>
+            <p className="mt-3 text-[13px] leading-relaxed text-muted-foreground">{m.landing_bento_loop_entry_text()}</p>
             <div className="mt-3 flex gap-2">
-              {["Dark mode", "Merge", "Slack"].map((t) => (
+              {[m.landing_bento_loop_tag_dark(), m.landing_bento_loop_tag_merge(), "Slack"].map((t) => (
                 <span key={t} className="rounded-md border border-border bg-background px-2 py-0.5 text-[12px] text-muted-foreground">
                   {t}
                 </span>
@@ -121,35 +123,35 @@ export function Bento() {
             </div>
             <div className="mt-4 flex items-center gap-2 border-t border-border pt-3 text-[12px] text-status-shipped">
               <PaperPlaneTiltIcon className="size-3.5" />
-              Published · 128 followers emailed
+              {m.landing_bento_loop_published()}
             </div>
           </div>
         </Cell>
-        <Cell title="A roadmap that stays honest" desc="Statuses are data. Drag a card and the board, the roadmap and the changelog agree.">
+        <Cell title={m.landing_bento_roadmap_title()} desc={m.landing_bento_roadmap_desc()}>
           <div className="grid w-full max-w-[480px] grid-cols-3 gap-2 md:gap-3">
-            {columns.map(([name, dot, cards]) => (
+            {columns().map(([name, dot, cards], col) => (
               <div key={name} className="flex flex-col gap-2">
                 <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground md:gap-2 md:text-[12px]">
                   <span className={cn("size-2 rounded-full", dot)} />
                   {name}
                 </div>
-                {cards.map((c) => (
-                  <div key={c} className={cn("rounded-lg border bg-card p-2 text-[12px] font-medium md:p-3 md:text-[13px]", name === "Shipped" ? "border-status-shipped/60" : "border-border")}>
+                {cards.map(([c, votes]) => (
+                  <div key={c} className={cn("rounded-lg border bg-card p-2 text-[12px] font-medium md:p-3 md:text-[13px]", col === 2 ? "border-status-shipped/60" : "border-border")}>
                     {c}
-                    <div className="mt-1 text-[10px] font-normal text-faint tabular-nums md:mt-1.5 md:text-[11px]">▲ {c.length * 7}</div>
+                    <div className="mt-1 text-[10px] font-normal text-faint tabular-nums md:mt-1.5 md:text-[11px]">▲ {votes}</div>
                   </div>
                 ))}
               </div>
             ))}
           </div>
         </Cell>
-        <Cell title="Ask it from Claude or Cursor" desc="API keys, an HTTP API and an MCP server. Your agent reads the top requests before you plan a sprint.">
+        <Cell title={m.landing_bento_agent_title()} desc={m.landing_bento_agent_desc()}>
           <Terminal title="claude" className="max-w-[440px]">
-            <TypingAnimation delay={200}>› What are the top open requests?</TypingAnimation>
+            <TypingAnimation delay={200}>{`› ${m.landing_bento_term_ask()}`}</TypingAnimation>
             <AnimatedSpan delay={1800} className="pl-4 text-link">└ openheard.list_posts sort=top status=open</AnimatedSpan>
-            <AnimatedSpan delay={2300} className="text-muted-foreground">● 1. Dark mode for the widget · 128</AnimatedSpan>
-            <AnimatedSpan delay={2600} className="text-muted-foreground">● 2. Merge duplicates · 86</AnimatedSpan>
-            <AnimatedSpan delay={2900} className="text-muted-foreground">● 3. GitHub issue sync · 47</AnimatedSpan>
+            <AnimatedSpan delay={2300} className="text-muted-foreground">{`● 1. ${m.landing_bento_term_top_1()} · 128`}</AnimatedSpan>
+            <AnimatedSpan delay={2600} className="text-muted-foreground">{`● 2. ${m.landing_bento_term_top_2()} · 86`}</AnimatedSpan>
+            <AnimatedSpan delay={2900} className="text-muted-foreground">{`● 3. ${m.landing_bento_term_top_3()} · 47`}</AnimatedSpan>
           </Terminal>
         </Cell>
       </div>
@@ -171,29 +173,30 @@ function Cell({ title, desc, children }: { title: string; desc: string; children
 
 /* ------------------------------------------------------------------- loop */
 
-const moments = [
-  ["01", "Post", "Whoever posts follows the request from the first minute."],
-  ["02", "Vote", "Voting or commenting follows it too. Status changes reach all of them."],
-  ["03", "Ship", "The changelog entry links the request. Followers get the email."],
-  ["04", "Return", "Changelog subscribers and the RSS feed hear about every release."],
+const moments = () => [
+  ["01", m.landing_loop_post_title(), m.landing_loop_post_text()],
+  ["02", m.landing_loop_vote_title(), m.landing_loop_vote_text()],
+  ["03", m.landing_loop_ship_title(), m.landing_loop_ship_text()],
+  ["04", m.landing_loop_return_title(), m.landing_loop_return_text()],
 ];
 
 export function Loop() {
+  const steps = moments();
   return (
     <Framed>
       <div className="grid divide-y divide-border md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:divide-x md:divide-y-0">
         <div className="flex flex-col gap-4 p-6">
-          <Eyebrow>The loop</Eyebrow>
-          <h2 className="max-w-[20ch] text-3xl font-medium tracking-tighter text-balance md:text-4xl">Feedback tools go quiet after collection.</h2>
+          <Eyebrow>{m.landing_loop_eyebrow()}</Eyebrow>
+          <h2 className="max-w-[20ch] text-3xl font-medium tracking-tighter text-balance md:text-4xl">{m.landing_loop_title()}</h2>
           <div className="flex max-w-[60ch] flex-col gap-4 leading-relaxed text-pretty text-muted-foreground">
-            <p>A user writes an idea, it lands in a dashboard, and that is the last they hear. openheard treats every post as the start of a loop, not the end of one.</p>
-            <p>Post, vote or comment and you follow the request. When it moves to Planned, you get an email. When it ships, you get the changelog entry that says so, with your request linked. One click unsubscribes.</p>
-            <p>Status emails are on by default for verified accounts. Turn the board on and the loop runs the same day.</p>
+            <p>{m.landing_loop_p1()}</p>
+            <p>{m.landing_loop_p2()}</p>
+            <p>{m.landing_loop_p3()}</p>
           </div>
         </div>
         <div className="flex flex-col p-6" role="list">
-          {moments.map(([n, t, d], i) => (
-            <div key={n} role="listitem" className={cn("flex gap-5 py-5 first:pt-0 last:pb-0", i < moments.length - 1 && "border-b border-border")}>
+          {steps.map(([n, t, d], i) => (
+            <div key={n} role="listitem" className={cn("flex gap-5 py-5 first:pt-0 last:pb-0", i < steps.length - 1 && "border-b border-border")}>
               <span className="pt-0.5 text-[13px] text-link tabular-nums">{n}</span>
               <div>
                 <p className="text-[16px] font-medium">{t}</p>
@@ -209,12 +212,13 @@ export function Loop() {
 
 /* ------------------------------------------------------------------- own */
 
-const own = [
-  ["Two commands on Cloudflare", "A Worker, D1, KV and an R2 bucket, all on the free tier. Point a domain at it and you have a board."],
-  ["Cloudflare and nothing else", "No Postgres, no Redis, no queue. One Worker and its storage, on your domain."],
-  ["AGPL-3, fork it", "Read every line. Change what you want. Running it for your own users is always free."],
-  ["Cloud when you want it", "Same code, we host it. Move between the two with a CSV."],
+const own = () => [
+  [m.landing_own_cloudflare_title(), m.landing_own_cloudflare_text()],
+  [m.landing_own_nothing_title(), m.landing_own_nothing_text()],
+  [m.landing_own_agpl_title(), m.landing_own_agpl_text()],
+  [m.landing_own_cloud_title(), m.landing_own_cloud_text()],
 ];
+const OWN_COUNT = 4;
 
 const OWN_ADVANCE_MS = 5000;
 
@@ -227,7 +231,7 @@ export function Own() {
   const reduce = useReducedMotion();
 
   const advance = useCallback(() => {
-    setActive((i) => (i + 1) % own.length);
+    setActive((i) => (i + 1) % OWN_COUNT);
     setProgress(0);
     startRef.current = Date.now();
   }, []);
@@ -263,10 +267,10 @@ export function Own() {
 
   return (
     <section id="own" className="relative flex w-full scroll-mt-16 flex-col items-center justify-center gap-5">
-      <SectionHeader title="Self-host is not a trial. It is the full product, forever." />
+      <SectionHeader title={m.landing_own_title()} />
       <div className="grid w-full items-center gap-6 px-4 pb-10 md:grid-cols-[400px_1fr] md:gap-10 md:px-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
         <div className="flex flex-col">
-          {own.map(([t, d], i) => (
+          {own().map(([t, d], i) => (
             <button key={t} type="button" onClick={() => select(i)} className={cn("relative flex flex-col gap-1 overflow-hidden rounded-lg px-4 py-3 text-left transition-colors md:px-5 md:py-4", active === i ? "bg-secondary/60" : "hover:bg-accent/40")}>
               {active === i && (
                 <div className="absolute inset-y-0 left-0 w-0.5 rounded-full bg-link" style={{ height: `${progress * 100}%`, transition: paused ? "none" : undefined }} />
@@ -281,10 +285,10 @@ export function Own() {
         <Terminal title="zsh — ~/openheard" className="min-h-[280px] md:min-h-[320px]">
           <TypingAnimation delay={200}>$ cd packages/infra && bunx alchemy login --configure</TypingAnimation>
           <TypingAnimation delay={2600}>$ bun run deploy</TypingAnimation>
-          <AnimatedSpan delay={4200} className="pl-4 text-status-shipped">✓ Worker, KV and R2 bucket created</AnimatedSpan>
-          <AnimatedSpan delay={4700} className="pl-4 text-status-shipped">✓ D1 database migrated (28 tables)</AnimatedSpan>
+          <AnimatedSpan delay={4200} className="pl-4 text-status-shipped">{`✓ ${m.landing_own_term_created()}`}</AnimatedSpan>
+          <AnimatedSpan delay={4700} className="pl-4 text-status-shipped">{`✓ ${m.landing_own_term_migrated()}`}</AnimatedSpan>
           <AnimatedSpan delay={5300} className="pl-4 text-link">→ https://openheard.acme.workers.dev</AnimatedSpan>
-          <AnimatedSpan delay={5900} className="text-muted-foreground"># The first account to sign up becomes the admin.</AnimatedSpan>
+          <AnimatedSpan delay={5900} className="text-muted-foreground">{m.landing_own_term_admin()}</AnimatedSpan>
         </Terminal>
       </div>
     </section>
@@ -293,9 +297,9 @@ export function Own() {
 
 /* --------------------------------------------------------------- pricing */
 
-const plans = [
-  { name: "Free", price: "$0", per: "/month", desc: "The whole product. Every feature, no seat limits.", cta: "Start for free", lead: "Included", items: ["Unlimited users and votes", "2 workspaces", "Board, roadmap, changelog, help center, widget", "Email updates, Slack, Discord, webhooks", "API and MCP server", "CSV import and export"] },
-  { name: "Pro", price: "$19", per: "/month", desc: "For teams running more than one product.", cta: "Upgrade to Pro", primary: true, lead: "Everything in Free, plus", items: ["5 workspaces", "Priority support"] },
+const plans = () => [
+  { name: "Free", price: "$0", per: m.landing_pricing_per(), desc: m.landing_pricing_free_desc(), cta: m.landing_cta_start(), lead: m.landing_pricing_free_lead(), items: [m.landing_pricing_free_item_1(), m.landing_pricing_free_item_2(), m.landing_pricing_free_item_3(), m.landing_pricing_free_item_4(), m.landing_pricing_free_item_5(), m.landing_pricing_free_item_6()] },
+  { name: "Pro", price: "$19", per: m.landing_pricing_per(), desc: m.landing_pricing_pro_desc(), cta: m.landing_pricing_pro_cta(), primary: true, lead: m.landing_pricing_pro_lead(), items: [m.landing_pricing_pro_item_1(), m.landing_pricing_pro_item_2()] },
 ];
 
 // Template pricing: plain section gap-10 pb-10, SectionHeader, cards in a
@@ -303,14 +307,14 @@ const plans = [
 export function Pricing() {
   return (
     <section id="pricing" className="relative flex w-full scroll-mt-16 flex-col items-center justify-center gap-10 pb-10">
-      <SectionHeader title="Unlimited users. Every plan." sub="Every feature is on Free. Pro adds workspaces and support, never seats." />
+      <SectionHeader title={m.landing_pricing_title()} sub={m.landing_pricing_sub()} />
       <div className="mx-auto grid w-full max-w-[820px] gap-4 px-6 min-[650px]:grid-cols-2">
-        {plans.map((p) => (
+        {plans().map((p) => (
           <div key={p.name} className={cn("relative grid h-full grid-rows-[auto_auto_auto_1fr] rounded-xl border", p.primary ? "border-input bg-accent" : "border-border bg-[#f9fafb]/[0.02]")}>
             <div className="flex flex-col gap-4 p-4">
               <p className="flex h-6 items-center text-sm">
                 {p.name}
-                {p.primary ? <span className="ml-2 inline-flex h-6 w-fit items-center justify-center rounded-full bg-[#4a6ae0] px-2 text-xs font-medium text-white">Popular</span> : null}
+                {p.primary ? <span className="ml-2 inline-flex h-6 w-fit items-center justify-center rounded-full bg-[#4a6ae0] px-2 text-xs font-medium text-white">{m.landing_pricing_popular()}</span> : null}
               </p>
               <div className="mt-2 flex items-baseline">
                 <span className="text-4xl font-semibold tracking-tight tabular-nums">{p.price}</span>
@@ -341,9 +345,9 @@ export function Pricing() {
         ))}
       </div>
       <p className="px-6 text-center text-[14px] text-muted-foreground">
-        Self-hosting is free forever, no tier, no limits. AGPL-3.{" "}
+        {m.landing_pricing_note()}{" "}
         <a href="#own" className="text-foreground underline underline-offset-4">
-          Deploy on your own Cloudflare account
+          {m.landing_pricing_note_link()}
         </a>
         .
       </p>
@@ -353,13 +357,13 @@ export function Pricing() {
 
 /* ------------------------------------------------------------------- faq */
 
-const faq = [
-  ["Is it really free to self-host?", "Yes. AGPL-3 means the code is free to use, modify and deploy. Running it on your own infrastructure for your own users is always free. If you change the code and let others use it, by download or over the network, you share your changes under the same licence."],
-  ["Can I import my existing board?", "Yes. Export a CSV from your current tool and drop it into Settings. Posts, votes, authors and statuses come across in one step."],
-  ["What is the stack?", "TanStack Start, Drizzle, SQLite locally and D1 on Cloudflare, Better Auth. One Worker with D1, KV and R2. No Postgres, no Redis, no queue."],
-  ["Is there a managed cloud?", "Yes, with a free tier. Same code as self-host. Start in the cloud and move to your own account later with a CSV, or the other way round."],
-  ["What does AGPL-3 mean for me?", "Use it, change it, run it. If you distribute a modified version or offer it as a service to others, you publish your changes. Using it for your own product is not that."],
-  ["How do I contribute?", "Read CONTRIBUTING.md in the repo. Local setup is three commands and takes about two minutes."],
+const faq = () => [
+  [m.landing_faq_free_q(), m.landing_faq_free_a()],
+  [m.landing_faq_import_q(), m.landing_faq_import_a()],
+  [m.landing_faq_stack_q(), m.landing_faq_stack_a()],
+  [m.landing_faq_cloud_q(), m.landing_faq_cloud_a()],
+  [m.landing_faq_agpl_q(), m.landing_faq_agpl_a()],
+  [m.landing_faq_contribute_q(), m.landing_faq_contribute_a()],
 ];
 
 // Template FAQ: plain section gap-10 pb-10, max-w-3xl px-10, each row a
@@ -368,9 +372,9 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section id="faq" className="relative flex w-full flex-col items-center justify-center gap-10 pb-10">
-      <SectionHeader title="Frequently asked, plainly answered." sub="Everything else is in the docs and the README." />
+      <SectionHeader title={m.landing_faq_title()} sub={m.landing_faq_sub()} />
       <div className="mx-auto grid w-full max-w-3xl gap-2 px-6 md:px-10">
-        {faq.map(([q, a], i) => (
+        {faq().map(([q, a], i) => (
           <div key={q} className="grid gap-2">
             <div>
               <button type="button" onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i} className={cn("flex w-full cursor-pointer items-center justify-between gap-6 rounded-lg border border-border bg-accent px-4 py-3.5 text-left text-[15px] font-medium", open === i && "ring-2 ring-ring/20")}>
@@ -399,12 +403,12 @@ export function Closing() {
         <div className="relative z-20 h-[400px] w-full overflow-hidden rounded-xl border border-border bg-card shadow-xl">
           <div aria-hidden className="absolute inset-0 [background:radial-gradient(60%_80%_at_50%_0%,rgba(110,139,255,.28),transparent_70%)]" />
           <div className="absolute inset-0 -top-24 flex flex-col items-center justify-center md:-top-40">
-            <h2 className="max-w-xs text-center text-3xl font-medium tracking-tighter text-balance md:max-w-xl md:text-7xl">Your users have opinions.</h2>
+            <h2 className="max-w-xs text-center text-3xl font-medium tracking-tighter text-balance md:max-w-xl md:text-7xl">{m.landing_closing_title()}</h2>
             <div className="absolute bottom-10 flex flex-col items-center justify-center gap-3">
               <Button size="lg" arrow nativeButton={false} render={<Link to="/start" />}>
-                Start for free
+                {m.landing_cta_start()}
               </Button>
-              <span className="text-sm text-muted-foreground">Or self-host on your own Cloudflare account</span>
+              <span className="text-sm text-muted-foreground">{m.landing_closing_selfhost()}</span>
             </div>
           </div>
         </div>
@@ -415,10 +419,10 @@ export function Closing() {
 
 /* ---------------------------------------------------------------- footer */
 
-const footerCols = [
-  ["Product", [["Board", "#product"], ["Agents", "#agents"], ["Pricing", "#pricing"], ["Changelog", "/changelog"]]],
-  ["Open source", [["GitHub", GITHUB], ["Contributing", GITHUB + "/blob/main/CONTRIBUTING.md"], ["Security", GITHUB + "/blob/main/SECURITY.md"], ["Licence", GITHUB + "/blob/main/LICENSE"]]],
-  ["Legal", [["Privacy", "/privacy"], ["Terms", "/terms"]]],
+const footerCols = () => [
+  [m.landing_nav_product(), [[m.landing_footer_board(), "#product"], [m.landing_nav_agents(), "#agents"], [m.landing_nav_pricing(), "#pricing"], [m.landing_footer_changelog(), "/changelog"]]],
+  [m.landing_footer_opensource(), [["GitHub", GITHUB], [m.landing_footer_contributing(), GITHUB + "/blob/main/CONTRIBUTING.md"], [m.landing_footer_security(), GITHUB + "/blob/main/SECURITY.md"], [m.landing_footer_licence(), GITHUB + "/blob/main/LICENSE"]]],
+  [m.landing_footer_legal(), [[m.landing_footer_privacy(), "/privacy"], [m.landing_footer_terms(), "/terms"]]],
 ] as const;
 
 // Template footer: p-10, brand block left (max-w-xs), link columns right,
@@ -432,12 +436,13 @@ export function Footer() {
             <Logo size={30} />
             openheard
           </Link>
-          <p className="font-medium tracking-tight text-muted-foreground">Open source feedback board. Post, vote, roadmap, changelog. Self-host or cloud.</p>
+          <p className="font-medium tracking-tight text-muted-foreground">{m.landing_footer_tagline()}</p>
           <p className="text-[12px] text-muted-foreground">AGPL-3.0 · © {new Date().getFullYear()} openheard</p>
+          <LanguageSwitch className="text-[12px]" />
         </div>
         <div className="pt-5 md:w-1/2">
           <div className="flex flex-col items-start justify-start gap-y-5 md:flex-row md:items-start md:justify-between lg:pl-10">
-            {footerCols.map(([title, links]) => (
+            {footerCols().map(([title, links]) => (
               <ul key={title} role="list" className="flex flex-col gap-y-2">
                 <li className="mb-2 text-sm font-semibold">{title}</li>
                 {links.map(([label, href]) => (

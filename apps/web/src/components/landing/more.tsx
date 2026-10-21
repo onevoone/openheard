@@ -1,5 +1,6 @@
 import { CheckIcon, FileTextIcon, ImageIcon, RocketIcon, XIcon } from "@phosphor-icons/react";
 
+import { m } from "@openheard/i18n/messages";
 import { cn } from "@openheard/ui/lib/utils";
 import { BlurFade } from "./magic/blur-fade";
 import { Eyebrow, Framed, SectionHeader, Shot } from "./shared";
@@ -10,32 +11,32 @@ import { Eyebrow, Framed, SectionHeader, Shot } from "./shared";
 // the help center, and images on posts and comments. Widget leads with a real
 // screenshot; the other two are small mocks of the actual UI, like the bento.
 
-const widgetPoints = ["One script tag, about 6 KB, works on any site", "Theme, accent, launcher, position, corners and tabs", "Limit it to your own sites, sign-in tokens expire in 12 hours"];
-const helpPoints = ["Collections with icons, search, popular and related", "Readers mark an article helpful or not", "Matching articles show up before someone posts"];
-const uploadPoints = ["Paste, drop or pick up to four images", "PNG, JPEG, GIF or WebP, 5 MB each", "Click any image to open it full size"];
+const widgetPoints = () => [m.landing_surfaces_widget_point_1(), m.landing_surfaces_widget_point_2(), m.landing_surfaces_widget_point_3()];
+const helpPoints = () => [m.landing_surfaces_help_point_1(), m.landing_surfaces_help_point_2(), m.landing_surfaces_help_point_3()];
+const uploadPoints = () => [m.landing_surfaces_images_point_1(), m.landing_surfaces_images_point_2(), m.landing_surfaces_images_point_3()];
 
 export function Surfaces() {
   return (
     <Framed id="widget">
-      <SectionHeader title="Put the board inside your app." sub="A widget for feedback, the roadmap and what's new, plus a help center that answers questions before they become posts." />
+      <SectionHeader title={m.landing_surfaces_title()} sub={m.landing_surfaces_sub()} />
       <div className="grid divide-y divide-border border-b border-border md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:divide-x md:divide-y-0">
         <div className="flex flex-col justify-center gap-2 p-6">
-          <Eyebrow className="mb-1">Widget</Eyebrow>
-          <h3 className="text-lg font-semibold tracking-tighter text-balance">Feedback without leaving your product.</h3>
-          <p className="max-w-[46ch] text-pretty text-muted-foreground">Users vote, post and read the changelog from a panel in the corner. A dot on the launcher tells them something new shipped.</p>
-          <Points items={widgetPoints} />
+          <Eyebrow className="mb-1">{m.landing_surfaces_widget_eyebrow()}</Eyebrow>
+          <h3 className="text-lg font-semibold tracking-tighter text-balance">{m.landing_surfaces_widget_title()}</h3>
+          <p className="max-w-[46ch] text-pretty text-muted-foreground">{m.landing_surfaces_widget_text()}</p>
+          <Points items={widgetPoints()} />
         </div>
         <div className="overflow-hidden p-4 md:p-6">
           <BlurFade inView>
-            <Shot src="/landing/widget.png" width={1920} height={1280} alt="openheard widget open over a web app, showing the Feedback tab with posts ranked by votes" className="aspect-[3/2]" />
+            <Shot src="/landing/widget.png" width={1920} height={1280} alt={m.landing_surfaces_widget_alt()} className="aspect-[3/2]" />
           </BlurFade>
         </div>
       </div>
       <div className="grid divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
-        <Card eyebrow="Help center" title="Answer it once." sub="Write guides in markdown and publish them at /help." points={helpPoints}>
+        <Card eyebrow={m.landing_surfaces_help_eyebrow()} title={m.landing_surfaces_help_title()} sub={m.landing_surfaces_help_sub()} points={helpPoints()}>
           <HelpMock />
         </Card>
-        <Card eyebrow="Images" title="Show, don't describe." sub="Screenshots on posts and comments, from the board or the dashboard." points={uploadPoints}>
+        <Card eyebrow={m.landing_surfaces_images_eyebrow()} title={m.landing_surfaces_images_title()} sub={m.landing_surfaces_images_sub()} points={uploadPoints()}>
           <UploadMock />
         </Card>
       </div>
@@ -74,16 +75,16 @@ function Card({ eyebrow, title, sub, points, children }: { eyebrow: string; titl
 // the title, the same "From the help center" list the real dialog shows.
 function HelpMock() {
   const hits = [
-    { title: "How voting works", col: "Getting started" },
-    { title: "Post your first idea", col: "Getting started" },
+    { title: m.landing_surfaces_help_hit_1(), col: m.landing_surfaces_help_collection() },
+    { title: m.landing_surfaces_help_hit_2(), col: m.landing_surfaces_help_collection() },
   ];
   return (
     <div className="w-full max-w-[420px] rounded-xl border border-border bg-card">
       <div className="border-b border-border px-4 py-3.5 text-[15px] font-medium">
-        Let people vote more than once<span aria-hidden className="ml-px inline-block h-4 w-px translate-y-0.5 bg-foreground motion-safe:animate-pulse" />
+        {m.landing_surfaces_help_typed()}<span aria-hidden className="ml-px inline-block h-4 w-px translate-y-0.5 bg-foreground motion-safe:animate-pulse" />
       </div>
       <div className="flex flex-col gap-1 px-4 pt-2 pb-3">
-        <div className="pt-1 pb-1.5 text-xs font-medium text-muted-foreground">From the help center</div>
+        <div className="pt-1 pb-1.5 text-xs font-medium text-muted-foreground">{m.landing_surfaces_help_from()}</div>
         {hits.map((h) => (
           <div key={h.title} className="flex min-h-11 items-center gap-2.5 rounded-lg bg-secondary px-2.5 py-2 text-[13px]">
             <FileTextIcon className="size-4 shrink-0 text-faint" />
@@ -103,7 +104,7 @@ function HelpMock() {
 function UploadMock() {
   return (
     <div className="w-full max-w-[420px] rounded-xl border border-border bg-card p-4">
-      <p className="text-[14px] leading-relaxed text-muted-foreground">The export button is cut off on small screens, see the second one.</p>
+      <p className="text-[14px] leading-relaxed text-muted-foreground">{m.landing_surfaces_images_comment()}</p>
       <div className="mt-3 flex gap-2">
         <Thumb />
         <Thumb crop />
@@ -114,9 +115,9 @@ function UploadMock() {
       <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-[12px] text-faint">
         <span className="inline-flex items-center gap-1.5">
           <ImageIcon className="size-3.5 text-link" />
-          Paste or drop images
+          {m.landing_surfaces_images_drop()}
         </span>
-        <span className="tabular-nums">2 of 4</span>
+        <span className="tabular-nums">{m.landing_surfaces_images_count()}</span>
       </div>
     </div>
   );
