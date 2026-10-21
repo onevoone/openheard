@@ -3,6 +3,7 @@
 // real database rather than a stub.
 import { createClient } from "@libsql/client";
 import type { Db } from "@openheard/db";
+import { defaultStatuses } from "@openheard/db/defaults";
 import * as schema from "@openheard/db/schema/index";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
@@ -27,7 +28,7 @@ async function freshDb(): Promise<Db> {
 // A paying workspace that happens to touch the same global rows the demo seeds.
 async function seedCustomer(db: Db) {
   await db.insert(schema.workspace).values({ id: "acme", name: "Acme Inc" });
-  await db.insert(schema.status).values(schema.DEFAULT_STATUSES.map((d, i) => ({ workspaceId: "acme", ...d, position: i })));
+  await db.insert(schema.status).values(defaultStatuses("en").map((d, i) => ({ workspaceId: "acme", ...d, position: i })));
   await db.insert(schema.user).values({ id: "acme-owner", name: "Owner", email: "owner@acme.test" });
   await db.insert(schema.membership).values({ workspaceId: "acme", userId: "acme-owner", role: "admin" });
   await db.insert(schema.board).values({ id: "acme-features", workspaceId: "acme", name: "Feature requests" });

@@ -8,6 +8,7 @@ import { BURST_EASE, SPARKS } from "@/components/interior/like-burst";
 import { useValueFlash } from "@/components/interior/value-flash";
 import { toggleAnonVote, toggleVote } from "@/functions/posts";
 import { getAnonToken, getAnonVotes, setAnonVoted } from "@/lib/anon-vote";
+import { formatNumber } from "@/lib/format";
 import { openSignIn } from "@/lib/pending-action";
 import { useOptimisticVote } from "@/lib/use-optimistic-vote";
 import { cn } from "@openheard/ui/lib/utils";
@@ -20,7 +21,7 @@ const FLASH_LIFT = { type: "spring", stiffness: 380, damping: 26, mass: 0.7 } as
 const FLASH_CLEAR = { duration: 0.16, ease: [0.4, 0, 1, 1] } as const;
 const FLASH_CELL = { type: "spring", stiffness: 520, damping: 34, mass: 0.45 } as const;
 
-const fmt = (n: number) => new Intl.NumberFormat("en-US").format(n);
+const fmt = (n: number) => formatNumber(n);
 
 export function VoteButton({
   postId,

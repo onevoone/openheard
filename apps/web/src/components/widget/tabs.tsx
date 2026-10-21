@@ -6,6 +6,7 @@ import { useState } from "react";
 import { VoteButton } from "@/components/vote-button";
 import { getRoadmap } from "@/functions/posts";
 import type { listChangelog } from "@/functions/changelog";
+import { formatDate } from "@/lib/format";
 import { roadmapStatuses } from "@/lib/status";
 
 import { rowKeyDown, useLoad, useWidget } from "./context";
@@ -77,7 +78,7 @@ export function RoadmapTab() {
 export type ChangelogEntry = Awaited<ReturnType<typeof listChangelog>>[number];
 
 function shortDate(d: Date | string | number) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toLowerCase();
+  return formatDate(d).toLowerCase();
 }
 
 export function ChangelogTab({ entries, error, retry, seenAt }: { entries?: ChangelogEntry[]; error?: string; retry: () => void; seenAt: number }) {

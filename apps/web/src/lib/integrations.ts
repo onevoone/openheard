@@ -2,6 +2,8 @@
 // is pure so the settings page, the server and the tests share one copy of
 // the rules. Storage, encryption and delivery live in integration-db.ts.
 import type { IntegrationEvent, IntegrationKind } from "@openheard/db/schema/integrations";
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 
 export type { IntegrationEvent, IntegrationKind };
 
@@ -88,39 +90,40 @@ export type UrlCheck = { ok: true; url: string } | { ok: false; error: string };
 
 // `allowLocal` lets a local dev install point the plain webhook at a mock on
 // localhost. It is never true in the Worker.
-export function checkIntegrationUrl(kind: IntegrationKind, raw: string, opts: { allowLocal?: boolean } = {}): UrlCheck {
+export function checkIntegrationUrl(kind: IntegrationKind, raw: string, opts: { allowLocal?: boolean; locale?: Locale } = {}): UrlCheck {
+  const o = { locale: opts.locale };
   let u: URL;
   try {
     u = new URL(raw.trim());
   } catch {
-    return { ok: false, error: "That is not a URL" };
+    return { ok: false, error: m.err_url_invalid({}, o) };
   }
-  if (u.username || u.password) return { ok: false, error: "URLs with a username or password are not accepted" };
+  if (u.username || u.password) return { ok: false, error: m.err_url_credentials({}, o) };
   const host = u.hostname.toLowerCase();
   if (kind === "slack") {
-    if (u.protocol !== "https:" || !SLACK_HOSTS.includes(host) || u.port) return { ok: false, error: "Paste a Slack incoming webhook, it starts with https://hooks.slack.com/" };
-    if (!/^\/(services|triggers|workflows)\/[A-Za-z0-9/_-]+$/.test(u.pathname)) return { ok: false, error: "That Slack URL is missing its webhook path" };
+    if (u.protocol !== "https:" || !SLACK_HOSTS.includes(host) || u.port) return { ok: false, error: m.err_url_slack({}, o) };
+    if (!/^\/(services|triggers|workflows)\/[A-Za-z0-9/_-]+$/.test(u.pathname)) return { ok: false, error: m.err_url_slack_path({}, o) };
     return { ok: true, url: `https://${host}${u.pathname}` };
   }
   if (kind === "discord") {
-    if (u.protocol !== "https:" || !DISCORD_HOSTS.includes(host) || u.port) return { ok: false, error: "Paste a Discord webhook, it starts with https://discord.com/api/webhooks/" };
-    if (!/^\/api(\/v\d+)?\/webhooks\/\d+\/[A-Za-z0-9_-]+$/.test(u.pathname)) return { ok: false, error: "That Discord URL is missing its webhook id or token" };
+    if (u.protocol !== "https:" || !DISCORD_HOSTS.includes(host) || u.port) return { ok: false, error: m.err_url_discord({}, o) };
+    if (!/^\/api(\/v\d+)?\/webhooks\/\d+\/[A-Za-z0-9_-]+$/.test(u.pathname)) return { ok: false, error: m.err_url_discord_path({}, o) };
     return { ok: true, url: `https://${host}${u.pathname}${u.search}` };
   }
   const local = opts.allowLocal && (u.protocol === "http:" || u.protocol === "https:") && ["localhost", "127.0.0.1"].includes(host);
   if (local) return { ok: true, url: u.toString() };
-  if (u.protocol !== "https:") return { ok: false, error: "Webhook URLs must use https" };
-  if (isPrivateHost(host) || !host.includes(".")) return { ok: false, error: "That host is not reachable from openheard" };
-  if (u.port && u.port !== "443") return { ok: false, error: "Webhooks go to port 443" };
+  if (u.protocol !== "https:") return { ok: false, error: m.err_url_https({}, o) };
+  if (isPrivateHost(host) || !host.includes(".")) return { ok: false, error: m.err_url_host_unreachable({}, o) };
+  if (u.port && u.port !== "443") return { ok: false, error: m.err_url_port({}, o) };
   return { ok: true, url: u.toString() };
 }
 
 // Keeps the picked boards that still exist. A pick where none are left is
 // refused rather than stored as null, which would mean every board.
-export function ownedBoards(picked: string[] | null, owned: string[]): string[] | null {
+export function ownedBoards(picked: string[] | null, owned: string[], locale?: Locale): string[] | null {
   if (!picked?.length) return null;
   const keep = [...new Set(picked)].filter((id) => owned.includes(id));
-  if (!keep.length) throw new Error("The boards you picked no longer exist. Reload the page and pick again");
+  if (!keep.length) throw new Error(m.err_boards_gone({}, { locale }));
   return keep;
 }
 

@@ -9,11 +9,23 @@ const read = (rel: string) => JSON.parse(readFileSync(resolve(import.meta.dirnam
 const messages = Object.fromEntries(LOCALES.map((l) => [l, read(`../messages/${l}.json`)]));
 const keysOf = (locale: string) => Object.keys(messages[locale]!).filter((k) => k !== "$schema");
 
-// Every `{name}` a message uses. Plural messages are objects, not strings, and
-// are covered by the compiler; strings are what the pilot uses.
+// Every `{name}` a message uses. A plural message is an array of variants; it
+// uses what it declares as input and what its branches interpolate.
 function placeholders(value: unknown): string[] {
-  if (typeof value !== "string") return [];
-  return [...value.matchAll(/\{\s*([A-Za-z_][\w]*)\s*\}/g)].map((m) => m[1]!).sort();
+  const found = new Set<string>();
+  const scan = (text: string) => {
+    for (const m of text.matchAll(/\{\s*([A-Za-z_][\w]*)\s*\}/g)) found.add(m[1]!);
+  };
+  if (typeof value === "string") scan(value);
+  else if (Array.isArray(value))
+    for (const variant of value as { declarations?: string[]; match?: Record<string, string> }[]) {
+      for (const d of variant.declarations ?? []) {
+        const input = /^input\s+(\w+)/.exec(d);
+        if (input) found.add(input[1]!);
+      }
+      for (const text of Object.values(variant.match ?? {})) scan(text);
+    }
+  return [...found].sort();
 }
 
 describe("project.inlang settings", () => {
@@ -47,6 +59,21 @@ describe("messages", () => {
   it("have no empty text", () => {
     for (const locale of LOCALES)
       for (const key of keysOf(locale)) expect(messages[locale]![key], `${locale}.${key}`).not.toBe("");
+  });
+
+  // Ukrainian counts need one/few/many; a message that forgets a category
+  // falls back to its key in front of a visitor.
+  const CATEGORIES: Record<string, string[]> = { uk: ["one", "few", "many", "other"], en: ["one", "other"] };
+  it("cover every plural category of their language", () => {
+    for (const locale of LOCALES)
+      for (const key of keysOf(locale)) {
+        const value = messages[locale]![key];
+        if (!Array.isArray(value)) continue;
+        for (const variant of value as { match: Record<string, string> }[]) {
+          const have = Object.keys(variant.match).map((k) => k.split("=")[1]);
+          for (const category of CATEGORIES[locale]!) expect(have, `${locale}.${key}`).toContain(category);
+        }
+      }
   });
 
   it("use the same placeholders in every locale", () => {

@@ -31,7 +31,7 @@ describe("the shared demo account", () => {
     expect(isDemoIdentity({ id: DEMO_ADMIN_ID })).toBe(true);
     expect(isDemoIdentity({ id: "acme-owner" })).toBe(false);
     expect(isDemoIdentity(null)).toBe(false);
-    expect(() => assertNotDemoIdentity({ id: DEMO_ADMIN_ID })).toThrow(/demo account/i);
+    expect(() => assertNotDemoIdentity({ id: DEMO_ADMIN_ID }, "en")).toThrow(/demo account/i);
     expect(() => assertNotDemoIdentity({ id: "acme-owner" })).not.toThrow();
   });
 
@@ -44,8 +44,12 @@ describe("the shared demo account", () => {
 
 describe("demo workspace guards", () => {
   it("blocks import and the other locked actions", () => {
-    expect(() => assertNotDemo({ id: DEMO_WORKSPACE_ID })).toThrow(/demo workspace/i);
+    expect(() => assertNotDemo({ id: DEMO_WORKSPACE_ID }, "en")).toThrow(/demo workspace/i);
     expect(() => assertNotDemo({ id: "acme" })).not.toThrow();
+  });
+
+  it("words the refusal in the language it is asked for", () => {
+    expect(() => assertNotDemo({ id: DEMO_WORKSPACE_ID }, "uk")).toThrow("Недоступно в демо-просторі");
   });
 
   it("hides only settings the nav actually has", () => {

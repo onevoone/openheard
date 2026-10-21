@@ -14,14 +14,7 @@ export type StatusKind = (typeof STATUS_KINDS)[number];
 export const STATUSES = STATUS_KINDS;
 export type Status = string;
 
-export const DEFAULT_STATUSES: { key: string; label: string; color: string; kind: StatusKind; onRoadmap: boolean }[] = [
-  { key: "open", label: "Pending", color: "#f2b53d", kind: "open", onRoadmap: false },
-  { key: "review", label: "Under review", color: "#b08cff", kind: "review", onRoadmap: true },
-  { key: "planned", label: "Planned", color: "#f2b53d", kind: "planned", onRoadmap: true },
-  { key: "progress", label: "In progress", color: "#6e8bff", kind: "progress", onRoadmap: true },
-  { key: "done", label: "Shipped", color: "#3ecf8e", kind: "done", onRoadmap: true },
-  { key: "closed", label: "Closed", color: "#7a7a85", kind: "closed", onRoadmap: false },
-];
+// The default statuses are in ../defaults.ts: their labels are translated.
 
 // A workspace is one public board plus its team. The id doubles as the
 // subdomain slug in the cloud version. Self-hosted installs use "default".

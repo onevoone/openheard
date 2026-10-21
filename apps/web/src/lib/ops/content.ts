@@ -1,5 +1,6 @@
 import { activity, changelogEntry, changelogPost, helpArticle, helpCollection, post } from "@openheard/db";
 import type { Db } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import { HELP_SLUG, type HelpIcon, uniqueSlug } from "@/lib/help";
@@ -12,8 +13,8 @@ import { type OpCtx, OpError, listOf, refresh } from "./context";
 
 // Help center and changelog writes.
 
-function checkSlug(slug: string) {
-  if (slug && !HELP_SLUG.test(slug)) throw new OpError(`Slug '${slug}' is not valid: use lowercase letters, numbers and dashes`);
+function checkSlug(ctx: OpCtx, slug: string) {
+  if (slug && !HELP_SLUG.test(slug)) throw new OpError(m.err_help_slug_invalid({ slug }, { locale: ctx.locale }));
 }
 
 export async function listHelp(ctx: OpCtx) {
@@ -37,25 +38,25 @@ export async function saveHelpArticle(
   const { db } = ctx;
   const ws = ctx.workspace.id;
   const title = data.title.trim();
-  if (title.length < 3 || title.length > 140) throw new OpError("Title must be 3 to 140 characters");
+  if (title.length < 3 || title.length > 140) throw new OpError(m.err_title_length({ min: 3, max: 140 }, { locale: ctx.locale }));
   const wanted = (data.slug ?? "").trim().toLowerCase();
-  checkSlug(wanted);
+  checkSlug(ctx, wanted);
   const collectionId = data.collectionId ?? null;
 
   // Article and collection ids are global. Prove both belong here first.
   const existing = data.id ? await helpArticleById(db, ws, data.id) : null;
-  if (data.id && !existing) throw new OpError(`Help article ${data.id} not found`, 404);
+  if (data.id && !existing) throw new OpError(m.err_help_article_not_found({ id: data.id }, { locale: ctx.locale }), 404);
   if (collectionId !== null) {
     const [owned] = await db.select({ id: helpCollection.id }).from(helpCollection).where(and(eq(helpCollection.id, collectionId), eq(helpCollection.workspaceId, ws))).limit(1);
     if (!owned) {
       const all = await db.select({ id: helpCollection.id, title: helpCollection.title }).from(helpCollection).where(eq(helpCollection.workspaceId, ws));
-      throw new OpError(`Collection ${collectionId} not found; collections are: ${listOf(all.map((c) => `${c.id} (${c.title})`))}`);
+      throw new OpError(m.err_collection_not_found_list({ id: collectionId, list: listOf(all.map((c) => `${c.id} (${c.title})`), ctx.locale) }, { locale: ctx.locale }));
     }
   }
 
   const taken = (await db.select({ slug: helpArticle.slug }).from(helpArticle).where(and(eq(helpArticle.workspaceId, ws), data.id ? ne(helpArticle.id, data.id) : undefined))).map((r) => r.slug);
   // An explicit slug must be free; a derived one takes the next free number.
-  if (wanted && taken.includes(wanted)) throw new OpError(`Another article already uses /help/${wanted}`);
+  if (wanted && taken.includes(wanted)) throw new OpError(m.err_help_slug_taken({ slug: wanted }, { locale: ctx.locale }));
   const slug = wanted || uniqueSlug(title, taken);
 
   const values = {
@@ -81,7 +82,7 @@ export async function saveHelpArticle(
 }
 
 export async function deleteHelpArticle(ctx: OpCtx, id: number) {
-  if (!(await helpArticleById(ctx.db, ctx.workspace.id, id))) throw new OpError(`Help article ${id} not found`, 404);
+  if (!(await helpArticleById(ctx.db, ctx.workspace.id, id))) throw new OpError(m.err_help_article_not_found({ id }, { locale: ctx.locale }), 404);
   await removeHelpArticle(ctx.db, ctx.workspace.id, id);
   refresh(ctx);
   return { deleted: id };
@@ -91,15 +92,15 @@ export async function saveHelpCollection(ctx: OpCtx, data: { id?: number; title:
   const { db } = ctx;
   const ws = ctx.workspace.id;
   const title = data.title.trim();
-  if (title.length < 2 || title.length > 80) throw new OpError("Title must be 2 to 80 characters");
+  if (title.length < 2 || title.length > 80) throw new OpError(m.err_title_length({ min: 2, max: 80 }, { locale: ctx.locale }));
   const wanted = (data.slug ?? "").trim().toLowerCase();
-  checkSlug(wanted);
+  checkSlug(ctx, wanted);
   if (data.id) {
     const [owned] = await db.select({ id: helpCollection.id }).from(helpCollection).where(and(eq(helpCollection.id, data.id), eq(helpCollection.workspaceId, ws))).limit(1);
-    if (!owned) throw new OpError(`Collection ${data.id} not found`, 404);
+    if (!owned) throw new OpError(m.err_collection_not_found({ id: data.id }, { locale: ctx.locale }), 404);
   }
   const taken = (await db.select({ slug: helpCollection.slug }).from(helpCollection).where(and(eq(helpCollection.workspaceId, ws), data.id ? ne(helpCollection.id, data.id) : undefined))).map((r) => r.slug);
-  if (wanted && taken.includes(wanted)) throw new OpError(`Another collection already uses ${wanted}`);
+  if (wanted && taken.includes(wanted)) throw new OpError(m.err_collection_slug_taken({ slug: wanted }, { locale: ctx.locale }));
   const slug = wanted || uniqueSlug(title, taken, "collection");
   const values = { title, description: data.description?.trim() || null, icon: data.icon ?? null, slug };
   let id = data.id;
@@ -146,9 +147,9 @@ export async function saveChangelog(ctx: OpCtx, data: { id?: number; title: stri
   const { db } = ctx;
   const ws = ctx.workspace.id;
   const title = data.title.trim();
-  if (title.length < 3 || title.length > 140) throw new OpError("Title must be 3 to 140 characters");
+  if (title.length < 3 || title.length > 140) throw new OpError(m.err_title_length({ min: 3, max: 140 }, { locale: ctx.locale }));
   const body = (data.body ?? "").trim();
-  if (body.length > 20000) throw new OpError("Body is at most 20000 characters");
+  if (body.length > 20000) throw new OpError(m.err_body_max({ max: 20000 }, { locale: ctx.locale }));
   const version = data.version?.trim() || null;
   let id = data.id;
   let wasPublished = false;
@@ -157,15 +158,15 @@ export async function saveChangelog(ctx: OpCtx, data: { id?: number; title: stri
   // silent, so prove ownership of everything this touches before writing.
   if (id) {
     const [owned] = await db.select({ id: changelogEntry.id, publishedAt: changelogEntry.publishedAt }).from(changelogEntry).where(and(eq(changelogEntry.id, id), eq(changelogEntry.workspaceId, ws))).limit(1);
-    if (!owned) throw new OpError(`Changelog entry ${id} not found`, 404);
+    if (!owned) throw new OpError(m.err_changelog_not_found({ id }, { locale: ctx.locale }), 404);
     wasPublished = !!owned.publishedAt;
   }
   const postIds = [...new Set(data.postIds ?? [])];
-  if (postIds.length > 50) throw new OpError("Link at most 50 posts");
+  if (postIds.length > 50) throw new OpError(m.err_changelog_posts_max({ count: 50 }, { locale: ctx.locale }));
   if (postIds.length) {
     const owned = new Set((await db.select({ id: post.id }).from(post).where(and(eq(post.workspaceId, ws), inArray(post.id, postIds)))).map((p) => p.id));
     const missing = postIds.filter((p) => !owned.has(p));
-    if (missing.length) throw new OpError(`Post ${missing.join(", ")} not found in this workspace`, 404);
+    if (missing.length) throw new OpError(m.err_posts_not_found({ ids: missing.join(", ") }, { locale: ctx.locale }), 404);
   }
   // Reads happen above; every write goes in one batch below, so a publish
   // lands whole or not at all. A new entry is created first as a bare draft
@@ -275,7 +276,7 @@ export async function changelogById(ctx: OpCtx, id: number) {
     where: and(eq(changelogEntry.id, id), eq(changelogEntry.workspaceId, ctx.workspace.id)),
     with: { posts: { columns: { postId: true } } },
   });
-  if (!entry) throw new OpError(`Changelog entry ${id} not found`, 404);
+  if (!entry) throw new OpError(m.err_changelog_not_found({ id }, { locale: ctx.locale }), 404);
   return { ...entry, postIds: entry.posts.map((p) => p.postId) };
 }
 

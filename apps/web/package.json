@@ -6,8 +6,8 @@
     "build": "vite build",
     "serve": "vite preview",
     "dev:bare": "vite dev",
-    "seed": "bun run src/scripts/seed.ts",
-    "demo:reset": "bun run src/scripts/demo-reset.ts",
+    "seed": "bun run i18n:compile && bun run src/scripts/seed.ts",
+    "demo:reset": "bun run i18n:compile && bun run src/scripts/demo-reset.ts",
     "i18n:compile": "bun run --cwd ../../packages/i18n i18n:compile",
     "check-types": "bun run i18n:compile && tsc --noEmit",
     "test": "bun run i18n:compile && vitest run"

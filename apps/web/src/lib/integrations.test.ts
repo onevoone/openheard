@@ -159,8 +159,8 @@ describe("ownedBoards", () => {
   });
 
   it("refuses a pick where no board is left instead of widening it to every board", () => {
-    expect(() => ownedBoards(["gone"], ["a", "b"])).toThrow(/no longer exist/);
-    expect(() => ownedBoards(["other-workspace-board"], [])).toThrow(/no longer exist/);
+    expect(() => ownedBoards(["gone"], ["a", "b"], "en")).toThrow(/no longer exist/);
+    expect(() => ownedBoards(["other-workspace-board"], [], "en")).toThrow(/no longer exist/);
   });
 });
 
@@ -305,5 +305,13 @@ describe("dispatchEvent", () => {
     const postId = await newPost("demo", "demo-features");
     expect(await dispatchEvent(db, "demo", { type: "post.created", postId }, "https://demo.test", fetchImpl)).toBe(0);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe("integration URL refusals", () => {
+  it("are worded in the language asked for", () => {
+    expect(checkIntegrationUrl("webhook", "http://example.com/x", { locale: "en" })).toEqual({ ok: false, error: "Webhook URLs must use https" });
+    expect(checkIntegrationUrl("webhook", "http://example.com/x", { locale: "uk" })).toEqual({ ok: false, error: "URL вебхуків мають починатися з https" });
+    expect(checkIntegrationUrl("slack", "nope", { locale: "uk" })).toEqual({ ok: false, error: "Це не схоже на URL" });
   });
 });

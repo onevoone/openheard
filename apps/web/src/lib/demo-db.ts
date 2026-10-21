@@ -1,5 +1,6 @@
 // Creating and wiping the demo workspace. Server only: it pulls the schema in.
 import type { Db } from "@openheard/db";
+import { defaultStatuses } from "@openheard/db/defaults";
 import * as schema from "@openheard/db/schema/index";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq, inArray, ne, sql } from "drizzle-orm";
@@ -71,7 +72,7 @@ export async function ensureDemoWorkspace(db: Db) {
   // and so cannot be imported by the standalone reset script.
   await db
     .insert(schema.status)
-    .values(schema.DEFAULT_STATUSES.map((d, i) => ({ workspaceId: DEMO_WORKSPACE_ID, ...d, position: i })))
+    .values(defaultStatuses("en").map((d, i) => ({ workspaceId: DEMO_WORKSPACE_ID, ...d, position: i })))
     .onConflictDoNothing();
 
   await db

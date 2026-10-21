@@ -118,7 +118,8 @@ export async function workspaceOrigin(workspaceId: string, requestOrigin: string
 export async function apiOps(ctx: ApiContext, requestOrigin: string, slug?: string | null): Promise<OpCtx & { query: string }> {
   const { workspace: ws, actor } = await resolveApiWorkspace(ctx, slug);
   const { origin, query } = await workspaceOrigin(ws.id, requestOrigin);
-  return { db: ctx.db, workspace: ws, actor, origin, query };
+  // The API answers in English whatever the board's language is.
+  return { db: ctx.db, workspace: ws, actor, origin, query, locale: "en" };
 }
 
 export class ApiError extends Error {

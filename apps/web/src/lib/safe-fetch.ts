@@ -10,7 +10,22 @@
 // local SQLite mode runs on the contributor's machine, where a rebinding name
 // could reach localhost services; do not expose a local install publicly.
 
-export class BlockedUrlError extends Error {}
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
+import { getLocale } from "@openheard/i18n/runtime";
+
+// Built from a message function rather than text, so the same refusal can be
+// worded for whoever sees it. `message` is English, for logs and the API;
+// `localized()` is for a person using the dashboard.
+export class BlockedUrlError extends Error {
+  constructor(private readonly say: (o: { locale: Locale }) => string) {
+    super(say({ locale: "en" }));
+  }
+
+  localized(locale?: Locale): string {
+    return this.say({ locale: locale ?? getLocale() });
+  }
+}
 
 export type Resolver = (host: string) => Promise<string[]>;
 
@@ -89,17 +104,17 @@ export function checkUrl(raw: string): { url: URL; host: string | null } {
   try {
     url = new URL(raw);
   } catch {
-    throw new BlockedUrlError("That is not a web address");
+    throw new BlockedUrlError((o) => m.err_fetch_not_web_address({}, o));
   }
-  if (url.protocol !== "http:" && url.protocol !== "https:") throw new BlockedUrlError("Only http and https addresses work");
-  if (url.username || url.password) throw new BlockedUrlError("Addresses with a login in them are not fetched");
-  if (url.port) throw new BlockedUrlError("Only the standard web ports are fetched");
+  if (url.protocol !== "http:" && url.protocol !== "https:") throw new BlockedUrlError((o) => m.err_fetch_scheme({}, o));
+  if (url.username || url.password) throw new BlockedUrlError((o) => m.err_fetch_credentials({}, o));
+  if (url.port) throw new BlockedUrlError((o) => m.err_fetch_port({}, o));
   const host = url.hostname.toLowerCase().replace(/\.$/, "");
   if (host.startsWith("[") || /^\d+\.\d+\.\d+\.\d+$/.test(host)) {
-    if (isPrivateAddress(host)) throw new BlockedUrlError("That address is private");
+    if (isPrivateAddress(host)) throw new BlockedUrlError((o) => m.err_fetch_private({}, o));
     return { url, host: null };
   }
-  if (!host.includes(".") || INTERNAL_SUFFIX.test(host)) throw new BlockedUrlError("That address is private");
+  if (!host.includes(".") || INTERNAL_SUFFIX.test(host)) throw new BlockedUrlError((o) => m.err_fetch_private({}, o));
   return { url, host };
 }
 
@@ -122,10 +137,10 @@ async function assertPublic(raw: string, resolve: Resolver): Promise<URL> {
   try {
     addresses = await resolve(host);
   } catch {
-    throw new BlockedUrlError("Could not look up that address");
+    throw new BlockedUrlError((o) => m.err_fetch_lookup_failed({}, o));
   }
-  if (!addresses.length) throw new BlockedUrlError("That address does not exist");
-  if (addresses.some(isPrivateAddress)) throw new BlockedUrlError("That address is private");
+  if (!addresses.length) throw new BlockedUrlError((o) => m.err_fetch_no_such_host({}, o));
+  if (addresses.some(isPrivateAddress)) throw new BlockedUrlError((o) => m.err_fetch_private({}, o));
   return url;
 }
 
@@ -139,7 +154,7 @@ async function readCapped(body: ReadableStream<Uint8Array> | null, max: number, 
     if (done) break;
     if (total + value.byteLength > max) {
       await reader.cancel().catch(() => {});
-      if (!truncate) throw new BlockedUrlError("That file is too large");
+      if (!truncate) throw new BlockedUrlError((o) => m.err_fetch_too_large({}, o));
       parts.push(value.subarray(0, max - total));
       total = max;
       break;
@@ -169,17 +184,17 @@ export async function safeFetch(raw: string, opts: SafeFetchOptions): Promise<Sa
     if (res.status >= 300 && res.status < 400) {
       const location = res.headers.get("location");
       await res.body?.cancel().catch(() => {});
-      if (!location) throw new BlockedUrlError("The site redirected nowhere");
+      if (!location) throw new BlockedUrlError((o) => m.err_fetch_redirect_nowhere({}, o));
       current = new URL(location, url).href;
       continue;
     }
     const declared = Number(res.headers.get("content-length") ?? "");
     if (!opts.truncate && declared > opts.maxBytes) {
       await res.body?.cancel().catch(() => {});
-      throw new BlockedUrlError("That file is too large");
+      throw new BlockedUrlError((o) => m.err_fetch_too_large({}, o));
     }
     const bytes = await readCapped(res.body, opts.maxBytes, !!opts.truncate);
     return { url: url.href, status: res.status, contentType: res.headers.get("content-type") ?? "", bytes };
   }
-  throw new BlockedUrlError("Too many redirects");
+  throw new BlockedUrlError((o) => m.err_fetch_too_many_redirects({}, o));
 }

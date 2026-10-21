@@ -2,6 +2,8 @@
 // the database and the R2 binding, so routes reach it through a dynamic import.
 import { attachment, workspace, type Db } from "@openheard/db";
 import { env } from "@openheard/env/server";
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { and, eq, inArray, isNull, like, lt, sql, type SQL } from "drizzle-orm";
 
 import { MAX_IMAGE_BYTES, MAX_IMAGES, formatBytes, imageSize, sniffImageType, toAttachmentView } from "./attachments";
@@ -46,12 +48,13 @@ const D1_CHUNK = 90;
 
 // Checks the bytes, not the claimed type, then writes an unclaimed row and the
 // object. The post or comment it was pasted into claims it on publish.
-export async function storeUpload(db: Db, input: { workspaceId: string; uploaderId: string; bytes: Uint8Array }) {
+export async function storeUpload(db: Db, input: { workspaceId: string; uploaderId: string; bytes: Uint8Array }, locale?: Locale) {
+  const o = { locale };
   const bucket = uploadsBucket();
-  if (!bucket) throw new UploadError(503, "Image uploads are not set up on this server");
-  if (input.bytes.byteLength > MAX_IMAGE_BYTES) throw new UploadError(413, "Images can be up to 5 MB.");
+  if (!bucket) throw new UploadError(503, m.err_upload_not_set_up({}, o));
+  if (input.bytes.byteLength > MAX_IMAGE_BYTES) throw new UploadError(413, m.err_upload_too_large({ max: formatBytes(MAX_IMAGE_BYTES) }, o));
   const type = sniffImageType(input.bytes);
-  if (!type) throw new UploadError(415, "That file is not a PNG, JPEG, GIF or WebP image.");
+  if (!type) throw new UploadError(415, m.err_upload_bad_type({}, o));
   const size = imageSize(input.bytes, type);
   const id = newId();
   const key = objectKey(input.workspaceId, id);
@@ -64,7 +67,7 @@ export async function storeUpload(db: Db, input: { workspaceId: string; uploader
     WHERE (SELECT coalesce(sum(size), 0) FROM attachment WHERE uploader_id = ${input.uploaderId} AND created_at > ${since}) + ${input.bytes.byteLength} <= ${DAILY_UPLOAD_BYTES}
     RETURNING id
   `);
-  if (!inserted.length) throw new UploadError(429, `You can upload up to ${formatBytes(DAILY_UPLOAD_BYTES)} of images a day. Try again tomorrow.`);
+  if (!inserted.length) throw new UploadError(429, m.err_upload_daily_limit({ limit: formatBytes(DAILY_UPLOAD_BYTES) }, o));
   try {
     await bucket.put(key, input.bytes, { httpMetadata: { contentType: type } });
   } catch (err) {

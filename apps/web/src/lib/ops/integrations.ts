@@ -1,5 +1,6 @@
 import { board, integration } from "@openheard/db";
 import { INTEGRATION_EVENTS, type IntegrationEvent, type IntegrationKind } from "@openheard/db/schema/integrations";
+import { m } from "@openheard/i18n/messages";
 import { and, asc, eq } from "drizzle-orm";
 
 import { assertNotDemo } from "@/lib/demo";
@@ -10,14 +11,14 @@ import { type OpCtx, OpError } from "./context";
 
 // Slack, Discord and signed webhooks. One destination per kind.
 
-function validUrl(kind: IntegrationKind, raw: string, local: boolean): string {
-  const check = checkIntegrationUrl(kind, raw, { allowLocal: local });
+function validUrl(ctx: OpCtx, kind: IntegrationKind, raw: string, local: boolean): string {
+  const check = checkIntegrationUrl(kind, raw, { allowLocal: local, locale: ctx.locale });
   if (!check.ok) throw new OpError(check.error);
   return check.url;
 }
 
 export async function listIntegrations(ctx: OpCtx) {
-  assertNotDemo(ctx.workspace);
+  assertNotDemo(ctx.workspace, ctx.locale);
   const ws = ctx.workspace.id;
   const [rows, boards] = await Promise.all([
     ctx.db.select().from(integration).where(eq(integration.workspaceId, ws)),
@@ -41,21 +42,22 @@ export async function listIntegrations(ctx: OpCtx) {
 // Empty `url` keeps the saved one. A plain webhook gets a signing secret the
 // first time; it is returned once and never again.
 export async function saveIntegration(ctx: OpCtx, data: { kind: IntegrationKind; url?: string; events: IntegrationEvent[]; boardIds: string[] | null; enabled?: boolean }) {
-  assertNotDemo(ctx.workspace);
+  assertNotDemo(ctx.workspace, ctx.locale);
   const { db } = ctx;
   const ws = ctx.workspace.id;
   const bad = data.events.filter((e) => !INTEGRATION_EVENTS.includes(e));
-  if (bad.length) throw new OpError(`Unknown event '${bad[0]}'; events are: ${INTEGRATION_EVENTS.join(", ")}`);
+  if (bad.length) throw new OpError(m.err_event_unknown({ event: bad[0], events: INTEGRATION_EVENTS.join(", ") }, { locale: ctx.locale }));
   const [existing] = await db.select().from(integration).where(and(eq(integration.workspaceId, ws), eq(integration.kind, data.kind))).limit(1);
   const raw = data.url?.trim() ?? "";
-  if (!existing && !raw) throw new OpError("Paste a webhook URL first");
+  if (!existing && !raw) throw new OpError(m.err_webhook_url_required({}, { locale: ctx.locale }));
   const boardIds = data.boardIds?.length
     ? ownedBoards(
         data.boardIds,
         (await db.select({ id: board.id }).from(board).where(eq(board.workspaceId, ws))).map((b) => b.id),
+        ctx.locale,
       )
     : null;
-  const url = raw ? validUrl(data.kind, raw, await allowLocal()) : null;
+  const url = raw ? validUrl(ctx, data.kind, raw, await allowLocal()) : null;
   const freshSecret = data.kind === "webhook" && !existing?.secretEnc ? newSigningSecret() : null;
   const values = {
     events: JSON.stringify([...new Set(data.events)]),
@@ -73,7 +75,7 @@ export async function saveIntegration(ctx: OpCtx, data: { kind: IntegrationKind;
 }
 
 export async function deleteIntegration(ctx: OpCtx, kind: IntegrationKind) {
-  assertNotDemo(ctx.workspace);
+  assertNotDemo(ctx.workspace, ctx.locale);
   const gone = await ctx.db
     .delete(integration)
     .where(and(eq(integration.workspaceId, ctx.workspace.id), eq(integration.kind, kind)))
@@ -84,13 +86,13 @@ export async function deleteIntegration(ctx: OpCtx, kind: IntegrationKind) {
 // Sends a sample message to `url`, or to the saved one when it is empty.
 // Only a send to the saved URL updates its delivery status.
 export async function testIntegration(ctx: OpCtx, kind: IntegrationKind, rawUrl = "") {
-  assertNotDemo(ctx.workspace);
+  assertNotDemo(ctx.workspace, ctx.locale);
   const { db } = ctx;
   const ws = ctx.workspace;
   const [saved] = await db.select().from(integration).where(and(eq(integration.workspaceId, ws.id), eq(integration.kind, kind))).limit(1);
   const raw = rawUrl.trim();
-  if (!raw && !saved) throw new OpError(`No ${kind} connection yet. Connect one first, or pass a URL to test.`);
-  const url = raw ? validUrl(kind, raw, await allowLocal()) : await unseal(saved!.urlEnc);
+  if (!raw && !saved) throw new OpError(m.err_integration_missing({ kind }, { locale: ctx.locale }));
+  const url = raw ? validUrl(ctx, kind, raw, await allowLocal()) : await unseal(saved!.urlEnc);
   const secret = saved?.secretEnc ? await unseal(saved.secretEnc) : null;
   const event: AlertEvent = {
     type: "post.created",

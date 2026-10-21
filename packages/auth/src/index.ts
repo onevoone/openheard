@@ -1,6 +1,8 @@
 import { createDb } from "@openheard/db";
 import * as schema from "@openheard/db/schema/auth";
-import { DEFAULT_STATUSES, membership, status, workspace } from "@openheard/db/schema/feedback";
+import { defaultStatuses, defaultTagline } from "@openheard/db/defaults";
+import { membership, status, workspace } from "@openheard/db/schema/feedback";
+import { BASE_LOCALE } from "@openheard/i18n/locales";
 import { env } from "@openheard/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -128,8 +130,10 @@ export function createAuth(opts?: { demo?: boolean }) {
           after: async (u) => {
             const [ws] = await db.select({ id: workspace.id }).from(workspace).where(eq(workspace.id, "default")).limit(1);
             if (!ws) {
-              await db.insert(workspace).values({ id: "default" }).onConflictDoNothing();
-              await db.insert(status).values(DEFAULT_STATUSES.map((d, i) => ({ workspaceId: "default", ...d, position: i }))).onConflictDoNothing();
+              // The page that renders before anyone can sign up has normally made
+              // this row already, in the visitor's language; this is the fallback.
+              await db.insert(workspace).values({ id: "default", locale: BASE_LOCALE, tagline: defaultTagline(BASE_LOCALE) }).onConflictDoNothing();
+              await db.insert(status).values(defaultStatuses(BASE_LOCALE).map((d, i) => ({ workspaceId: "default", ...d, position: i }))).onConflictDoNothing();
             }
             const role = rootDomain
               ? "member" as const

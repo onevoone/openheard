@@ -1,10 +1,12 @@
-import { LOCALES } from "@openheard/i18n/locales";
 import { apiKey, board, createDb, membership, post, postTag, tag } from "@openheard/db";
+import { defaultBoard } from "@openheard/db/defaults";
 
 import { apiKeyInput } from "@/lib/api-auth";
 import { purgeWorkspaceCache } from "@/lib/cache";
 import { listStatuses } from "@/lib/status-db";
 import { user } from "@openheard/db/schema/auth";
+import { BASE_LOCALE, LOCALES, isLocale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { and, count, eq } from "drizzle-orm";
@@ -29,7 +31,7 @@ const slug = (s: string) =>
 // collisions, they do not remove them, so every write proves ownership first.
 async function assertIdFree(db: ReturnType<typeof createDb>, table: typeof board | typeof tag, id: string, ws: string) {
   const [row] = await db.select({ workspaceId: table.workspaceId }).from(table).where(eq(table.id, id)).limit(1);
-  if (row && row.workspaceId !== ws) throw new Error("That name is already in use");
+  if (row && row.workspaceId !== ws) throw new Error(m.err_name_in_use());
   return !!row;
 }
 
@@ -250,7 +252,7 @@ export const importPosts = createServerFn({ method: "POST" })
 
     for (const r of data.rows) {
       // Board: reuse by name, else create.
-      const boardName = r.board?.trim() || "Feature requests";
+      const boardName = r.board?.trim() || defaultBoard(isLocale(context.workspace.locale) ? context.workspace.locale : BASE_LOCALE).name;
       let boardId = boards.get(boardName.toLowerCase());
       if (!boardId) {
         boardId = (ws === "default" ? slug(boardName) : `${ws}-${slug(boardName)}`) || "board";

@@ -7,7 +7,7 @@ import { drizzle } from "drizzle-orm/libsql";
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_WIDGET_SETTINGS, readWidgetSettings, widgetMeta, widgetSettingsSchema } from "./widget-settings";
+import { DEFAULT_WIDGET_SETTINGS, readWidgetSettings, widgetMeta, widgetSettingsSchema, widgetSettingsSchemaFor } from "./widget-settings";
 
 const MIGRATIONS = new URL("../../../../packages/db/migrations/", import.meta.url).pathname;
 
@@ -92,5 +92,21 @@ describe("/widget.json payload", () => {
   it("never serves an empty tab list", () => {
     const meta = widgetMeta({ name: "acme", accent: null, showRoadmap: false, showChangelog: true, widgetSettings: { tabs: ["roadmap"] } }, null);
     expect(meta.tabs).toEqual(["feedback"]);
+  });
+});
+
+describe("widget settings messages", () => {
+  const messages = (locale: "en" | "uk", bad: object) => {
+    const r = widgetSettingsSchemaFor(locale).safeParse({ ...valid, ...bad });
+    return r.success ? [] : r.error.issues.map((i) => i.message);
+  };
+
+  it("are worded when a value is checked, in the language asked for", () => {
+    expect(messages("en", { label: "" })).toEqual(["The label needs some text"]);
+    expect(messages("uk", { label: "" })).toEqual(["Додайте текст до підпису"]);
+    expect(messages("en", { label: "x".repeat(25) })).toEqual(["The label is at most 24 characters"]);
+    expect(messages("uk", { label: "x".repeat(25) })).toEqual(["Підпис — не довше 24 символів"]);
+    expect(messages("uk", { tabs: [] })).toEqual(["Залиште ввімкненою принаймні одну вкладку"]);
+    expect(messages("en", { accent: "red" })).toEqual(["Accent must be a hex colour like #6e8bff"]);
   });
 });

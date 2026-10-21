@@ -1,5 +1,6 @@
 import { createDb, helpArticle, helpCollection } from "@openheard/db";
 import { env } from "@openheard/env/server";
+import { m } from "@openheard/i18n/messages";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { and, eq, inArray } from "drizzle-orm";
@@ -37,7 +38,7 @@ const slugField = z
   .trim()
   .toLowerCase()
   .max(80)
-  .refine((s) => s === "" || HELP_SLUG.test(s), "Use lowercase letters, numbers and dashes");
+  .refine((s) => s === "" || HELP_SLUG.test(s), { error: () => m.err_slug_chars() });
 
 // ---------------------------------------------------------------------------
 // Public reads
@@ -74,7 +75,7 @@ export const searchHelp = createServerFn({ method: "GET" })
     // Every search scans the workspace's article bodies. Typing is debounced
     // on both callers, so a reader never comes near this.
     const rl = await rateLimit(`help-search:${clientIp()}`, { window: 60, max: 60 });
-    if (!rl.allowed) throw new Error("Too many searches. Try again in a minute.");
+    if (!rl.allowed) throw new Error(m.err_too_many_searches());
     // Suggestions under the new-post title want a real match, not any article
     // that mentions one of the words somewhere in its body.
     return searchHelpArticles(createDb(), context.workspace.id, data.q, { limit: data.limit ?? (data.suggest ? 3 : 8), minScore: data.suggest ? 2 : 1 });
@@ -90,7 +91,7 @@ export const voteHelpArticle = createServerFn({ method: "POST" })
     // Counts are what the team reads to decide what to rewrite, so a limiter
     // outage refuses answers rather than letting them through unmetered.
     const rl = await rateLimit(`help-vote:${networkOf(clientIp())}`, { window: 60, max: 20, failClosed: true });
-    if (!rl.allowed) throw new Error("Too many answers. Try again in a minute.");
+    if (!rl.allowed) throw new Error(m.err_too_many_answers());
 
     const voter = context.user ? `u:${context.user.id}` : await anonymousVoter();
     const db = createDb();
@@ -99,7 +100,7 @@ export const voteHelpArticle = createServerFn({ method: "POST" })
       .from(helpArticle)
       .where(and(eq(helpArticle.id, data.articleId), eq(helpArticle.workspaceId, context.workspace.id), eq(helpArticle.status, "published")))
       .limit(1);
-    if (!article) throw new Error("Article not found");
+    if (!article) throw new Error(m.err_article_not_found());
     await recordHelpVote(db, article.id, voter, data.helpful);
     return { helpful: data.helpful };
   });

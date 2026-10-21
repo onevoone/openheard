@@ -1,6 +1,9 @@
-import { DEFAULT_STATUSES, status } from "@openheard/db";
+import { status } from "@openheard/db";
 import type { Db } from "@openheard/db";
+import { defaultStatuses } from "@openheard/db/defaults";
 import type { STATUS_KINDS } from "@openheard/db/schema/feedback";
+import type { Locale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { and, asc, eq } from "drizzle-orm";
 
 // Server-only helpers. Never import this from a route or component; it pulls
@@ -11,10 +14,11 @@ export async function listStatuses(db: Db, workspaceId: string) {
   return db.select().from(status).where(eq(status.workspaceId, workspaceId)).orderBy(asc(status.position));
 }
 
-export async function seedStatuses(db: Db, workspaceId: string) {
+// The labels are written in `locale` once, here; the admin renames them later.
+export async function seedStatuses(db: Db, workspaceId: string, locale: Locale) {
   await db
     .insert(status)
-    .values(DEFAULT_STATUSES.map((d, i) => ({ workspaceId, ...d, position: i })))
+    .values(defaultStatuses(locale).map((d, i) => ({ workspaceId, ...d, position: i })))
     .onConflictDoNothing();
 }
 
@@ -26,6 +30,6 @@ export async function statusOfKind(db: Db, workspaceId: string, kind: (typeof ST
 
 export async function assertStatus(db: Db, workspaceId: string, key: string) {
   const [row] = await db.select({ key: status.key }).from(status).where(and(eq(status.workspaceId, workspaceId), eq(status.key, key))).limit(1);
-  if (!row) throw new Error("Unknown status");
+  if (!row) throw new Error(m.err_status_unknown());
 }
 

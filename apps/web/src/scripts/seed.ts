@@ -2,6 +2,7 @@
 // Usage: bun run db:seed  (needs OPENHEARD_LOCAL=1, set by the root script)
 import { createClient } from "@libsql/client";
 import type { Db } from "@openheard/db";
+import { defaultStatuses, defaultTagline } from "@openheard/db/defaults";
 import * as schema from "@openheard/db/schema/index";
 import { drizzle } from "drizzle-orm/libsql";
 
@@ -19,9 +20,9 @@ async function main() {
     process.exit(1);
   }
   const admin = users.find((u) => u.role === "admin") ?? users[0]!;
-  await db.insert(schema.workspace).values({ id: "default", name: "acme" }).onConflictDoNothing();
+  await db.insert(schema.workspace).values({ id: "default", name: "acme", locale: "en", tagline: defaultTagline("en") }).onConflictDoNothing();
   await db.insert(schema.membership).values({ workspaceId: "default", userId: admin.id, role: "admin" }).onConflictDoNothing();
-  await db.insert(schema.status).values(schema.DEFAULT_STATUSES.map((d, i) => ({ workspaceId: "default", ...d, position: i }))).onConflictDoNothing();
+  await db.insert(schema.status).values(defaultStatuses("en").map((d, i) => ({ workspaceId: "default", ...d, position: i }))).onConflictDoNothing();
 
   const { posts, entries, articles } = await seedDemoContent(db, "default", admin.id);
   console.log(`seeded ${posts} posts, ${entries} changelog entries, ${articles} help articles`);

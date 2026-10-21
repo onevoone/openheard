@@ -1,6 +1,7 @@
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { MAX_IMAGE_BYTES } from "@/lib/attachments";
+import { MAX_IMAGE_BYTES, formatBytes } from "@/lib/attachments";
 import { isDemo } from "@/lib/demo";
 
 const json = (body: unknown, status = 200, headers?: Record<string, string>) =>
@@ -41,21 +42,21 @@ export const Route = createFileRoute("/api/uploads")({
     handlers: {
       POST: async ({ request }) => {
         const origin = request.headers.get("origin");
-        if (origin && origin !== new URL(request.url).origin) return json({ error: "Cross-origin uploads are not allowed" }, 403);
+        if (origin && origin !== new URL(request.url).origin) return json({ error: m.err_cross_origin_upload() }, 403);
 
         const { getSessionContext } = await import("@/lib/session");
         const { user, workspace } = await getSessionContext(request);
-        if (!user) return json({ error: "Sign in to attach images" }, 401);
-        if (isDemo(workspace)) return json({ error: "Image uploads are off in the demo" }, 403);
+        if (!user) return json({ error: m.err_sign_in_to_attach() }, 401);
+        if (isDemo(workspace)) return json({ error: m.err_demo_uploads_off() }, 403);
 
         const { uploadAllowed } = await import("@/lib/rate-limit");
-        if (!(await uploadAllowed(user.id, request.headers.get("cf-connecting-ip")))) return json({ error: "Too many uploads. Try again in a minute." }, 429, { "retry-after": "60" });
+        if (!(await uploadAllowed(user.id, request.headers.get("cf-connecting-ip")))) return json({ error: m.err_too_many_uploads() }, 429, { "retry-after": "60" });
 
         const declared = Number(request.headers.get("content-length") ?? "");
-        if (declared > MAX_IMAGE_BYTES) return json({ error: "Images can be up to 5 MB." }, 413);
+        if (declared > MAX_IMAGE_BYTES) return json({ error: m.err_upload_too_large({ max: formatBytes(MAX_IMAGE_BYTES) }) }, 413);
         const bytes = await readCapped(request, MAX_IMAGE_BYTES);
-        if (!bytes) return json({ error: "Images can be up to 5 MB." }, 413);
-        if (!bytes.byteLength) return json({ error: "That file is empty." }, 400);
+        if (!bytes) return json({ error: m.err_upload_too_large({ max: formatBytes(MAX_IMAGE_BYTES) }) }, 413);
+        if (!bytes.byteLength) return json({ error: m.err_upload_empty() }, 400);
 
         const [{ createDb }, { storeUpload, UploadError }] = await Promise.all([import("@openheard/db"), import("@/lib/attachment-db")]);
         try {

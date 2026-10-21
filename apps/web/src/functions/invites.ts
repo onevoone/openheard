@@ -1,5 +1,6 @@
 import { createDb, membership } from "@openheard/db";
 import { invite } from "@openheard/db/schema/feedback";
+import { m } from "@openheard/i18n/messages";
 import { createServerFn } from "@tanstack/react-start";
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -61,16 +62,16 @@ export const acceptInvite = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ token: z.string() }).parse(d))
   .handler(async ({ data, context }) => {
     const user = context.user;
-    if (!user) throw new Error("Sign in first");
+    if (!user) throw new Error(m.err_sign_in_first());
     assertNotDemoIdentity(user);
     const db = createDb();
     const [inv] = await db
       .select()
       .from(invite)
       .where(and(eq(invite.token, data.token), gt(invite.expiresAt, new Date()), isNull(invite.acceptedAt)));
-    if (!inv) throw new Error("Invite not found or expired");
+    if (!inv) throw new Error(m.err_invite_not_found());
     // A token is an invitation to one address, not a bearer credential.
-    if (inv.email.toLowerCase() !== user.email.toLowerCase()) throw new Error("Sign in with the invited email");
+    if (inv.email.toLowerCase() !== user.email.toLowerCase()) throw new Error(m.err_invite_email_mismatch());
 
     await db
       .insert(membership)
@@ -86,7 +87,7 @@ export const removeMember = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const me = requireAdmin(context.user);
     assertNotDemo(context.workspace);
-    if (data.userId === me.id) throw new Error("You cannot remove yourself");
+    if (data.userId === me.id) throw new Error(m.err_remove_self());
     const db = createDb();
     await db
       .delete(membership)

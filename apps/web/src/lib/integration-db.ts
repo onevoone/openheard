@@ -95,7 +95,9 @@ export const resolveOverHttps: Resolve = async (host) => {
 export async function checkWebhookHost(url: string, resolve: Resolve): Promise<string | null> {
   const host = new URL(url).hostname.toLowerCase();
   if (["localhost", "127.0.0.1"].includes(host) && (await allowLocal())) return null;
-  const rules = checkIntegrationUrl("webhook", url);
+  // English on purpose: the outcome is stored with the delivery and read later,
+  // by whoever opens the dashboard, in a language this check cannot know.
+  const rules = checkIntegrationUrl("webhook", url, { locale: "en" });
   if (!rules.ok) return rules.error;
   if (/^[\d.]+$/.test(host)) return null; // a public IP literal, already checked
   let addresses: string[];

@@ -1,4 +1,5 @@
 import { createDb } from "@openheard/db";
+import { getLocale } from "@openheard/i18n/runtime";
 import { getRequest } from "@tanstack/react-start/server";
 
 import { type Ctx, requireAdmin } from "@/lib/session";
@@ -16,5 +17,5 @@ export function requestOrigin(): string {
 // The op context for a dashboard server function. Admins only.
 export function adminOps(context: Ctx): OpCtx {
   const u = requireAdmin(context.user);
-  return { db: createDb(), workspace: context.workspace, actor: { id: u.id, name: u.name, email: u.email }, origin: requestOrigin() };
+  return { db: createDb(), workspace: context.workspace, actor: { id: u.id, name: u.name, email: u.email }, origin: requestOrigin(), locale: getLocale() };
 }

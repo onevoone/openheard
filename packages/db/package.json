@@ -18,6 +18,7 @@
   "dependencies": {
     "@libsql/client": "catalog:",
     "@openheard/env": "workspace:*",
+    "@openheard/i18n": "workspace:*",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.2",
     "libsql": "catalog:",

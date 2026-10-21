@@ -9,7 +9,7 @@ import { Avatar } from "@/components/bits";
 import { DashboardErrorState, DashboardPanelSkeleton } from "@/components/states";
 import { deleteChangelog, listChangelog, saveChangelog } from "@/functions/changelog";
 import { searchPosts } from "@/functions/posts";
-import { ago, fullDate } from "@/lib/time";
+import { ago, fullDate, since } from "@/lib/time";
 import { cn } from "@openheard/ui/lib/utils";
 
 type Entry = Awaited<ReturnType<typeof listChangelog>>[number];
@@ -139,7 +139,7 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
             </button>
             <span className="text-[15px] font-semibold">{entry ? entry.title : "New entry"}</span>
             <span className={cn("ml-1 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium", published ? "bg-status-shipped/15 text-status-shipped" : "bg-status-planned/15 text-status-planned")}>
-              {published ? `Published ${ago(entry!.publishedAt!)} ago` : "Draft"}
+              {published ? `Published ${since(entry!.publishedAt!)}` : "Draft"}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
