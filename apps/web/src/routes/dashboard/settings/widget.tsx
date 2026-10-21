@@ -1,3 +1,4 @@
+import { isLocale } from "@openheard/i18n/locales";
 import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { Textarea } from "@openheard/ui/components/textarea";
@@ -55,7 +56,8 @@ function WidgetSettings() {
   const router = useRouter();
   const ws = root.workspace;
   const [page, setPage] = useState<Page>("install");
-  const saved = useMemo(() => readWidgetSettings(ws.widgetSettings), [ws.widgetSettings]);
+  // A label nobody saved yet shows (and is saved as) the default in the board's language.
+  const saved = useMemo(() => readWidgetSettings(ws.widgetSettings, isLocale(ws.locale) ? ws.locale : undefined), [ws.widgetSettings, ws.locale]);
   const [draft, setDraft] = useState<WidgetSettings>(saved);
   const [saving, setSaving] = useState(false);
   // Remounts the appearance form so a half-typed hex goes on Discard too.
