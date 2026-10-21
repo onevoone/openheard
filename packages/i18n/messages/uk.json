@@ -806,8 +806,608 @@
   "roadmap_progress": "Виконано на {value}%",
   "root_description": "Дошка відгуків із відкритим кодом.",
   "root_title": "{workspace} · відгуки",
+  "settings_accent": "Акцент",
+  "settings_access_anon_help": "Відвідувачі голосують один раз з браузера й можуть закріпити голос за собою, коли ввійдуть. З'явиться в наступному релізі.",
+  "settings_access_anon_label": "Анонімне голосування",
+  "settings_access_approval_help": "Нові ідеї приховані, доки адміністратор їх не схвалить.",
+  "settings_access_approval_label": "Вимагати схвалення",
+  "settings_access_changelog_aria": "Показувати журнал змін",
+  "settings_access_changelog_help": "Приховайте його, доки нічого не випустили.",
+  "settings_access_meta": "Доступ · налаштування",
+  "settings_access_posting": "Публікація",
+  "settings_access_roadmap_aria": "Показувати дорожню карту",
+  "settings_access_roadmap_help": "Приховайте її, якщо не хочете обіцяти порядок.",
+  "settings_access_sub": "Хто що може робити на публічній дошці.",
+  "settings_access_tabs": "Публічні вкладки",
+  "settings_access_title": "Доступ",
+  "settings_access_who_anyone": "Усі, хто увійшов",
+  "settings_access_who_help": "Учасники — це люди зі сторінки «Команда». «Усі, хто увійшов» — будь-який користувач, що увійшов в обліковий запис.",
+  "settings_access_who_label": "Хто може додавати ідеї",
+  "settings_access_who_members": "Лише учасники команди",
+  "settings_action_failed": "Не вдалося виконати дію",
+  "settings_add": "Додати",
+  "settings_appearance": "Вигляд",
+  "settings_billing_current": "Поточний тариф",
+  "settings_billing_current_badge": "Поточний",
+  "settings_billing_f_api": "API та MCP-сервер",
+  "settings_billing_f_everything": "Усе з Free",
+  "settings_billing_f_public": "Публічні дорожня карта й журнал змін",
+  "settings_billing_f_support": "Пріоритетна підтримка",
+  "settings_billing_f_unlimited": "Необмежена кількість ідей і голосів",
+  "settings_billing_forever": "назавжди",
+  "settings_billing_history": "Історія платежів",
+  "settings_billing_manage": "Керувати підпискою",
+  "settings_billing_meta": "Оплата · налаштування",
+  "settings_billing_monthly": "Щомісяця",
+  "settings_billing_per_month": "на місяць",
+  "settings_billing_per_year": "на рік",
+  "settings_billing_renews": "поновлюється {date}",
+  "settings_billing_soon": "Pro з'явиться незабаром.",
+  "settings_billing_sub": "Тарифи діють на рівні облікового запису. Кожен ваш простір враховується в ліміті.",
+  "settings_billing_title": "Оплата",
+  "settings_billing_upgrade": "Підвищити тариф",
+  "settings_billing_upgrade_title": "Перейти на Pro",
+  "settings_billing_usage": [
+    {
+      "declarations": [
+        "input owned",
+        "input limit",
+        "local limitPlural = limit: plural"
+      ],
+      "selectors": [
+        "limitPlural"
+      ],
+      "match": {
+        "limitPlural=one": "{owned} з {limit} простору використано",
+        "limitPlural=few": "{owned} з {limit} просторів використано",
+        "limitPlural=many": "{owned} з {limit} просторів використано",
+        "limitPlural=other": "{owned} з {limit} просторів використано"
+      }
+    }
+  ],
+  "settings_billing_workspaces": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} простір",
+        "countPlural=few": "{count} простори",
+        "countPlural=many": "{count} просторів",
+        "countPlural=other": "{count} простори"
+      }
+    }
+  ],
+  "settings_billing_yearly": "Щороку, економія 33%",
   "settings_board_language_help": "Мова, яку бачать відвідувачі, поки не оберуть свою. Змінити її можна внизу сторінки.",
   "settings_board_language_label": "Мова дошки",
+  "settings_boards": "Дошки",
+  "settings_boards_added": "Дошку додано",
+  "settings_boards_delete_confirm": "Видалити «{name}»?",
+  "settings_boards_deleted": "Дошку видалено",
+  "settings_boards_description_placeholder": "Опис в один рядок",
+  "settings_boards_meta": "Дошки й теги · налаштування",
+  "settings_boards_name_placeholder": "Назва дошки",
+  "settings_boards_new": "Нова дошка",
+  "settings_boards_no_description": "Без опису",
+  "settings_boards_sub": "Дошки групують ідеї. Теги працюють поперек дошок.",
+  "settings_boards_title": "Дошки й теги",
+  "settings_boards_updated": "Дошку оновлено",
+  "settings_brand_accent_aria": "Акцентний колір",
+  "settings_brand_accent_help": "Позначка проголосованого, активна крапка в навігації, посилання й рамки фокуса на публічній дошці.",
+  "settings_brand_applied": "Застосовано",
+  "settings_brand_applied_no_logo": "Застосовано. Логотип не вдалося зберегти, тому його пропущено.",
+  "settings_brand_apply": "Застосувати вибране",
+  "settings_brand_apply_failed": "Не вдалося застосувати",
+  "settings_brand_applying": "Застосовуємо…",
+  "settings_brand_background": "Тло",
+  "settings_brand_background_dark": "Темне",
+  "settings_brand_background_light": "Світле",
+  "settings_brand_font": "Шрифт",
+  "settings_brand_font_note": "Для довідки. Дошки набрано шрифтом Geist.",
+  "settings_brand_found": "Знайдено на {host}. Зніміть позначку з усього, що хочете залишити як є.",
+  "settings_brand_found_lightened": "Освітлено з {original}, щоб було видно на темній дошці.",
+  "settings_brand_found_name": "Назва",
+  "settings_brand_found_no_colour": "Фірмового кольору не знайдено. Поточний акцент залишається.",
+  "settings_brand_found_rename": "Позначте, щоб перейменувати: {name}.",
+  "settings_brand_logo_help": "Показується в шапці дошки та у віджеті.",
+  "settings_brand_logo_help_empty": "Підлаштуйтеся під свій сайт угорі, щоб додати логотип.",
+  "settings_brand_logo_label": "Логотип",
+  "settings_brand_logo_remove": "Прибрати",
+  "settings_brand_logo_remove_failed": "Не вдалося видалити логотип",
+  "settings_brand_match_button": "Підлаштувати під сайт",
+  "settings_brand_match_section": "Підлаштувати під мій сайт",
+  "settings_brand_meta": "Брендинг · налаштування",
+  "settings_brand_nothing_found": "На {host} не знайдено нічого надійного. Дошка зберігає поточний вигляд.",
+  "settings_brand_preview_help": "Позначка проголосованого у вашому акцентному кольорі.",
+  "settings_brand_read_failed": "Не вдалося прочитати цей сайт",
+  "settings_brand_reading": "Читаємо…",
+  "settings_brand_sub": "Як публічна дошка виглядає для ваших користувачів. Панель керування лишається однаковою для всіх.",
+  "settings_brand_title": "Брендинг",
+  "settings_brand_use_color": "Використати {color}",
+  "settings_brand_website_help": "Ми читаємо вашу головну сторінку: кольори, логотип і назву. Нічого не зміниться, доки ви не застосуєте.",
+  "settings_brand_website_label": "Сайт",
+  "settings_cancel": "Скасувати",
+  "settings_changelog": "Журнал змін",
+  "settings_copied": "Скопійовано",
+  "settings_copy": "Копіювати",
+  "settings_delete": "Видалити",
+  "settings_demo_locked": "Недоступно в демо-просторі.",
+  "settings_dismiss": "Відхилити",
+  "settings_done": "Готово",
+  "settings_edit": "Редагувати",
+  "settings_export_authors": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} автор",
+        "countPlural=few": "{count} автори",
+        "countPlural=many": "{count} авторів",
+        "countPlural=other": "{count} автори"
+      }
+    }
+  ],
+  "settings_export_boards": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} дошка",
+        "countPlural=few": "{count} дошки",
+        "countPlural=many": "{count} дошок",
+        "countPlural=other": "{count} дошки"
+      }
+    }
+  ],
+  "settings_export_choose": "Обрати CSV",
+  "settings_export_csv_download": "Завантажити CSV",
+  "settings_export_csv_help": "Один рядок на ідею, для таблиць. Коментарі не входять.",
+  "settings_export_exported": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Експортовано {count} ідею",
+        "countPlural=few": "Експортовано {count} ідеї",
+        "countPlural=many": "Експортовано {count} ідей",
+        "countPlural=other": "Експортовано {count} ідеї"
+      }
+    }
+  ],
+  "settings_export_failed": "Не вдалося експортувати",
+  "settings_export_from_csv": "З CSV",
+  "settings_export_from_csv_help": "Експорти з інших інструментів відгуків підійдуть без змін. Голоси переносяться як кількість, а автори стають учасниками, чиї облікові записи вони зможуть забрати собі, зареєструвавшись.",
+  "settings_export_import": "Імпорт",
+  "settings_export_import_failed": "Не вдалося імпортувати",
+  "settings_export_import_posts": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Імпортувати {count} ідею",
+        "countPlural=few": "Імпортувати {count} ідеї",
+        "countPlural=many": "Імпортувати {count} ідей",
+        "countPlural=other": "Імпортувати {count} ідеї"
+      }
+    }
+  ],
+  "settings_export_imported": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Імпортовано {count} ідею",
+        "countPlural=few": "Імпортовано {count} ідеї",
+        "countPlural=many": "Імпортовано {count} ідей",
+        "countPlural=other": "Імпортовано {count} ідеї"
+      }
+    }
+  ],
+  "settings_export_importing": "Імпортуємо",
+  "settings_export_json_download": "Завантажити JSON",
+  "settings_export_json_help": "Кожна ідея з текстом, статусом, дошкою, тегами, голосами, автором і публічними коментарями.",
+  "settings_export_meta": "Експорт · налаштування",
+  "settings_export_more": "і ще {count}",
+  "settings_export_no_rows": "Ідей не знайдено. Очікувалася колонка Title.",
+  "settings_export_posts": "Ідеї",
+  "settings_export_preparing": "Готуємо",
+  "settings_export_ready_posts": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} ідея готова",
+        "countPlural=few": "{count} ідеї готові",
+        "countPlural=many": "{count} ідей готові",
+        "countPlural=other": "{count} ідеї готові"
+      }
+    }
+  ],
+  "settings_export_statuses": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} статус",
+        "countPlural=few": "{count} статуси",
+        "countPlural=many": "{count} статусів",
+        "countPlural=other": "{count} статуси"
+      }
+    }
+  ],
+  "settings_export_sub": "Ваші дані належать вам. Завантажуйте їх і вивантажуйте.",
+  "settings_export_title": "Імпорт та експорт",
+  "settings_export_votes": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} голос",
+        "countPlural=few": "{count} голоси",
+        "countPlural=many": "{count} голосів",
+        "countPlural=other": "{count} голоси"
+      }
+    }
+  ],
+  "settings_feedback": "Відгуки",
+  "settings_general_meta": "Загальні · налаштування",
+  "settings_general_name_aria": "Назва простору",
+  "settings_general_name_help": "Показується біля логотипа й у заголовку сторінки.",
+  "settings_general_name_label": "Назва",
+  "settings_general_section": "Простір",
+  "settings_general_sub": "Що відвідувачі бачать угорі кожної публічної сторінки.",
+  "settings_general_tagline_help": "Один рядок під заголовком дошки. Залиште порожнім, щоб приховати.",
+  "settings_general_tagline_label": "Підзаголовок",
+  "settings_general_title": "Загальні",
+  "settings_int_all_boards": "Усі дошки",
+  "settings_int_boards_note": "Релізи журналу змін надсилаються незалежно від обраних дошок.",
+  "settings_int_delivered": "Доставлено {when}",
+  "settings_int_disconnect": "Відключити",
+  "settings_int_disconnect_confirm": "Відключити «{title}»?",
+  "settings_int_discord_help": "У налаштуваннях каналу відкрийте «Інтеграції», створіть вебхук і скопіюйте його URL.",
+  "settings_int_event_changelog_published": "Журнал змін опубліковано",
+  "settings_int_event_comment_created": "Новий коментар",
+  "settings_int_event_post_created": "Нова ідея",
+  "settings_int_event_status_changed": "Зміна статусу",
+  "settings_int_failed": "Помилка {when}: {error}",
+  "settings_int_idle": "Підключено, нічого ще не надіслано",
+  "settings_int_meta": "Інтеграції · налаштування",
+  "settings_int_not_connected": "Не підключено",
+  "settings_int_paused": "Призупинено",
+  "settings_int_saved": "{title}: збережено",
+  "settings_int_secret_title": "Скопіюйте секрет підпису зараз. Його показують лише раз.",
+  "settings_int_send_test": "Надіслати тест",
+  "settings_int_send_when": "Надсилати, коли",
+  "settings_int_sending_on": "Надсилання ввімкнено",
+  "settings_int_signed_after": "із вашим секретом.",
+  "settings_int_signed_before": "Кожен запит має заголовок",
+  "settings_int_signed_middle": ": це HMAC-SHA256 від",
+  "settings_int_slack_help": "Створіть у Slack вхідний вебхук для каналу, потім вставте його сюди.",
+  "settings_int_sub": "Надсилайте нові ідеї, коментарі, зміни статусу та релізи туди, де ваша команда вже читає.",
+  "settings_int_test_failed": "Тест не пройдено: {error}",
+  "settings_int_test_ok": "Тестове повідомлення доставлено",
+  "settings_int_title": "Інтеграції",
+  "settings_int_unknown_error": "невідома помилка",
+  "settings_int_url_label": "URL вебхука",
+  "settings_int_url_saved": "Збережено, закінчується на {hint}. Вставте новий URL, щоб замінити.",
+  "settings_int_webhook_help": "Будь-яка https-адреса. Ми надсилаємо POST із JSON і підписуємо запит, щоб ви могли перевірити, що він від нас.",
+  "settings_int_webhook_title": "Вебхук",
+  "settings_keys_active": "Активні ключі",
+  "settings_keys_agent_aria": "Агент",
+  "settings_keys_agent_other": "Інше",
+  "settings_keys_claude_manual": "Або підключіть самі",
+  "settings_keys_claude_manual_help": "Виконайте в терміналі, потім перезапустіть Claude Code.",
+  "settings_keys_claude_send": "Надішліть це в Claude Code",
+  "settings_keys_claude_send_help": "Вставте в новий чат у вашому проєкті. Claude підключить openheard і проведе вас через налаштування.",
+  "settings_keys_codex_config": "Додайте до ~/.codex/config.toml",
+  "settings_keys_codex_config_help": "Потім перезапустіть Codex.",
+  "settings_keys_codex_send": "Потім надішліть це в Codex",
+  "settings_keys_codex_send_help": "Вставте в Codex у вашому проєкті.",
+  "settings_keys_connect_title": "Підключіть свого ШІ-агента",
+  "settings_keys_copy_failed": "Не вдалося скопіювати. Виділіть текст і скопіюйте вручну.",
+  "settings_keys_create": "Створити ключ",
+  "settings_keys_create_failed": "Не вдалося створити ключ",
+  "settings_keys_created": "створено {when}",
+  "settings_keys_cursor_add": "Додати в Cursor",
+  "settings_keys_cursor_add_help": "Відкриває Cursor і встановлює сервер openheard із вашим ключем.",
+  "settings_keys_cursor_send": "Потім надішліть це в Cursor",
+  "settings_keys_cursor_send_help": "Вставте в чат Agent у вашому проєкті.",
+  "settings_keys_empty": "Ключів ще немає.",
+  "settings_keys_footnote": "Передайте ключ як Bearer-токен, щоб викликати HTTP API або підключити MCP-сервер за адресою /api/mcp.",
+  "settings_keys_fresh_sub": "Оберіть агента й вставте промпт. Він підключиться сам і налаштує openheard.",
+  "settings_keys_fresh_title": "Ключ готовий. Скопіюйте потрібне зараз: його показують лише раз.",
+  "settings_keys_idle_account": "Створіть ключ угорі, і він з'явиться тут. Один ключ відкриває доступ до всіх ваших просторів.",
+  "settings_keys_idle_workspace": "Створіть ключ угорі, і він з'явиться тут. Цей ключ відкриває доступ лише до цього простору.",
+  "settings_keys_key_help": "Для HTTP API або інших інструментів.",
+  "settings_keys_key_label": "API-ключ",
+  "settings_keys_limit": "Обмежити цим простором",
+  "settings_keys_limit_help": "Для ключа, яким ви ділитеся з колегою або скриптом.",
+  "settings_keys_meta": "API-ключі · налаштування",
+  "settings_keys_name_placeholder": "Назва ключа, напр. Claude на моєму ноутбуці",
+  "settings_keys_never_used": "не використано",
+  "settings_keys_other_header": "Заголовок",
+  "settings_keys_other_header_help": "Надсилайте його з кожним запитом.",
+  "settings_keys_other_send": "Потім надішліть це своєму агентові",
+  "settings_keys_other_send_help": "Будь-який агент із підтримкою MCP.",
+  "settings_keys_other_url": "URL сервера",
+  "settings_keys_other_url_help": "MCP-сервер зі Streamable HTTP.",
+  "settings_keys_prompt": "Підключи openheard, нашу дошку відгуків, і налаштуй її для цього проєкту.\n\n1. {connect}\n   Якщо інструменти openheard ще не з'явилися, скажи мені, щоб я тебе перезапустив, і продовжуй із кроку 2.\n2. {step2}\n3. Налаштуй: запитай адресу нашого сайту, потім виконай match_website і apply_branding. Запропонуй дошки й статуси та створи ті, з якими я погоджуся. Виконай configure_widget, щоб підлаштувати віджет під наш бренд. Виконай get_widget_snippet для фреймворка цього репозиторію й один раз додай сніпет у кореневий layout; покажи мені diff.\n4. Питай мене, перш ніж робити щось публічне чи надсилати листи, і ніколи не записуй цей ключ у файл, що потрапляє в коміт.",
+  "settings_keys_prompt_account": "Виконай list_workspaces. Цей ключ відкриває доступ до кожного простору, яким я керую. Якщо їх кілька, запитай, який використовувати для цього проєкту, і передавай його як workspace у кожному виклику; create_workspace може створити новий.",
+  "settings_keys_prompt_claude": "Додай MCP-сервер openheard: виконай  {command}",
+  "settings_keys_prompt_codex": "MCP-сервер openheard додано в ~/.codex/config.toml. Перевір, що його інструменти доступні.",
+  "settings_keys_prompt_cursor": "MCP-сервер openheard встановлено в Cursor. Перевір, що його інструменти доступні.",
+  "settings_keys_prompt_other": "Додай HTTP MCP-сервер з назвою openheard, URL {url} і заголовком {header}",
+  "settings_keys_prompt_workspace": "Виконай get_workspace, щоб перевірити підключення.",
+  "settings_keys_revoke": "Відкликати",
+  "settings_keys_revoke_confirm": "Відкликати «{name}»?",
+  "settings_keys_scope_all": "Усі ваші простори",
+  "settings_keys_scope_one": "Лише {name}",
+  "settings_keys_sub": "Ключі для HTTP API, MCP-сервера й CLI. Ключ діє від вашого імені в кожному просторі, яким ви керуєте, і може створювати нові.",
+  "settings_keys_title": "API-ключі",
+  "settings_keys_used": "використано {when}",
+  "settings_kind_closed": "закрито",
+  "settings_kind_closed_help": "Не робитимемо або об'єднано",
+  "settings_kind_done": "випущено",
+  "settings_kind_done_help": "Випущено",
+  "settings_kind_open": "нова",
+  "settings_kind_open_help": "Сюди потрапляють нові ідеї",
+  "settings_kind_planned": "заплановано",
+  "settings_kind_planned_help": "Заплановано, але не розпочато",
+  "settings_kind_progress": "у роботі",
+  "settings_kind_progress_help": "У розробці",
+  "settings_kind_review": "розгляд",
+  "settings_kind_review_help": "Розглядається",
+  "settings_nav_access": "Доступ",
+  "settings_nav_api_keys": "API-ключі",
+  "settings_nav_billing": "Оплата",
+  "settings_nav_boards": "Дошки й теги",
+  "settings_nav_branding": "Брендинг",
+  "settings_nav_developers": "Розробникам",
+  "settings_nav_export": "Імпорт та експорт",
+  "settings_nav_general": "Загальні",
+  "settings_nav_integrations": "Інтеграції",
+  "settings_nav_notifications": "Сповіщення",
+  "settings_nav_personal": "Особисте",
+  "settings_nav_product": "Продукт",
+  "settings_nav_profile": "Профіль",
+  "settings_nav_public_board": "Публічна дошка",
+  "settings_nav_statuses": "Статуси",
+  "settings_nav_team": "Команда",
+  "settings_nav_title": "Налаштування",
+  "settings_nav_widget": "Віджет",
+  "settings_nav_workspace": "Простір",
+  "settings_notif_comment_aria": "Новий коментар",
+  "settings_notif_comment_help": "Публічний коментар до будь-якої ідеї.",
+  "settings_notif_comment_label": "Хтось коментує",
+  "settings_notif_confirm_sent": "Перевірте пошту, щоб підтвердити листи журналу змін",
+  "settings_notif_followed_aria": "Ідеї, які я відстежую",
+  "settings_notif_followed_help": "Ідеї, за які ви проголосували, які прокоментували або написали, змінюють статус.",
+  "settings_notif_followed_label": "Змінюється статус ідеї, яку я відстежую",
+  "settings_notif_meta": "Сповіщення · налаштування",
+  "settings_notif_post_aria": "Нова ідея",
+  "settings_notif_post_help": "Нова ідея потрапляє в «Очікує».",
+  "settings_notif_post_label": "Хтось додає ідею",
+  "settings_notif_section": "Надсилати мені лист, коли",
+  "settings_notif_ships_help": "Кожен новий запис журналу змін.",
+  "settings_notif_ships_label": "Щось випущено",
+  "settings_notif_status_aria": "Зміна статусу",
+  "settings_notif_status_help": "Інший адміністратор змінює статус ідеї.",
+  "settings_notif_status_label": "Змінюється статус",
+  "settings_notif_sub": "Що надходить вам на пошту з цього простору.",
+  "settings_notif_title": "Сповіщення",
+  "settings_notif_users_aria": "Листи користувачам про статус",
+  "settings_notif_users_help": "Ті, хто голосував чи коментував, і автор дізнаються, коли їхня ідея змінює статус, разом із вашою нотаткою.",
+  "settings_notif_users_label": "Оновлення статусу",
+  "settings_notif_users_section": "Листи вашим користувачам",
+  "settings_posts_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} ідея",
+        "countPlural=few": "{count} ідеї",
+        "countPlural=many": "{count} ідей",
+        "countPlural=other": "{count} ідеї"
+      }
+    }
+  ],
+  "settings_preview": "Попередній перегляд",
+  "settings_profile_email_help": "Потрібна для входу. Зміна адреси з'явиться разом із підтримкою пошти.",
+  "settings_profile_email_label": "Електронна пошта",
+  "settings_profile_meta": "Профіль · налаштування",
+  "settings_profile_name_aria": "Відображуване ім'я",
+  "settings_profile_name_help": "Показується під вашими коментарями й у списку команди.",
+  "settings_profile_name_label": "Ім'я",
+  "settings_profile_picture_help": "Завантаження з'явиться разом із підтримкою зображень.",
+  "settings_profile_picture_label": "Фото",
+  "settings_profile_section": "Ви",
+  "settings_profile_sub": "Як вас бачать в ідеях і відповідях.",
+  "settings_profile_title": "Профіль",
+  "settings_public_footer": "Підвал",
+  "settings_public_meta": "Публічна дошка · налаштування",
+  "settings_public_powered_aria": "Працює на",
+  "settings_public_powered_help": "Невеликий підпис про авторство внизу сторінки.",
+  "settings_public_powered_label": "Працює на openheard",
+  "settings_public_sub": "Як дошка працює для відвідувачів.",
+  "settings_public_theme_help": "Темна чи світла — однакова для всіх відвідувачів.",
+  "settings_public_theme_label": "Тема",
+  "settings_public_title": "Публічна дошка",
+  "settings_roadmap": "Дорожня карта",
+  "settings_save": "Зберегти",
+  "settings_save_failed": "Не вдалося зберегти",
+  "settings_saved": "Збережено",
+  "settings_saving": "Зберігаємо…",
+  "settings_sending": "Надсилаємо…",
+  "settings_something_wrong": "Щось пішло не так",
+  "settings_statuses_added": "Статус додано",
+  "settings_statuses_delete_confirm": "Видалити «{name}»?",
+  "settings_statuses_deleted": "Статус видалено",
+  "settings_statuses_footnote": "Кожен статус має тип, який підказує openheard, що він означає. Нові ідеї потрапляють у перший статус типу «нова», об'єднані — у «закрито», а випуск із журналу змін використовує «випущено».",
+  "settings_statuses_kind": "тип",
+  "settings_statuses_label_placeholder": "Назва",
+  "settings_statuses_meta": "Статуси · налаштування",
+  "settings_statuses_new": "Новий статус",
+  "settings_statuses_on_roadmap": "Показувати на дорожній карті",
+  "settings_statuses_roadmap_chip": "дорожня карта",
+  "settings_statuses_sub": "Стани, у яких може бути ідея. Порядок тут збігається з порядком на дорожній карті й у хронології.",
+  "settings_statuses_title": "Статуси",
+  "settings_tags_added": "Тег додано",
+  "settings_tags_deleted": "Тег видалено",
+  "settings_tags_empty": "Тегів ще немає.",
+  "settings_tags_name_placeholder": "Назва тега",
+  "settings_tags_new": "Новий тег",
+  "settings_tags_title": "Теги",
+  "settings_team_admins": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} адміністратор",
+        "countPlural=few": "{count} адміністратори",
+        "countPlural=many": "{count} адміністраторів",
+        "countPlural=other": "{count} адміністратори"
+      }
+    }
+  ],
+  "settings_team_invite_failed": "Не вдалося надіслати запрошення",
+  "settings_team_invite_revoked": "Запрошення скасовано",
+  "settings_team_invite_send": "Надіслати запрошення",
+  "settings_team_invite_sent": "Запрошення надіслано на {email}",
+  "settings_team_invites": "Запрошення в очікуванні",
+  "settings_team_joined": "приєднано {when}",
+  "settings_team_meta": "Команда · налаштування",
+  "settings_team_people": "Люди",
+  "settings_team_remove": "Вилучити",
+  "settings_team_removed": "Користувача вилучено: {name}",
+  "settings_team_role_admin": "Адміністратор",
+  "settings_team_role_changed": "Роль змінено — {name}: {role}",
+  "settings_team_role_member": "Учасник",
+  "settings_team_sub": "Адміністратори керують дошкою й бачать внутрішні нотатки. Учасники — усі інші, хто зареєструвався.",
+  "settings_team_title": "Команда",
+  "settings_team_you": "ви",
+  "settings_theme_auto": "Авто",
+  "settings_theme_dark": "Темна",
+  "settings_theme_light": "Світла",
+  "settings_unsaved": "Є незбережені зміни",
+  "settings_widget_accent_aria": "Акцентний колір",
+  "settings_widget_accent_help": "Кнопка віджета, позначки проголосованого й посилання. За замовчуванням — колір вашого бренду.",
+  "settings_widget_copy_failed": "Не вдалося скопіювати. Виділіть сніпет і скопіюйте вручну.",
+  "settings_widget_demo_status": "Віджет у демо лишається без змін",
+  "settings_widget_discard": "Скасувати зміни",
+  "settings_widget_icon_aria": "Іконка кнопки",
+  "settings_widget_icon_chat": "Чат",
+  "settings_widget_icon_lightbulb": "Лампочка",
+  "settings_widget_icon_megaphone": "Рупор",
+  "settings_widget_icon_question": "Питання",
+  "settings_widget_icon_sparkle": "Іскра",
+  "settings_widget_label_aria": "Напис на кнопці",
+  "settings_widget_label_help": "Показуються на кнопці.",
+  "settings_widget_label_label": "Напис і іконка",
+  "settings_widget_launcher_help": "Кнопка, що відкриває віджет.",
+  "settings_widget_launcher_hidden": "Приховано",
+  "settings_widget_launcher_icon": "Іконка",
+  "settings_widget_launcher_label": "Кнопка віджета",
+  "settings_widget_launcher_label_option": "Іконка + напис",
+  "settings_widget_launcher_own": "Ваша власна кнопка",
+  "settings_widget_meta": "Віджет · налаштування",
+  "settings_widget_nav_aria": "Налаштування віджета",
+  "settings_widget_open_a": "Будь-який елемент з атрибутом",
+  "settings_widget_open_b": "відкриває віджет, або викличте",
+  "settings_widget_open_c": ". Передайте назву вкладки, щоб відкрити саме її. Якщо ваша кнопка — єдиний спосіб відкрити віджет, оберіть для кнопки віджета «Приховано» у розділі «Вигляд».",
+  "settings_widget_open_example": "Що нового",
+  "settings_widget_open_title": "Відкривайте з власної кнопки",
+  "settings_widget_origins_a": "Сайти, на яких може показуватися віджет, по одній адресі (origin) на рядок, наприклад",
+  "settings_widget_origins_any": "Віджет може вбудувати будь-який сайт",
+  "settings_widget_origins_b": "або",
+  "settings_widget_origins_c": ". Залиште порожнім, щоб дозволити будь-який сайт. Інші сайти отримають порожню рамку, тож ніхто не зможе видати вашу дошку за свою на власній сторінці.",
+  "settings_widget_origins_demo": "У демо змінювати не можна.",
+  "settings_widget_origins_invalid": "Це не origin: {value}",
+  "settings_widget_origins_placeholder": "Будь-який сайт",
+  "settings_widget_origins_restricted": "Тепер віджет можуть вбудовувати лише ці сайти",
+  "settings_widget_origins_title": "Дозволені сайти",
+  "settings_widget_page_content": "Вміст",
+  "settings_widget_page_install": "Встановлення",
+  "settings_widget_position_bottom_left": "Унизу ліворуч",
+  "settings_widget_position_bottom_right": "Унизу праворуч",
+  "settings_widget_position_help": "У якому куті вона розташована.",
+  "settings_widget_position_label": "Розташування",
+  "settings_widget_preview_note": "Наживо, на основі цього простору. Голоси й ідеї справжні.",
+  "settings_widget_preview_title": "Попередній перегляд віджета",
+  "settings_widget_radius_help": "Підлаштуйте під кнопки й картки вашого застосунку.",
+  "settings_widget_radius_label": "Заокруглення кутів",
+  "settings_widget_radius_round": "Круглі",
+  "settings_widget_radius_sharp": "Гострі",
+  "settings_widget_radius_soft": "М'які",
+  "settings_widget_saved": "Збережено. Сайти зі сніпетом підхоплять зміни протягом хвилини.",
+  "settings_widget_snippet": "Сніпет",
+  "settings_widget_snippet_copy_aria": "Копіювати сніпет",
+  "settings_widget_snippet_help": "Вставте це перед закривним тегом body на кожній сторінці, де має бути кнопка віджета. Сніпет завантажується після вашої сторінки й ніколи її не блокує. Зміни вигляду доходять до нього самі, тож редагувати його знову не доведеться.",
+  "settings_widget_sub": "Додайте відгуки, дорожню карту й журнал змін у свій застосунок одним тегом script.",
+  "settings_widget_summary_icon": "іконка",
+  "settings_widget_summary_icon_label": "іконка + напис",
+  "settings_widget_summary_none": "без кнопки",
+  "settings_widget_tab_hidden": "Приховано й на публічній дошці, тому віджет її пропускає. Увімкніть у розділі «Доступ».",
+  "settings_widget_tab_last": "Залиште ввімкненою принаймні одну вкладку.",
+  "settings_widget_tabs": "Вкладки",
+  "settings_widget_tabs_help": "Вимкніть те, чим не користуєтесь. Перша ввімкнена вкладка відкривається за замовчуванням.",
+  "settings_widget_theme_help": "«Авто» слідує системним налаштуванням відвідувача.",
+  "settings_widget_theme_label": "Тема",
+  "settings_widget_title": "Віджет",
   "start_access_question": "Хто може бачити вашу дошку?",
   "start_back": "Назад",
   "start_continue": "Продовжити",

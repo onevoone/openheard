@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { Link, Outlet, createFileRoute, redirect, useLoaderData, useLocation } from "@tanstack/react-router";
 
@@ -28,23 +29,23 @@ function SettingsLayout() {
   // The demo hands admin to anyone, so the settings that spend money, show
   // member emails or outlive the nightly reset are not there at all.
   const locked = isDemo(root.workspace) ? (DEMO_HIDDEN_SETTINGS as readonly string[]) : [];
-  const groups = SETTINGS_NAV.map((g) => ({ group: g.group, items: g.items.filter(([slug]) => !locked.includes(slug)) })).filter((g) => g.items.length > 0);
+  const groups = SETTINGS_NAV.map((g) => ({ id: g.id, group: g.group, items: g.items.filter(([slug]) => !locked.includes(slug)) })).filter((g) => g.items.length > 0);
   const onLocked = locked.some((slug) => pathname === `/dashboard/settings/${slug}`);
   return (
-    <Panel title="Settings" className="flex flex-col md:flex-row">
+    <Panel title={m.settings_nav_title()} className="flex flex-col md:flex-row">
       <nav data-settings-nav className="flex shrink-0 flex-row gap-1 overflow-x-auto border-b px-3 py-2 md:w-[220px] md:flex-col md:overflow-x-hidden md:overflow-y-auto md:border-r md:border-b-0 md:pt-3 md:pb-4">
         <Link to="/dashboard" className="hidden h-[30px] cursor-pointer items-center gap-2 rounded-md px-2 text-sm font-semibold select-none hover:bg-accent/60 md:flex">
-          <ArrowLeftIcon className="size-[13px] text-faint" /> Settings
+          <ArrowLeftIcon className="size-[13px] text-faint" /> {m.settings_nav_title()}
         </Link>
         {groups.map((g) => (
-          <div key={g.group} className="flex flex-row gap-0.5 md:flex-col md:pt-3.5">
-            <div className="hidden px-2 pb-1.5 text-xs font-medium text-muted-foreground md:block">{g.group}</div>
+          <div key={g.id} className="flex flex-row gap-0.5 md:flex-col md:pt-3.5">
+            <div className="hidden px-2 pb-1.5 text-xs font-medium text-muted-foreground md:block">{g.group()}</div>
             {g.items.map(([slug, label]) => {
               const to = `/dashboard/settings/${slug}`;
               const on = pathname === to;
               return (
                 <Link key={slug} to={to} preload="viewport" className={cn("flex h-7 cursor-pointer items-center whitespace-nowrap rounded-md px-2 text-[13px] select-none", on ? "bg-secondary font-semibold text-foreground" : "text-muted-foreground hover:bg-accent/60 hover:text-foreground")}>
-                  {label}
+                  {label()}
                 </Link>
               );
             })}
@@ -55,7 +56,7 @@ function SettingsLayout() {
         {/* The widget page keeps its live preview beside the form. */}
         <div className={pathname === "/dashboard/settings/widget" ? "max-w-[1400px]" : "max-w-[920px]"}>
           {onLocked ? (
-            <p className="text-[13px] text-muted-foreground">Not available in the demo workspace.</p>
+            <p className="text-[13px] text-muted-foreground">{m.settings_demo_locked()}</p>
           ) : (
             <Outlet />
           )}

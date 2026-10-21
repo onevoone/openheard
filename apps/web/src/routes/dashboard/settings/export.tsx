@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { DownloadSimpleIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { createFileRoute, useLoaderData, useRouter } from "@tanstack/react-router";
@@ -11,7 +12,7 @@ import type { ImportRow } from "@/lib/csv";
 import { PageHead } from "@/routes/dashboard/settings";
 
 export const Route = createFileRoute("/dashboard/settings/export")({
-  head: () => ({ meta: [{ title: "Export · settings" }] }),
+  head: () => ({ meta: [{ title: m.settings_export_meta() }] }),
   component: Export,
 });
 
@@ -33,7 +34,7 @@ function Export() {
 
   async function pick(file: File) {
     const rows = toImportRows(parseCsv(await file.text()));
-    if (rows.length === 0) return toast.error("No posts found. Expected a Title column.");
+    if (rows.length === 0) return toast.error(m.settings_export_no_rows());
     setPreview(rows);
   }
 
@@ -44,9 +45,9 @@ function Export() {
       const { created } = await importPosts({ data: { rows: preview } });
       setPreview(null);
       await router.invalidate();
-      toast.success(`Imported ${created} posts`);
+      toast.success(m.settings_export_imported({ count: created }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Import failed");
+      toast.error(err instanceof Error ? err.message : m.settings_export_import_failed());
     } finally {
       setBusy(null);
     }
@@ -63,9 +64,9 @@ function Export() {
         const lines = rows.map((p) => [p.id, p.title, p.status, p.board, p.votes, p.author?.name, p.author?.email, new Date(p.createdAt).toISOString(), p.tags.join("|"), p.body].map(csvCell).join(","));
         download(`${root.workspace.id}-posts-${stamp}.csv`, [head.join(","), ...lines].join("\n"), "text/csv");
       }
-      toast.success(`Exported ${rows.length} posts`);
+      toast.success(m.settings_export_exported({ count: rows.length }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Export failed");
+      toast.error(err instanceof Error ? err.message : m.settings_export_failed());
     } finally {
       setBusy(null);
     }
@@ -73,34 +74,34 @@ function Export() {
 
   return (
     <>
-      <PageHead title="Import & export" sub="Your data is yours. Bring it in, take it out." />
-      <SectionHead title="Posts" />
-      <Row label="JSON" help="Every post with body, status, board, tags, votes, author and public comments.">
+      <PageHead title={m.settings_export_title()} sub={m.settings_export_sub()} />
+      <SectionHead title={m.settings_export_posts()} />
+      <Row label="JSON" help={m.settings_export_json_help()}>
         <Button size="sm" variant="secondary" disabled={busy !== null} onClick={() => run("json")}>
-          <DownloadSimpleIcon className="size-3.5" /> {busy === "json" ? "Preparing" : "Download JSON"}
+          <DownloadSimpleIcon className="size-3.5" /> {busy === "json" ? m.settings_export_preparing() : m.settings_export_json_download()}
         </Button>
       </Row>
-      <Row label="CSV" help="One row per post, for spreadsheets. Comments are not included.">
+      <Row label="CSV" help={m.settings_export_csv_help()}>
         <Button size="sm" variant="secondary" disabled={busy !== null} onClick={() => run("csv")}>
-          <DownloadSimpleIcon className="size-3.5" /> {busy === "csv" ? "Preparing" : "Download CSV"}
+          <DownloadSimpleIcon className="size-3.5" /> {busy === "csv" ? m.settings_export_preparing() : m.settings_export_csv_download()}
         </Button>
       </Row>
       <div className="pt-7">
-        <SectionHead title="Import" />
+        <SectionHead title={m.settings_export_import()} />
       </div>
-      <Row label="From a CSV" help="Exports from other feedback tools work as they are. Votes come over as counts, authors as members they can claim by signing up.">
+      <Row label={m.settings_export_from_csv()} help={m.settings_export_from_csv_help()}>
         <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && pick(e.target.files[0])} />
         <Button size="sm" variant="secondary" disabled={busy !== null} onClick={() => fileRef.current?.click()}>
-          <UploadSimpleIcon className="size-3.5" /> Choose CSV
+          <UploadSimpleIcon className="size-3.5" /> {m.settings_export_choose()}
         </Button>
       </Row>
       {preview ? (
         <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-card p-4">
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-semibold">
-              {preview.length} posts ready · {preview.reduce((n, r) => n + r.votes, 0)} votes · {new Set(preview.map((r) => r.authorEmail).filter(Boolean)).size} authors
+              {m.settings_export_ready_posts({ count: preview.length })} · {m.settings_export_votes({ count: preview.reduce((n, r) => n + r.votes, 0) })} · {m.settings_export_authors({ count: new Set(preview.map((r) => r.authorEmail).filter(Boolean)).size })}
             </span>
-            <span className="text-xs text-faint">{new Set(preview.map((r) => r.board ?? "")).size} boards · {new Set(preview.map((r) => r.status ?? "")).size} statuses</span>
+            <span className="text-xs text-faint">{m.settings_export_boards({ count: new Set(preview.map((r) => r.board ?? "")).size })} · {m.settings_export_statuses({ count: new Set(preview.map((r) => r.status ?? "")).size })}</span>
           </div>
           <div className="flex max-h-48 flex-col overflow-auto rounded-md border bg-background">
             {preview.slice(0, 12).map((r, i) => (
@@ -111,14 +112,14 @@ function Export() {
                 <span className="text-faint">{r.authorName ?? ""}</span>
               </div>
             ))}
-            {preview.length > 12 ? <div className="px-3 py-1.5 text-xs text-faint">and {preview.length - 12} more</div> : null}
+            {preview.length > 12 ? <div className="px-3 py-1.5 text-xs text-faint">{m.settings_export_more({ count: preview.length - 12 })}</div> : null}
           </div>
           <div className="flex justify-end gap-2">
             <Button size="sm" variant="ghost" onClick={() => setPreview(null)}>
-              Cancel
+              {m.settings_cancel()}
             </Button>
             <Button size="sm" arrow disabled={busy !== null} onClick={runImport}>
-              {busy === "import" ? "Importing" : `Import ${preview.length} posts`}
+              {busy === "import" ? m.settings_export_importing() : m.settings_export_import_posts({ count: preview.length })}
             </Button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { CopyIcon, PlusIcon } from "@phosphor-icons/react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
@@ -13,7 +14,7 @@ import { PageHead } from "@/routes/dashboard/settings";
 
 export const Route = createFileRoute("/dashboard/settings/api-keys")({
   loader: () => listApiKeys(),
-  head: () => ({ meta: [{ title: "API keys · settings" }] }),
+  head: () => ({ meta: [{ title: m.settings_keys_meta() }] }),
   component: ApiKeys,
 });
 
@@ -38,7 +39,7 @@ function ApiKeys() {
       setName("");
       await router.invalidate();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not create key");
+      toast.error(err instanceof Error ? err.message : m.settings_keys_create_failed());
     } finally {
       setBusy(false);
     }
@@ -46,50 +47,50 @@ function ApiKeys() {
 
   return (
     <>
-      <PageHead title="API keys" sub="Keys for the HTTP API, the MCP server and the CLI. A key acts as you in every workspace you administer, and can create new ones." />
+      <PageHead title={m.settings_keys_title()} sub={m.settings_keys_sub()} />
 
       <form onSubmit={create} className="flex flex-col gap-3 pb-6">
         <div className="flex flex-wrap items-center gap-2">
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Key name, e.g. Claude on my laptop" className="h-8 flex-1 rounded-lg border border-input bg-card px-2.5 text-[13px] outline-none placeholder:text-faint focus:border-ring/60" />
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={m.settings_keys_name_placeholder()} className="h-8 flex-1 rounded-lg border border-input bg-card px-2.5 text-[13px] outline-none placeholder:text-faint focus:border-ring/60" />
           <Button size="sm" type="submit" disabled={busy || !name.trim()}>
-            <PlusIcon weight="bold" className="size-3" /> Create key
+            <PlusIcon weight="bold" className="size-3" /> {m.settings_keys_create()}
           </Button>
         </div>
         <div className="flex items-center gap-2.5">
-          <Toggle on={limited} onChange={setLimited} label="Limit to this workspace" />
-          <span className="text-[13px] font-semibold">Limit to this workspace</span>
-          <span className="text-xs text-faint">Use it for a key you share with a teammate or a script.</span>
+          <Toggle on={limited} onChange={setLimited} label={m.settings_keys_limit()} />
+          <span className="text-[13px] font-semibold">{m.settings_keys_limit()}</span>
+          <span className="text-xs text-faint">{m.settings_keys_limit_help()}</span>
         </div>
       </form>
 
       <Connect fresh={fresh} scope={fresh ? freshScope : scope} rootDomain={rootDomain} onDone={() => setFresh(null)} />
 
-      <SectionHead title="Active keys" right={<span className="text-xs text-faint">{live.length}</span>} />
-      {live.length === 0 ? <p className="border-t py-4 text-sm text-faint">No keys yet.</p> : null}
+      <SectionHead title={m.settings_keys_active()} right={<span className="text-xs text-faint">{live.length}</span>} />
+      {live.length === 0 ? <p className="border-t py-4 text-sm text-faint">{m.settings_keys_empty()}</p> : null}
       {live.map((k) => (
         <div key={k.id} className="flex items-center gap-3 border-t py-2.5">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="text-[13px] font-semibold">{k.name}</span>
             <span className="text-[11px] text-faint">
-              {k.prefix}… · {k.scope === "account" ? "All your workspaces" : `Only ${workspaceName}`}
+              {k.prefix}… · {k.scope === "account" ? m.settings_keys_scope_all() : m.settings_keys_scope_one({ name: workspaceName })}
             </span>
           </div>
-          <span className="text-xs text-faint">{k.lastUsedAt ? `used ${since(k.lastUsedAt)}` : "never used"}</span>
-          <span className="text-xs text-faint">created {since(k.createdAt)}</span>
-          <Button size="sm" variant="ghost" onClick={() => confirm(`Revoke "${k.name}"?`) && revokeApiKey({ data: { id: k.id } }).then(() => router.invalidate())}>
-            Revoke
+          <span className="text-xs text-faint">{k.lastUsedAt ? m.settings_keys_used({ when: since(k.lastUsedAt) }) : m.settings_keys_never_used()}</span>
+          <span className="text-xs text-faint">{m.settings_keys_created({ when: since(k.createdAt) })}</span>
+          <Button size="sm" variant="ghost" onClick={() => confirm(m.settings_keys_revoke_confirm({ name: k.name })) && revokeApiKey({ data: { id: k.id } }).then(() => router.invalidate())}>
+            {m.settings_keys_revoke()}
           </Button>
         </div>
       ))}
-      <p className="pt-6 pb-8 text-xs text-faint">Send a key as a Bearer token to call the HTTP API or connect the MCP server at /api/mcp.</p>
+      <p className="pt-6 pb-8 text-xs text-faint">{m.settings_keys_footnote()}</p>
     </>
   );
 }
 
 function copy(text: string) {
   navigator.clipboard.writeText(text).then(
-    () => toast.success("Copied"),
-    () => toast.error("Could not copy. Select the text and copy it by hand."),
+    () => toast.success(m.settings_copied()),
+    () => toast.error(m.settings_keys_copy_failed()),
   );
 }
 
@@ -102,7 +103,7 @@ function CopyBlock({ label, help, text, disabled }: { label: string; help: strin
           <span className="text-xs text-muted-foreground">{help}</span>
         </div>
         <Button size="sm" variant="secondary" onClick={() => copy(text)} disabled={disabled}>
-          <CopyIcon className="size-3" /> Copy
+          <CopyIcon className="size-3" /> {m.settings_copy()}
         </Button>
       </div>
       <div className={cn("max-h-36 overflow-y-auto rounded-md bg-background px-2.5 py-2 text-[12px]/5 wrap-anywhere whitespace-pre-wrap", disabled ? "text-faint" : "select-all")}>{text}</div>
@@ -112,11 +113,12 @@ function CopyBlock({ label, help, text, disabled }: { label: string; help: strin
 
 type Agent = "claude" | "cursor" | "codex" | "other";
 
-const AGENTS: { id: Agent; label: string; Logo: ((p: { className?: string }) => React.ReactNode) | null }[] = [
+// Product names stay as they are; "Other" is a callback so it is worded while rendering.
+const AGENTS: { id: Agent; label: string | (() => string); Logo: ((p: { className?: string }) => React.ReactNode) | null }[] = [
   { id: "claude", label: "Claude Code", Logo: ClaudeLogo },
   { id: "cursor", label: "Cursor", Logo: CursorLogo },
   { id: "codex", label: "Codex", Logo: OpenAILogo },
-  { id: "other", label: "Other", Logo: null },
+  { id: "other", label: () => m.settings_keys_agent_other(), Logo: null },
 ];
 
 type Scope = "workspace" | "account";
@@ -133,13 +135,7 @@ function apiOrigin(scope: Scope, rootDomain: string | null) {
 
 // What an agent does once connected. Step 1 differs per agent.
 function setupPrompt(connect: string, scope: Scope) {
-  return `Connect openheard, our feedback board, and set it up for this project.
-
-1. ${connect}
-   If the openheard tools do not show up yet, tell me to restart you, then continue from step 2.
-2. ${scope === "account" ? "Call list_workspaces. This key reaches every workspace I run. If there is more than one, ask me which to use for this project and pass it as workspace on every call; create_workspace can make a new one." : "Call get_workspace to check the connection."}
-3. Set it up: ask me for our website, then match_website and apply_branding. Suggest boards and statuses and create the ones I agree to. configure_widget to match our brand. get_widget_snippet for this codebase's framework and add it once to the root layout; show me the diff.
-4. Ask me before anything public or emailed, and never write this key into a committed file.`;
+  return m.settings_keys_prompt({ connect, step2: scope === "account" ? m.settings_keys_prompt_account() : m.settings_keys_prompt_workspace() });
 }
 
 // Connecting an agent, per agent. A new key fills in here and is shown once.
@@ -160,19 +156,19 @@ function Connect({ fresh, scope, rootDomain, onDone }: { fresh: string | null; s
     <div className={cn("mb-6 flex flex-col rounded-lg border", fresh ? "border-status-shipped/30 bg-status-shipped/5" : "bg-card")}>
       <div className="flex items-start justify-between gap-3 px-4 pt-3.5 pb-3">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[13px] font-semibold">{fresh ? "Your key is ready. Copy what you need now; it is shown once." : "Connect your AI agent"}</span>
+          <span className="text-[13px] font-semibold">{fresh ? m.settings_keys_fresh_title() : m.settings_keys_connect_title()}</span>
           <span className="text-xs text-muted-foreground">
-            {fresh ? "Pick your agent, then paste the prompt. It connects itself and sets openheard up." : scope === "account" ? "Create a key above and it fills in here. One key reaches all your workspaces." : "Create a key above and it fills in here. This key reaches only this workspace."}
+            {fresh ? m.settings_keys_fresh_sub() : scope === "account" ? m.settings_keys_idle_account() : m.settings_keys_idle_workspace()}
           </span>
         </div>
         {fresh ? (
           <Button size="sm" variant="ghost" onClick={onDone}>
-            Done
+            {m.settings_done()}
           </Button>
         ) : null}
       </div>
 
-      <div className="flex gap-1 border-y px-3 py-1.5" role="tablist" aria-label="Agent">
+      <div className="flex gap-1 border-y px-3 py-1.5" role="tablist" aria-label={m.settings_keys_agent_aria()}>
         {AGENTS.map(({ id, label, Logo }) => (
           <button
             key={id}
@@ -186,7 +182,7 @@ function Connect({ fresh, scope, rootDomain, onDone }: { fresh: string | null; s
             )}
           >
             {Logo ? <Logo className="size-3.5" /> : null}
-            {label}
+            {typeof label === "function" ? label() : label}
           </button>
         ))}
       </div>
@@ -194,38 +190,38 @@ function Connect({ fresh, scope, rootDomain, onDone }: { fresh: string | null; s
       <div className="flex flex-col gap-4 px-4 py-3.5">
         {agent === "claude" ? (
           <>
-            <CopyBlock label="Send this to Claude Code" help="Paste it into a new chat in your project. Claude connects openheard and walks you through setup." text={setupPrompt(`Add the openheard MCP server: run  ${claudeCommand}`, scope)} disabled={off} />
-            <CopyBlock label="Or connect it yourself" help="Run in a terminal, then restart Claude Code." text={claudeCommand} disabled={off} />
+            <CopyBlock label={m.settings_keys_claude_send()} help={m.settings_keys_claude_send_help()} text={setupPrompt(m.settings_keys_prompt_claude({ command: claudeCommand }), scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_claude_manual()} help={m.settings_keys_claude_manual_help()} text={claudeCommand} disabled={off} />
           </>
         ) : null}
         {agent === "cursor" ? (
           <>
             <div className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13px] font-semibold">Add to Cursor</span>
-                <span className="text-xs text-muted-foreground">Opens Cursor and installs the openheard server with your key.</span>
+                <span className="text-[13px] font-semibold">{m.settings_keys_cursor_add()}</span>
+                <span className="text-xs text-muted-foreground">{m.settings_keys_cursor_add_help()}</span>
               </div>
               <Button size="sm" disabled={off} render={off ? undefined : <a href={cursorLink} />} nativeButton={off}>
-                <CursorLogo className="size-3.5" /> Add to Cursor
+                <CursorLogo className="size-3.5" /> {m.settings_keys_cursor_add()}
               </Button>
             </div>
-            <CopyBlock label="Then send this to Cursor" help="Paste it into Agent chat in your project." text={setupPrompt("The openheard MCP server is installed in Cursor. Check its tools are available.", scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_cursor_send()} help={m.settings_keys_cursor_send_help()} text={setupPrompt(m.settings_keys_prompt_cursor(), scope)} disabled={off} />
           </>
         ) : null}
         {agent === "codex" ? (
           <>
-            <CopyBlock label="Add to ~/.codex/config.toml" help="Then restart Codex." text={codexConfig} disabled={off} />
-            <CopyBlock label="Then send this to Codex" help="Paste it into Codex in your project." text={setupPrompt("The openheard MCP server is in ~/.codex/config.toml. Check its tools are available.", scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_codex_config()} help={m.settings_keys_codex_config_help()} text={codexConfig} disabled={off} />
+            <CopyBlock label={m.settings_keys_codex_send()} help={m.settings_keys_codex_send_help()} text={setupPrompt(m.settings_keys_prompt_codex(), scope)} disabled={off} />
           </>
         ) : null}
         {agent === "other" ? (
           <>
-            <CopyBlock label="Server URL" help="Streamable HTTP MCP server." text={url} />
-            <CopyBlock label="Header" help="Send it with every request." text={header} disabled={off} />
-            <CopyBlock label="Then send this to your agent" help="Any agent with MCP support." text={setupPrompt(`Add an HTTP MCP server named openheard with URL ${url} and the header ${header}`, scope)} disabled={off} />
+            <CopyBlock label={m.settings_keys_other_url()} help={m.settings_keys_other_url_help()} text={url} />
+            <CopyBlock label={m.settings_keys_other_header()} help={m.settings_keys_other_header_help()} text={header} disabled={off} />
+            <CopyBlock label={m.settings_keys_other_send()} help={m.settings_keys_other_send_help()} text={setupPrompt(m.settings_keys_prompt_other({ url, header }), scope)} disabled={off} />
           </>
         ) : null}
-        {fresh ? <CopyBlock label="API key" help="For the HTTP API or other tools." text={fresh} /> : null}
+        {fresh ? <CopyBlock label={m.settings_keys_key_label()} help={m.settings_keys_key_help()} text={fresh} /> : null}
       </div>
     </div>
   );

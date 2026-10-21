@@ -1,3 +1,5 @@
+import { isLocale } from "@openheard/i18n/locales";
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { Textarea } from "@openheard/ui/components/textarea";
 import { cn } from "@openheard/ui/lib/utils";
@@ -38,15 +40,15 @@ import { workspaceUrl } from "@/lib/workspace-url";
 import { PageHead } from "@/routes/dashboard/settings";
 
 export const Route = createFileRoute("/dashboard/settings/widget")({
-  head: () => ({ meta: [{ title: "Widget · settings" }] }),
+  head: () => ({ meta: [{ title: m.settings_widget_meta() }] }),
   component: WidgetSettings,
 });
 
 type Page = "install" | "appearance" | "content";
-const PAGES: [Page, string][] = [
-  ["install", "Install"],
-  ["appearance", "Appearance"],
-  ["content", "Content"],
+const PAGES: [Page, () => string][] = [
+  ["install", () => m.settings_widget_page_install()],
+  ["appearance", () => m.settings_appearance()],
+  ["content", () => m.settings_widget_page_content()],
 ];
 
 function WidgetSettings() {
@@ -54,7 +56,8 @@ function WidgetSettings() {
   const router = useRouter();
   const ws = root.workspace;
   const [page, setPage] = useState<Page>("install");
-  const saved = useMemo(() => readWidgetSettings(ws.widgetSettings), [ws.widgetSettings]);
+  // A label nobody saved yet shows (and is saved as) the default in the board's language.
+  const saved = useMemo(() => readWidgetSettings(ws.widgetSettings, isLocale(ws.locale) ? ws.locale : undefined), [ws.widgetSettings, ws.locale]);
   const [draft, setDraft] = useState<WidgetSettings>(saved);
   const [saving, setSaving] = useState(false);
   // Remounts the appearance form so a half-typed hex goes on Discard too.
@@ -76,9 +79,9 @@ function WidgetSettings() {
       const next = await saveWidgetSettings({ data: draft });
       setDraft(next);
       await router.invalidate();
-      toast.success("Saved. Sites with the snippet pick it up within a minute.");
+      toast.success(m.settings_widget_saved());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : m.settings_save_failed());
     } finally {
       setSaving(false);
     }
@@ -86,8 +89,8 @@ function WidgetSettings() {
 
   return (
     <>
-      <PageHead title="Widget" sub="Put feedback, your roadmap and the changelog inside your own app with one script tag." />
-      <nav className="-mt-2 mb-6 flex gap-1 border-b" aria-label="Widget settings">
+      <PageHead title={m.settings_widget_title()} sub={m.settings_widget_sub()} />
+      <nav className="-mt-2 mb-6 flex gap-1 border-b" aria-label={m.settings_widget_nav_aria()}>
         {PAGES.map(([p, label]) => (
           <button
             key={p}
@@ -96,7 +99,7 @@ function WidgetSettings() {
             aria-current={page === p ? "page" : undefined}
             className={cn("relative -mb-px h-9 border-b px-3 text-[13px] transition-colors", page === p ? "border-foreground font-semibold text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}
           >
-            {label}
+            {label()}
           </button>
         ))}
       </nav>
@@ -109,14 +112,14 @@ function WidgetSettings() {
           <div className="min-w-0">
             {page === "appearance" ? <Appearance key={discards} draft={draft} set={set} brand={brand} /> : <Content draft={draft} set={set} ws={ws} />}
             <div className="flex items-center justify-end gap-3 border-t pt-4">
-              <span className="text-xs text-faint">{locked ? "The demo's widget stays as it is" : dirty ? "Unsaved changes" : "Saved"}</span>
+              <span className="text-xs text-faint">{locked ? m.settings_widget_demo_status() : dirty ? m.settings_unsaved() : m.settings_saved()}</span>
               {dirty ? (
                 <Button size="sm" variant="secondary" onClick={() => (setDraft(saved), setDiscards((n) => n + 1))} disabled={saving}>
-                  Discard
+                  {m.settings_widget_discard()}
                 </Button>
               ) : null}
               <Button arrow size="sm" disabled={!dirty || saving || locked} onClick={save}>
-                Save
+                {m.settings_save()}
               </Button>
             </div>
           </div>
@@ -138,33 +141,33 @@ function Install({ src, locked, origins }: { src: string; locked: boolean; origi
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      toast.error("Could not copy. Select the snippet and copy it by hand.");
+      toast.error(m.settings_widget_copy_failed());
     }
   }
 
   return (
     <>
-      <SectionHead title="Snippet" />
+      <SectionHead title={m.settings_widget_snippet()} />
       <div className="mb-8 flex flex-col gap-2.5 border-t pt-4">
         <p className="text-[13px] text-muted-foreground">
-          Paste this before the closing body tag on every page that should show the launcher. It loads after your page and never blocks it. Appearance changes reach it on their own; you never edit the snippet again.
+          {m.settings_widget_snippet_help()}
         </p>
         <div className="flex items-start gap-2 rounded-lg border bg-card p-1.5 pl-3.5">
           <code className="min-w-0 flex-1 py-1.5 font-mono text-[12px]/5 break-all text-foreground">{snippet}</code>
-          <Button size="sm" variant="secondary" onClick={copy} aria-label="Copy snippet">
+          <Button size="sm" variant="secondary" onClick={copy} aria-label={m.settings_widget_snippet_copy_aria()}>
             {copied ? <CheckIcon weight="bold" className="size-3 text-status-shipped" /> : <CopyIcon className="size-3" />}
-            {copied ? "Copied" : "Copy"}
+            {copied ? m.settings_copied() : m.settings_copy()}
           </Button>
         </div>
       </div>
 
-      <SectionHead title="Open it from your own button" />
+      <SectionHead title={m.settings_widget_open_title()} />
       <div className="mb-8 flex flex-col gap-2.5 border-t pt-4 text-[13px] text-muted-foreground">
         <p>
-          Any element with a <code className="font-mono text-[12px] text-foreground">data-openheard-open</code> attribute opens the widget, or call{" "}
-          <code className="font-mono text-[12px] text-foreground">window.openheard("open")</code>. Pass a tab to land on it. Set the launcher to Hidden under Appearance if your button is the only way in.
+          {m.settings_widget_open_a()} <code className="font-mono text-[12px] text-foreground">data-openheard-open</code> {m.settings_widget_open_b()}{" "}
+          <code className="font-mono text-[12px] text-foreground">window.openheard("open")</code>{m.settings_widget_open_c()}
         </p>
-        <code className="rounded-md bg-card px-2.5 py-1.5 font-mono text-[12px] text-foreground">{`<button data-openheard-open="changelog">What's new</button>`}</code>
+        <code className="rounded-md bg-card px-2.5 py-1.5 font-mono text-[12px] text-foreground">{`<button data-openheard-open="changelog">${m.settings_widget_open_example()}</button>`}</code>
       </div>
 
       <AllowedSites current={origins} locked={locked} />
@@ -176,7 +179,13 @@ type SetFn = <K extends keyof WidgetSettings>(key: K, value: WidgetSettings[K]) 
 
 const SWATCHES = [DEFAULT_ACCENT, "#e5484d", "#f2a93b", "#3ecf8e", "#ededf0"];
 const ICONS: Record<WidgetIcon, Icon> = { chat: ChatCircleDotsIcon, lightbulb: LightbulbIcon, megaphone: MegaphoneIcon, question: QuestionIcon, sparkle: SparkleIcon };
-const ICON_NAMES: Record<WidgetIcon, string> = { chat: "Chat", lightbulb: "Light bulb", megaphone: "Megaphone", question: "Question", sparkle: "Sparkle" };
+const ICON_NAMES: Record<WidgetIcon, () => string> = {
+  chat: () => m.settings_widget_icon_chat(),
+  lightbulb: () => m.settings_widget_icon_lightbulb(),
+  megaphone: () => m.settings_widget_icon_megaphone(),
+  question: () => m.settings_widget_icon_question(),
+  sparkle: () => m.settings_widget_icon_sparkle(),
+};
 
 function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; brand: string }) {
   const accent = draft.accent ?? brand;
@@ -186,18 +195,18 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
 
   return (
     <>
-      <Row label="Theme" help="Auto follows the visitor's system setting.">
+      <Row label={m.settings_widget_theme_label()} help={m.settings_widget_theme_help()}>
         <Segmented
           value={draft.theme}
           onChange={(v) => set("theme", v)}
           options={[
-            ["dark", "Dark", MoonIcon],
-            ["light", "Light", SunIcon],
-            ["auto", "Auto", CircleHalfIcon],
+            ["dark", m.settings_theme_dark(), MoonIcon],
+            ["light", m.settings_theme_light(), SunIcon],
+            ["auto", m.settings_theme_auto(), CircleHalfIcon],
           ]}
         />
       </Row>
-      <Row label="Accent" help="Launcher, voted pills and links. Defaults to your brand colour.">
+      <Row label={m.settings_accent()} help={m.settings_widget_accent_help()}>
         <div className="flex flex-wrap items-center gap-2">
           <span className="flex flex-wrap gap-1.5">
             {SWATCHES.map((c) => (
@@ -219,19 +228,19 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
               const v = e.target.value.trim().toLowerCase();
               if (/^#[0-9a-f]{6}$/.test(v)) set("accent", v === brand ? null : v);
             }}
-            aria-label="Accent colour"
+            aria-label={m.settings_widget_accent_aria()}
             aria-invalid={!/^#[0-9a-f]{6}$/i.test(hex.trim()) || undefined}
             className="h-8 w-24 rounded-lg border border-input bg-card px-2.5 text-[12px] tabular-nums outline-none focus:border-ring/60 aria-invalid:border-destructive"
           />
         </div>
       </Row>
-      <Row label="Launcher" help="The button that opens the widget.">
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Launcher">
+      <Row label={m.settings_widget_launcher_label()} help={m.settings_widget_launcher_help()}>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={m.settings_widget_launcher_label()}>
           {(
             [
-              ["icon", "Icon"],
-              ["label", "Icon + label"],
-              ["hidden", "Hidden"],
+              ["icon", m.settings_widget_launcher_icon()],
+              ["label", m.settings_widget_launcher_label_option()],
+              ["hidden", m.settings_widget_launcher_hidden()],
             ] as [WidgetLauncher, string][]
           ).map(([v, name]) => (
             <button
@@ -253,7 +262,7 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
                     <span className="truncate">{draft.label}</span>
                   </span>
                 ) : (
-                  <span className="text-[11px] text-faint">Your own button</span>
+                  <span className="text-[11px] text-faint">{m.settings_widget_launcher_own()}</span>
                 )}
               </span>
               {name}
@@ -261,17 +270,17 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
           ))}
         </div>
       </Row>
-      <Row label="Label and icon" help="Shown on the launcher.">
+      <Row label={m.settings_widget_label_label()} help={m.settings_widget_label_help()}>
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={draft.label}
             maxLength={WIDGET_LABEL_MAX}
             onChange={(e) => set("label", e.target.value)}
             onBlur={() => !draft.label.trim() && set("label", DEFAULT_WIDGET_SETTINGS.label)}
-            aria-label="Launcher label"
+            aria-label={m.settings_widget_label_aria()}
             className="h-8 w-36 rounded-lg border border-input bg-card px-2.5 text-[13px] outline-none focus:border-ring/60"
           />
-          <div className="inline-flex h-8 items-center gap-0.5 rounded-lg border bg-card p-0.5" role="radiogroup" aria-label="Launcher icon">
+          <div className="inline-flex h-8 items-center gap-0.5 rounded-lg border bg-card p-0.5" role="radiogroup" aria-label={m.settings_widget_icon_aria()}>
             {WIDGET_ICONS.map((i) => {
               const I = ICONS[i];
               return (
@@ -280,8 +289,8 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
                   type="button"
                   role="radio"
                   aria-checked={draft.icon === i}
-                  aria-label={ICON_NAMES[i]}
-                  title={ICON_NAMES[i]}
+                  aria-label={ICON_NAMES[i]()}
+                  title={ICON_NAMES[i]()}
                   onClick={() => set("icon", i)}
                   className={cn("grid h-full w-7 place-items-center rounded-md transition-colors", draft.icon === i ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground")}
                 >
@@ -292,24 +301,24 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
           </div>
         </div>
       </Row>
-      <Row label="Position" help="Which corner it sits in.">
+      <Row label={m.settings_widget_position_label()} help={m.settings_widget_position_help()}>
         <Segmented
           value={draft.position}
           onChange={(v) => set("position", v)}
           options={[
-            ["bottom-right", "Bottom right"],
-            ["bottom-left", "Bottom left"],
+            ["bottom-right", m.settings_widget_position_bottom_right()],
+            ["bottom-left", m.settings_widget_position_bottom_left()],
           ]}
         />
       </Row>
-      <Row label="Corner radius" help="Match your app's buttons and cards.">
+      <Row label={m.settings_widget_radius_label()} help={m.settings_widget_radius_help()}>
         <Segmented
           value={draft.radius}
           onChange={(v) => set("radius", v)}
           options={[
-            ["sharp", "Sharp"],
-            ["soft", "Soft"],
-            ["round", "Round"],
+            ["sharp", m.settings_widget_radius_sharp()],
+            ["soft", m.settings_widget_radius_soft()],
+            ["round", m.settings_widget_radius_round()],
           ]}
         />
       </Row>
@@ -317,22 +326,22 @@ function Appearance({ draft, set, brand }: { draft: WidgetSettings; set: SetFn; 
   );
 }
 
-const TAB_NAMES: Record<WidgetTabName, string> = { feedback: "Feedback", roadmap: "Roadmap", changelog: "Changelog" };
+const TAB_NAMES: Record<WidgetTabName, () => string> = { feedback: () => m.settings_feedback(), roadmap: () => m.settings_roadmap(), changelog: () => m.settings_changelog() };
 
 function Content({ draft, set, ws }: { draft: WidgetSettings; set: SetFn; ws: { showRoadmap: boolean; showChangelog: boolean } }) {
   const hiddenEverywhere = (t: WidgetTabName) => (t === "roadmap" && !ws.showRoadmap) || (t === "changelog" && !ws.showChangelog);
   return (
     <>
-      <SectionHead title="Tabs" />
-      <p className="pb-3 text-[13px] text-muted-foreground">Turn off what you do not use. The first one on opens by default.</p>
+      <SectionHead title={m.settings_widget_tabs()} />
+      <p className="pb-3 text-[13px] text-muted-foreground">{m.settings_widget_tabs_help()}</p>
       {WIDGET_TABS.map((t) => {
         const on = draft.tabs.includes(t);
         const last = on && draft.tabs.length === 1;
         return (
-          <Row key={t} label={TAB_NAMES[t]} help={hiddenEverywhere(t) ? "Hidden on your public board too, so the widget skips it. Turn it on under Access." : last ? "Keep at least one tab on." : undefined}>
+          <Row key={t} label={TAB_NAMES[t]()} help={hiddenEverywhere(t) ? m.settings_widget_tab_hidden() : last ? m.settings_widget_tab_last() : undefined}>
             <Toggle
               on={on}
-              label={TAB_NAMES[t]}
+              label={TAB_NAMES[t]()}
               onChange={(next) => {
                 if (!next && last) return;
                 set("tabs", next ? WIDGET_TABS.filter((x) => x === t || draft.tabs.includes(x)) : draft.tabs.filter((x) => x !== t));
@@ -360,9 +369,9 @@ function AllowedSites({ current, locked }: { current: string | null; locked: boo
       const { origins } = await saveWidgetOrigins({ data: { origins: value } });
       setValue(origins.join("\n"));
       await router.invalidate();
-      toast.success(origins.length ? "Only those sites can embed the widget now" : "Any site can embed the widget");
+      toast.success(origins.length ? m.settings_widget_origins_restricted() : m.settings_widget_origins_any());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : m.settings_save_failed());
     } finally {
       setSaving(false);
     }
@@ -370,25 +379,25 @@ function AllowedSites({ current, locked }: { current: string | null; locked: boo
 
   return (
     <div className="mt-8">
-      <SectionHead title="Allowed sites" />
+      <SectionHead title={m.settings_widget_origins_title()} />
       <div className="flex flex-col gap-2.5 border-t pt-4">
         <p className="text-[13px] text-muted-foreground">
-          The sites that may show the widget, one origin per line, like <code className="font-mono text-[12px] text-foreground">https://app.example.com</code> or{" "}
-          <code className="font-mono text-[12px] text-foreground">https://*.example.com</code>. Leave it empty to allow any site. Other sites get a blank frame, so nobody can dress up your board inside their page.
+          {m.settings_widget_origins_a()} <code className="font-mono text-[12px] text-foreground">https://app.example.com</code> {m.settings_widget_origins_b()}{" "}
+          <code className="font-mono text-[12px] text-foreground">https://*.example.com</code>{m.settings_widget_origins_c()}
         </p>
         <Textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
           disabled={locked}
-          placeholder="Any site"
+          placeholder={m.settings_widget_origins_placeholder()}
           spellCheck={false}
           aria-invalid={invalid.length > 0 || undefined}
           className="text-[12px]"
         />
         <div className="flex items-center justify-between gap-3">
-          <span className="text-xs text-faint">{locked ? "Fixed in the demo." : invalid.length ? `Not an origin: ${invalid[0]}` : ""}</span>
+          <span className="text-xs text-faint">{locked ? m.settings_widget_origins_demo() : invalid.length ? m.settings_widget_origins_invalid({ value: invalid[0] }) : ""}</span>
           <Button size="sm" variant="secondary" onClick={save} disabled={locked || saving || invalid.length > 0 || value === saved}>
-            Save
+            {m.settings_save()}
           </Button>
         </div>
       </div>
@@ -433,10 +442,11 @@ function Preview({ src, settings, brand }: { src: string; settings: WidgetSettin
     w?.openheard?.("config", config);
   }, [config]);
 
-  const summary = [settings.theme, settings.launcher === "label" ? "icon + label" : settings.launcher === "icon" ? "icon" : "no launcher"].join(" · ");
+  const themeName = { dark: m.settings_theme_dark(), light: m.settings_theme_light(), auto: m.settings_theme_auto() }[settings.theme];
+  const summary = [themeName.toLowerCase(), settings.launcher === "label" ? m.settings_widget_summary_icon_label() : settings.launcher === "icon" ? m.settings_widget_summary_icon() : m.settings_widget_summary_none()].join(" · ");
   const head = (
     <div className="flex items-center justify-between pb-2 text-xs">
-      <span className="font-semibold text-muted-foreground">Preview</span>
+      <span className="font-semibold text-muted-foreground">{m.settings_preview()}</span>
       <span className="text-faint">{summary}</span>
     </div>
   );
@@ -447,9 +457,9 @@ function Preview({ src, settings, brand }: { src: string; settings: WidgetSettin
     <div className="@min-[1000px]:sticky @min-[1000px]:top-0">
       {head}
       <div className="overflow-hidden rounded-xl border">
-        <iframe ref={frame} title="Widget preview" srcDoc={doc} className="block h-[680px] w-full bg-[#f7f5f0]" />
+        <iframe ref={frame} title={m.settings_widget_preview_title()} srcDoc={doc} className="block h-[680px] w-full bg-[#f7f5f0]" />
       </div>
-      <p className="pt-2 text-xs text-faint">Live, against this workspace. Votes and posts are real.</p>
+      <p className="pt-2 text-xs text-faint">{m.settings_widget_preview_note()}</p>
     </div>
   );
 }

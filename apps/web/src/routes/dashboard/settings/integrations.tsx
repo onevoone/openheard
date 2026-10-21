@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { Button } from "@openheard/ui/components/button";
 import { cn } from "@openheard/ui/lib/utils";
 import { CopyIcon } from "@phosphor-icons/react";
@@ -7,30 +8,39 @@ import { toast } from "sonner";
 
 import { SectionHead } from "@/components/admin/panel";
 import { deleteIntegration, listIntegrations, saveIntegration, testIntegration } from "@/functions/integrations";
-import { EVENTS, EVENT_KEYS, type IntegrationEvent, type IntegrationKind, SIGNATURE_HEADER, checkIntegrationUrl } from "@/lib/integrations";
+import { EVENT_KEYS, type IntegrationEvent, type IntegrationKind, SIGNATURE_HEADER, checkIntegrationUrl } from "@/lib/integrations";
 import { since } from "@/lib/time";
 import { PageHead } from "@/routes/dashboard/settings";
 
 export const Route = createFileRoute("/dashboard/settings/integrations")({
   loader: () => listIntegrations(),
-  head: () => ({ meta: [{ title: "Integrations · settings" }] }),
+  head: () => ({ meta: [{ title: m.settings_int_meta() }] }),
   component: Integrations,
 });
 
 type Data = Awaited<ReturnType<typeof listIntegrations>>;
 type Saved = Data["integrations"][number];
 
-const COPY: Record<IntegrationKind, { title: string; help: string; placeholder: string }> = {
-  slack: { title: "Slack", help: "Create an incoming webhook for the channel in Slack, then paste it here.", placeholder: "https://hooks.slack.com/services/…" },
-  discord: { title: "Discord", help: "In the channel settings, open Integrations, create a webhook and copy its URL.", placeholder: "https://discord.com/api/webhooks/…" },
-  webhook: { title: "Webhook", help: "Any https endpoint. We POST JSON and sign it so you can check it came from us.", placeholder: "https://example.com/hooks/openheard" },
+// Titles and help are callbacks so they are worded while rendering. The
+// placeholders are example URLs, the same in every language.
+const COPY: Record<IntegrationKind, { title: () => string; help: () => string; placeholder: string }> = {
+  slack: { title: () => "Slack", help: () => m.settings_int_slack_help(), placeholder: "https://hooks.slack.com/services/…" },
+  discord: { title: () => "Discord", help: () => m.settings_int_discord_help(), placeholder: "https://discord.com/api/webhooks/…" },
+  webhook: { title: () => m.settings_int_webhook_title(), help: () => m.settings_int_webhook_help(), placeholder: "https://example.com/hooks/openheard" },
+};
+
+const EVENT_LABEL: Record<IntegrationEvent, () => string> = {
+  "post.created": () => m.settings_int_event_post_created(),
+  "comment.created": () => m.settings_int_event_comment_created(),
+  "post.status_changed": () => m.settings_int_event_status_changed(),
+  "changelog.published": () => m.settings_int_event_changelog_published(),
 };
 
 function Integrations() {
   const { integrations, boards } = Route.useLoaderData();
   return (
     <>
-      <PageHead title="Integrations" sub="Send new posts, comments, status changes and releases to the places your team already reads." />
+      <PageHead title={m.settings_int_title()} sub={m.settings_int_sub()} />
       {(["slack", "discord", "webhook"] as const).map((kind) => (
         <Destination key={kind} kind={kind} saved={integrations.find((i) => i.kind === kind) ?? null} boards={boards} />
       ))}
@@ -66,7 +76,7 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
     try {
       await work();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : m.settings_something_wrong());
     } finally {
       setBusy(null);
     }
@@ -77,20 +87,20 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
       const res = await saveIntegration({ data: { kind, url, events, boardIds: boardIds.length ? boardIds : null, enabled } });
       if (res.secret) setSecret(res.secret);
       setUrl("");
-      toast.success(`${copy.title} saved`);
+      toast.success(m.settings_int_saved({ title: copy.title() }));
       await router.invalidate();
     });
 
   const test = () =>
     run("test", async () => {
       const res = await testIntegration({ data: { kind, url } });
-      if (res.ok) toast.success("Test message delivered");
-      else toast.error(`Test failed: ${res.error}`);
+      if (res.ok) toast.success(m.settings_int_test_ok());
+      else toast.error(m.settings_int_test_failed({ error: res.error }));
       await router.invalidate();
     });
 
   const remove = () =>
-    confirm(`Disconnect ${copy.title}?`) &&
+    confirm(m.settings_int_disconnect_confirm({ title: copy.title() })) &&
     run("remove", async () => {
       await deleteIntegration({ data: { kind } });
       setSecret(null);
@@ -100,18 +110,18 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
 
   return (
     <section className="pb-9" aria-labelledby={`int-${kind}`}>
-      <SectionHead title={copy.title} right={<DeliveryStatus saved={saved} />} />
+      <SectionHead title={copy.title()} right={<DeliveryStatus saved={saved} />} />
       <div className="flex flex-col gap-4 border-t pt-4">
         <p id={`int-${kind}`} className="text-[13px] text-muted-foreground">
-          {copy.help}
+          {copy.help()}
         </p>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-muted-foreground">Webhook URL</span>
+          <span className="text-xs font-semibold text-muted-foreground">{m.settings_int_url_label()}</span>
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder={saved ? `Saved, ending in ${saved.urlHint}. Paste a new URL to replace it.` : copy.placeholder}
+            placeholder={saved ? m.settings_int_url_saved({ hint: saved.urlHint }) : copy.placeholder}
             spellCheck={false}
             autoComplete="off"
             aria-invalid={!!urlError}
@@ -121,11 +131,11 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
         </label>
 
         <fieldset className="flex flex-col gap-1.5">
-          <legend className="pb-1.5 text-xs font-semibold text-muted-foreground">Send when</legend>
+          <legend className="pb-1.5 text-xs font-semibold text-muted-foreground">{m.settings_int_send_when()}</legend>
           <div className="flex flex-wrap gap-1.5">
-            {EVENTS.map((e) => (
-              <Chip key={e.key} on={events.includes(e.key)} onClick={() => toggleEvent(e.key)}>
-                {e.label}
+            {EVENT_KEYS.map((key) => (
+              <Chip key={key} on={events.includes(key)} onClick={() => toggleEvent(key)}>
+                {EVENT_LABEL[key]()}
               </Chip>
             ))}
           </div>
@@ -133,10 +143,10 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
 
         {boards.length > 1 ? (
           <fieldset className="flex flex-col gap-1.5">
-            <legend className="pb-1.5 text-xs font-semibold text-muted-foreground">Boards</legend>
+            <legend className="pb-1.5 text-xs font-semibold text-muted-foreground">{m.settings_boards()}</legend>
             <div className="flex flex-wrap gap-1.5">
               <Chip on={boardIds.length === 0} onClick={() => setBoardIds([])}>
-                All boards
+                {m.settings_int_all_boards()}
               </Chip>
               {boards.map((b) => (
                 <Chip key={b.id} on={boardIds.includes(b.id)} onClick={() => toggleBoard(b.id)}>
@@ -144,24 +154,25 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
                 </Chip>
               ))}
             </div>
-            <span className="text-xs text-faint">Changelog releases are sent whatever boards you pick.</span>
+            <span className="text-xs text-faint">{m.settings_int_boards_note()}</span>
           </fieldset>
         ) : null}
 
         {kind === "webhook" && secret ? (
           <div className="flex flex-col gap-2 rounded-lg border border-status-shipped/30 bg-status-shipped/10 px-4 py-3">
-            <div className="text-[13px] font-semibold">Copy the signing secret now. It is shown once.</div>
+            <div className="text-[13px] font-semibold">{m.settings_int_secret_title()}</div>
             <div className="flex items-center gap-2">
               <code className="flex-1 truncate rounded-md bg-background px-2.5 py-1.5 font-mono text-[12px]">{secret}</code>
-              <Button size="sm" variant="secondary" onClick={() => navigator.clipboard.writeText(secret).then(() => toast.success("Copied"))}>
-                <CopyIcon className="size-3" /> Copy
+              <Button size="sm" variant="secondary" onClick={() => navigator.clipboard.writeText(secret).then(() => toast.success(m.settings_copied()))}>
+                <CopyIcon className="size-3" /> {m.settings_copy()}
               </Button>
             </div>
           </div>
         ) : null}
         {kind === "webhook" && saved?.signed ? (
           <p className="text-xs text-faint">
-            Each request carries <code className="font-mono text-[11px] text-muted-foreground">{SIGNATURE_HEADER}: t=…,v1=…</code>, an HMAC-SHA256 of <code className="font-mono text-[11px] text-muted-foreground">t.body</code> with your secret.
+            {m.settings_int_signed_before()} <code className="font-mono text-[11px] text-muted-foreground">{SIGNATURE_HEADER}: t=…,v1=…</code>
+            {m.settings_int_signed_middle()} <code className="font-mono text-[11px] text-muted-foreground">t.body</code> {m.settings_int_signed_after()}
           </p>
         ) : null}
 
@@ -169,21 +180,21 @@ function Destination({ kind, saved, boards }: { kind: IntegrationKind; saved: Sa
           {saved ? (
             <label className="mr-auto flex items-center gap-2 text-[13px] text-muted-foreground">
               <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="size-3.5 accent-[var(--link)]" />
-              Sending on
+              {m.settings_int_sending_on()}
             </label>
           ) : (
             <span className="mr-auto" />
           )}
           {saved ? (
             <Button size="sm" variant="ghost" onClick={remove} disabled={busy !== null}>
-              Disconnect
+              {m.settings_int_disconnect()}
             </Button>
           ) : null}
           <Button size="sm" variant="secondary" onClick={test} disabled={busy !== null || !!urlError || (!url && !saved)}>
-            {busy === "test" ? "Sending…" : "Send test"}
+            {busy === "test" ? m.settings_sending() : m.settings_int_send_test()}
           </Button>
           <Button size="sm" arrow onClick={save} disabled={busy !== null || !!urlError || (!saved && !url) || !dirty || events.length === 0}>
-            {busy === "save" ? "Saving…" : "Save"}
+            {busy === "save" ? m.settings_saving() : m.settings_save()}
           </Button>
         </div>
       </div>
@@ -206,14 +217,14 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 }
 
 function DeliveryStatus({ saved }: { saved: Saved | null }) {
-  if (!saved) return <span className="text-xs text-faint">Not connected</span>;
-  if (!saved.enabled) return <span className="text-xs text-faint">Paused</span>;
-  if (!saved.lastStatus || !saved.lastAt) return <span className="text-xs text-faint">Connected, nothing sent yet</span>;
+  if (!saved) return <span className="text-xs text-faint">{m.settings_int_not_connected()}</span>;
+  if (!saved.enabled) return <span className="text-xs text-faint">{m.settings_int_paused()}</span>;
+  if (!saved.lastStatus || !saved.lastAt) return <span className="text-xs text-faint">{m.settings_int_idle()}</span>;
   const ok = saved.lastStatus === "ok";
   return (
     <span className="flex max-w-[60%] items-center gap-1.5 text-xs text-faint" title={saved.lastError ?? undefined}>
       <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", ok ? "bg-status-shipped" : "bg-destructive")} />
-      <span className="truncate tabular-nums">{ok ? `Delivered ${since(saved.lastAt)}` : `Failed ${since(saved.lastAt)}: ${saved.lastError ?? "unknown error"}`}</span>
+      <span className="truncate tabular-nums">{ok ? m.settings_int_delivered({ when: since(saved.lastAt) }) : m.settings_int_failed({ when: since(saved.lastAt), error: saved.lastError ?? m.settings_int_unknown_error() })}</span>
     </span>
   );
 }

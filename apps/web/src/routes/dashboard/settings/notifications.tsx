@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import { LoadingButton } from "@openheard/ui/components/interior/loading-button";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
@@ -10,7 +11,7 @@ import { PageHead } from "@/routes/dashboard/settings";
 
 export const Route = createFileRoute("/dashboard/settings/notifications")({
   loader: async () => ({ team: await getNotificationPrefs(), email: await getEmailPrefs() }),
-  head: () => ({ meta: [{ title: "Notifications · settings" }] }),
+  head: () => ({ meta: [{ title: m.settings_notif_meta() }] }),
   component: Notifications,
 });
 
@@ -24,7 +25,7 @@ function Notifications() {
   async function save() {
     const [, res] = await Promise.all([saveNotificationPrefs({ data: form }), saveEmailPrefs({ data: email })]);
     if (res.confirmSent) {
-      toast.success("Check your inbox to confirm changelog emails");
+      toast.success(m.settings_notif_confirm_sent());
       // Off until the link is clicked, which is what the saved prefs say too.
       setEmail((e) => ({ ...e, changelog: false }));
     }
@@ -33,37 +34,37 @@ function Notifications() {
 
   return (
     <>
-      <PageHead title="Notifications" sub="What lands in your inbox for this workspace." />
-      <SectionHead title="Email me when" />
-      <Row label="Someone posts" help="A new post lands in Pending.">
-        <Toggle on={form.notifyNewPost} onChange={(v) => setForm({ ...form, notifyNewPost: v })} label="New post" />
+      <PageHead title={m.settings_notif_title()} sub={m.settings_notif_sub()} />
+      <SectionHead title={m.settings_notif_section()} />
+      <Row label={m.settings_notif_post_label()} help={m.settings_notif_post_help()}>
+        <Toggle on={form.notifyNewPost} onChange={(v) => setForm({ ...form, notifyNewPost: v })} label={m.settings_notif_post_aria()} />
       </Row>
-      <Row label="Someone comments" help="A public comment on any post.">
-        <Toggle on={form.notifyComment} onChange={(v) => setForm({ ...form, notifyComment: v })} label="New comment" />
+      <Row label={m.settings_notif_comment_label()} help={m.settings_notif_comment_help()}>
+        <Toggle on={form.notifyComment} onChange={(v) => setForm({ ...form, notifyComment: v })} label={m.settings_notif_comment_aria()} />
       </Row>
-      <Row label="A status changes" help="Another admin moves a post.">
-        <Toggle on={form.notifyStatus} onChange={(v) => setForm({ ...form, notifyStatus: v })} label="Status change" />
+      <Row label={m.settings_notif_status_label()} help={m.settings_notif_status_help()}>
+        <Toggle on={form.notifyStatus} onChange={(v) => setForm({ ...form, notifyStatus: v })} label={m.settings_notif_status_aria()} />
       </Row>
-      <Row label="A post I follow moves" help="Posts you voted on, commented on or wrote change status.">
-        <Toggle on={email.followedPosts} onChange={(v) => setEmail({ ...email, followedPosts: v })} label="Posts I follow" />
+      <Row label={m.settings_notif_followed_label()} help={m.settings_notif_followed_help()}>
+        <Toggle on={email.followedPosts} onChange={(v) => setEmail({ ...email, followedPosts: v })} label={m.settings_notif_followed_aria()} />
       </Row>
-      <Row label="Something ships" help="Each new changelog entry.">
-        <Toggle on={email.changelog} onChange={(v) => setEmail({ ...email, changelog: v })} label="Changelog" />
+      <Row label={m.settings_notif_ships_label()} help={m.settings_notif_ships_help()}>
+        <Toggle on={email.changelog} onChange={(v) => setEmail({ ...email, changelog: v })} label={m.settings_changelog()} />
       </Row>
       {email.workspaceStatusEmails !== undefined && (
         <>
           <div className="pt-6">
-            <SectionHead title="Emails to your users" />
+            <SectionHead title={m.settings_notif_users_section()} />
           </div>
-          <Row label="Status updates" help="Voters, commenters and the author hear when their post changes status, with your note.">
-            <Toggle on={email.workspaceStatusEmails} onChange={(v) => setEmail({ ...email, workspaceStatusEmails: v })} label="Status emails to users" />
+          <Row label={m.settings_notif_users_label()} help={m.settings_notif_users_help()}>
+            <Toggle on={email.workspaceStatusEmails} onChange={(v) => setEmail({ ...email, workspaceStatusEmails: v })} label={m.settings_notif_users_aria()} />
           </Row>
         </>
       )}
       <div className="flex items-center justify-end gap-3 border-t pt-4">
-        <span className="text-xs text-faint">{dirty ? "Unsaved changes" : "Saved"}</span>
-        <LoadingButton onAction={save} disabled={!dirty} successLabel="Saved" onError={(err) => toast.error(err instanceof Error ? err.message : "Could not save")}>
-          Save
+        <span className="text-xs text-faint">{dirty ? m.settings_unsaved() : m.settings_saved()}</span>
+        <LoadingButton onAction={save} disabled={!dirty} successLabel={m.settings_saved()} onError={(err) => toast.error(err instanceof Error ? err.message : m.settings_save_failed())}>
+          {m.settings_save()}
         </LoadingButton>
       </div>
     </>
