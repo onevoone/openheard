@@ -1,5 +1,23 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
+  "activity_merged_into": "merged into \"{title}\"",
+  "activity_merged_into_this": [
+    {
+      "declarations": [
+        "input title",
+        "input votes",
+        "local votesPlural = votes: plural"
+      ],
+      "selectors": [
+        "votesPlural"
+      ],
+      "match": {
+        "votesPlural=one": "merged \"{title}\" into this, +{votes} vote",
+        "votesPlural=other": "merged \"{title}\" into this, +{votes} votes"
+      }
+    }
+  ],
+  "activity_shipped": "shipped in {name}",
   "attach_attached": "Attached images",
   "attach_drop": "Drop images to attach",
   "attach_empty": "That image is empty.",

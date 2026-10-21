@@ -15,6 +15,7 @@ import { Avatar, StatusChip, TeamBadge } from "@/components/bits";
 import { DashboardErrorState, DashboardPanelSkeleton } from "@/components/states";
 import { listInbox, setBoard } from "@/functions/admin";
 import { AttachButton, AttachmentGallery, DraftError, DraftTray, DropOverlay, useImageDrafts } from "@/components/attachments";
+import { activityNote } from "@/lib/activity-note";
 import type { AttachmentView } from "@/lib/attachments";
 import { isDemo } from "@/lib/demo";
 import { REACTIONS, addComment, getPost, setEta as setEtaFn, setStatus, setTags, togglePin, toggleReaction } from "@/functions/posts";
@@ -467,7 +468,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                             {m.dash_inbox_moved_to()} <StatusChip status={item.to} showOpen />
                           </span>
                         ) : null}
-                        {item.note ? <div className="mt-1">{item.note}</div> : null}
+                        {item.note ? <div className="mt-1">{activityNote(item)}</div> : null}
                       </div>
                     )}
                   </div>

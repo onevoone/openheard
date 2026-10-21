@@ -1,5 +1,25 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
+  "activity_merged_into": "об'єднано з ідеєю «{title}»",
+  "activity_merged_into_this": [
+    {
+      "declarations": [
+        "input title",
+        "input votes",
+        "local votesPlural = votes: plural"
+      ],
+      "selectors": [
+        "votesPlural"
+      ],
+      "match": {
+        "votesPlural=one": "ідею «{title}» об'єднано з цією, +{votes} голос",
+        "votesPlural=few": "ідею «{title}» об'єднано з цією, +{votes} голоси",
+        "votesPlural=many": "ідею «{title}» об'єднано з цією, +{votes} голосів",
+        "votesPlural=other": "ідею «{title}» об'єднано з цією, +{votes} голосу"
+      }
+    }
+  ],
+  "activity_shipped": "випущено: {name}",
   "attach_attached": "Прикріплені зображення",
   "attach_drop": "Перетягніть зображення, щоб прикріпити",
   "attach_empty": "Це зображення порожнє.",

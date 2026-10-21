@@ -262,7 +262,12 @@ export const activity = sqliteTable(
     type: text("type", { enum: ["status", "merge", "pin"] }).notNull(),
     fromStatus: text("from_status"),
     toStatus: text("to_status"),
+    // English text, as the REST API and MCP return it.
     note: text("note"),
+    // The same note as JSON ({ code, ...values }), so the dashboard and the
+    // public post can word it in the reader's language. Null for notes the
+    // team typed and for rows written before this column existed.
+    noteData: text("note_data"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).default(now).notNull(),
   },
   (t) => [index("activity_post_idx").on(t.postId)],

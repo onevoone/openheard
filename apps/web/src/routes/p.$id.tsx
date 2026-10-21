@@ -14,6 +14,7 @@ import { RailLabel, Shell } from "@/components/shell";
 import { ErrorState, PostSkeleton } from "@/components/states";
 import { VoteButton } from "@/components/vote-button";
 import { addComment, getPost, mergePosts, setEta } from "@/functions/posts";
+import { activityNote } from "@/lib/activity-note";
 import type { AttachmentView } from "@/lib/attachments";
 import { isDemo } from "@/lib/demo";
 import { findStatus, roadmapStatuses, useStatuses } from "@/lib/status";
@@ -344,17 +345,6 @@ function PostPage() {
     </Shell>
     </SkeletonSwap>
   );
-}
-
-// Pin events are stored as the words "pinned" / "unpinned"; show those in the
-// reader's language. Other notes (a merge, a changelog line, what the team
-// typed with a status change) are kept as they were written.
-function activityNote(item: { type?: string; note?: string | null }) {
-  if (item.type === "pin") {
-    if (item.note === "pinned") return m.post_activity_pinned();
-    if (item.note === "unpinned") return m.post_activity_unpinned();
-  }
-  return item.note;
 }
 
 function EtaEditor({ postId, value }: { postId: number; value: string | null }) {
