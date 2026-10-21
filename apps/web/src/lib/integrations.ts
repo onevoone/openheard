@@ -9,14 +9,8 @@ export type { IntegrationEvent, IntegrationKind };
 
 export const KINDS: IntegrationKind[] = ["slack", "discord", "webhook"];
 
-export const EVENTS: { key: IntegrationEvent; label: string }[] = [
-  { key: "post.created", label: "New post" },
-  { key: "comment.created", label: "New comment" },
-  { key: "post.status_changed", label: "Status change" },
-  { key: "changelog.published", label: "Changelog published" },
-];
-
-export const EVENT_KEYS = EVENTS.map((e) => e.key);
+// The settings page words these itself (settings_int_event_*).
+export const EVENT_KEYS: IntegrationEvent[] = ["post.created", "comment.created", "post.status_changed", "changelog.published"];
 
 // ---- URL rules ----
 
@@ -167,25 +161,37 @@ export type AlertEvent = {
   version?: string | null;
   at: string;
   test?: boolean;
+  // The workspace's language. Slack and Discord messages are worded in it; the
+  // generic webhook is JSON for machines and ignores it. Alerts are sent
+  // outside the request (waitUntil), so it is passed, never read from getLocale().
+  locale: Locale;
 };
 
-const HEADLINE: Record<IntegrationEvent, string> = {
-  "post.created": "New post",
-  "comment.created": "New comment",
-  "post.status_changed": "Status changed",
-  "changelog.published": "Changelog published",
+const headline = (e: AlertEvent): string => {
+  const o = { locale: e.locale };
+  if (e.test) return m.integration_test_message({}, o);
+  switch (e.type) {
+    case "post.created":
+      return m.integration_headline_post_created({}, o);
+    case "comment.created":
+      return m.integration_headline_comment_created({}, o);
+    case "post.status_changed":
+      return m.integration_headline_status_changed({}, o);
+    case "changelog.published":
+      return m.integration_headline_changelog_published({}, o);
+  }
 };
 
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s);
 
 // The one-line summary under the title: who, what status, how many votes.
 export function metaLine(e: AlertEvent): string {
-  const parts = [e.test ? "Test message" : HEADLINE[e.type]];
-  if (e.author) parts.push(`by ${e.author}`);
+  const parts = [headline(e)];
+  if (e.author) parts.push(m.integration_by_author({ author: e.author }, { locale: e.locale }));
   if (e.type === "post.status_changed" && e.fromStatus && e.status) parts.push(`${e.fromStatus} → ${e.status}`);
   else if (e.status) parts.push(e.status);
   if (e.version) parts.push(e.version);
-  if (e.votes !== null) parts.push(`${e.votes} ${e.votes === 1 ? "vote" : "votes"}`);
+  if (e.votes !== null) parts.push(m.post_votes_count({ count: e.votes }, { locale: e.locale }));
   return parts.join(" · ");
 }
 
@@ -198,7 +204,7 @@ export function slackPayload(e: AlertEvent) {
   const lines = [`*<${e.url}|${title}>*`, slackEscape(metaLine(e))];
   if (e.comment) lines.push(`> ${slackEscape(clip(e.comment, 280)).replace(/\n+/g, " ")}`);
   return {
-    text: `${e.test ? "Test message" : HEADLINE[e.type]}: ${slackEscape(clip(e.title, 150))}`,
+    text: `${headline(e)}: ${slackEscape(clip(e.title, 150))}`,
     blocks: [{ type: "section", text: { type: "mrkdwn", text: lines.join("\n") } }],
     unfurl_links: false,
   };

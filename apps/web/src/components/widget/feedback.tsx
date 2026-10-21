@@ -137,7 +137,7 @@ export function PostDetail({ id }: { id: number }) {
                 <h2 className="text-[18px]/6 font-semibold tracking-[-0.02em] text-pretty">{post.title}</h2>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-faint">
                   <StatusChip status={post.status} />
-                  <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1.5" suppressHydrationWarning>
                     <Avatar name={post.author?.name ?? "?"} image={post.author?.image} size={16} />
                     {post.author?.name ?? m.widget_someone()} · {ago(post.createdAt)}
                   </span>
@@ -169,7 +169,7 @@ export function PostDetail({ id }: { id: number }) {
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <span className="text-xs">
                         <span className="font-semibold text-foreground">{c.author?.name ?? m.widget_someone()}</span>
-                        <span className="text-faint"> · {ago(c.at)}</span>
+                        <span className="text-faint" suppressHydrationWarning> · {ago(c.at)}</span>
                       </span>
                       <p className="text-[13px]/[1.55] whitespace-pre-wrap text-muted-foreground">{c.body}</p>
                     </div>

@@ -198,7 +198,7 @@ export const getPost = createServerFn({ method: "GET" })
             }, {}),
           ),
         })),
-        ...p.activity.map((a) => ({ kind: "activity" as const, id: `a${a.id}`, at: a.createdAt, author: a.actor, type: a.type, from: a.fromStatus, to: a.toStatus, note: a.note })),
+        ...p.activity.map((a) => ({ kind: "activity" as const, id: `a${a.id}`, at: a.createdAt, author: a.actor, type: a.type, from: a.fromStatus, to: a.toStatus, note: a.note, noteData: a.noteData })),
       ].sort((a, b) => +new Date(b.at) - +new Date(a.at)),
     };
   });

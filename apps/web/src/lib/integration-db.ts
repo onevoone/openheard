@@ -4,9 +4,11 @@
 // handlers; the rules themselves are in integrations.ts.
 import { changelogEntry, comment, integration, post, status, workspace, type Db } from "@openheard/db";
 import { user } from "@openheard/db/schema/auth";
+import type { Locale } from "@openheard/i18n/locales";
 import { and, eq } from "drizzle-orm";
 
 import { DEMO_WORKSPACE_ID } from "./demo";
+import { emailLocale } from "./email-locale";
 import {
   type AlertEvent,
   type IntegrationEvent,
@@ -63,6 +65,9 @@ export async function unseal(sealed: string, secret?: string): Promise<string> {
 
 const TIMEOUT_MS = 5000;
 
+// The `error` text is stored with the integration (lastError) and read later
+// by whoever opens the settings page, so it stays English and machine-like
+// ("HTTP 404: ...", "Timed out after 5s"): no language is known at send time.
 export type Delivery = { ok: true } | { ok: false; error: string };
 
 export async function allowLocal(): Promise<boolean> {
@@ -196,7 +201,7 @@ async function statusLabel(db: Db, workspaceId: string, key: string): Promise<st
   return s?.label ?? key;
 }
 
-async function postEvent(db: Db, ws: { id: string; name: string }, origin: string, postId: number) {
+async function postEvent(db: Db, ws: { id: string; name: string }, locale: Locale, origin: string, postId: number) {
   const [p] = await db
     .select({ id: post.id, title: post.title, status: post.status, votes: post.voteCount, boardId: post.boardId, author: user.name })
     .from(post)
@@ -204,12 +209,15 @@ async function postEvent(db: Db, ws: { id: string; name: string }, origin: strin
     .where(and(eq(post.id, postId), eq(post.workspaceId, ws.id)))
     .limit(1);
   if (!p) return null;
-  return { workspace: ws, boardId: p.boardId, url: `${origin}/p/${p.id}`, title: p.title, author: p.author, status: await statusLabel(db, ws.id, p.status), votes: p.votes, postId: p.id };
+  return { workspace: ws, locale, boardId: p.boardId, url: `${origin}/p/${p.id}`, title: p.title, author: p.author, status: await statusLabel(db, ws.id, p.status), votes: p.votes, postId: p.id };
 }
 
 export async function buildEvent(db: Db, workspaceId: string, trigger: Trigger, origin: string): Promise<AlertEvent | null> {
-  const [w] = await db.select({ id: workspace.id, name: workspace.name }).from(workspace).where(eq(workspace.id, workspaceId)).limit(1);
-  if (!w) return null;
+  const [row] = await db.select({ id: workspace.id, name: workspace.name, locale: workspace.locale }).from(workspace).where(eq(workspace.id, workspaceId)).limit(1);
+  if (!row) return null;
+  const w = { id: row.id, name: row.name };
+  // Alerts leave the request (waitUntil), so they are worded in the workspace's language.
+  const locale = emailLocale(row);
   const at = new Date().toISOString();
   if (trigger.type === "changelog.published") {
     const [c] = await db
@@ -219,7 +227,7 @@ export async function buildEvent(db: Db, workspaceId: string, trigger: Trigger, 
       .where(and(eq(changelogEntry.id, trigger.entryId), eq(changelogEntry.workspaceId, workspaceId)))
       .limit(1);
     if (!c) return null;
-    return { type: trigger.type, workspace: w, boardId: null, url: `${origin}/changelog`, title: c.title, author: c.author, status: null, votes: null, version: c.version, at };
+    return { type: trigger.type, workspace: w, locale, boardId: null, url: `${origin}/changelog`, title: c.title, author: c.author, status: null, votes: null, version: c.version, at };
   }
   if (trigger.type === "comment.created") {
     const [c] = await db
@@ -230,11 +238,11 @@ export async function buildEvent(db: Db, workspaceId: string, trigger: Trigger, 
       .limit(1);
     // Internal notes stay inside the dashboard.
     if (!c || c.internal) return null;
-    const p = await postEvent(db, w, origin, c.postId);
+    const p = await postEvent(db, w, locale, origin, c.postId);
     if (!p) return null;
     return { ...p, type: trigger.type, author: c.author, comment: c.body || null, at };
   }
-  const p = await postEvent(db, w, origin, trigger.postId);
+  const p = await postEvent(db, w, locale, origin, trigger.postId);
   if (!p) return null;
   if (trigger.type === "post.status_changed") return { ...p, type: trigger.type, fromStatus: await statusLabel(db, workspaceId, trigger.fromStatus), at };
   return { ...p, type: trigger.type, at };

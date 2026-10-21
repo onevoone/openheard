@@ -73,7 +73,7 @@ function Team() {
               <EnvelopeSimpleIcon className="size-3.5 text-faint" />
               <span className="min-w-0 flex-1 truncate text-[13px]">{inv.email}</span>
               <span className="text-xs text-faint">{roleLabel(inv.role)}</span>
-              <span className="text-xs text-faint">{since(inv.createdAt)}</span>
+              <span className="text-xs text-faint" suppressHydrationWarning>{since(inv.createdAt)}</span>
               <button
                 type="button"
                 className="rounded p-1 text-faint hover:bg-accent hover:text-foreground"
@@ -106,7 +106,7 @@ function Team() {
               </span>
               <span className="text-xs text-faint">{person.email}</span>
             </div>
-            <span className="text-xs text-faint">{m.settings_team_joined({ when: since(person.createdAt) })}</span>
+            <span className="text-xs text-faint" suppressHydrationWarning>{m.settings_team_joined({ when: since(person.createdAt) })}</span>
             <DropdownMenu>
               <DropdownMenuTrigger disabled={you} className="inline-flex h-[26px] items-center gap-1.5 rounded-md border border-input bg-card px-2 text-xs outline-none hover:bg-accent disabled:opacity-60">
                 {roleLabel(person.role)} <CaretDownIcon className="size-2.5 text-faint" />

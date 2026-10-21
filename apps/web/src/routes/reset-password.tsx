@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button } from "@openheard/ui/components/button";
 import { WorkspaceLogo } from "@/components/logo";
 import { authClient } from "@/lib/auth-client";
+import { type AuthClientError, authErrorMessage } from "@/lib/auth-errors";
 
 const searchSchema = z.object({
   token: z.string().optional(),
@@ -57,8 +58,8 @@ function RequestForm() {
       { email, redirectTo: "/reset-password" },
       {
         onSuccess: () => setSent(true),
-        onError: (err: { error: { message?: string; statusText: string } }) => {
-          setError(err.error.message || err.error.statusText);
+        onError: (err: AuthClientError) => {
+          setError(authErrorMessage(err));
           setBusy(false);
         },
       },
@@ -113,8 +114,8 @@ function NewPasswordForm({ token }: { token: string }) {
       { newPassword: password, token },
       {
         onSuccess: () => setDone(true),
-        onError: (err: { error: { message?: string; statusText: string } }) => {
-          setError(err.error.message || err.error.statusText);
+        onError: (err: AuthClientError) => {
+          setError(authErrorMessage(err));
           setBusy(false);
         },
       },

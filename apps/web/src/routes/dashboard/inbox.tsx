@@ -15,6 +15,7 @@ import { Avatar, StatusChip, TeamBadge } from "@/components/bits";
 import { DashboardErrorState, DashboardPanelSkeleton } from "@/components/states";
 import { listInbox, setBoard } from "@/functions/admin";
 import { AttachButton, AttachmentGallery, DraftError, DraftTray, DropOverlay, useImageDrafts } from "@/components/attachments";
+import { activityNote } from "@/lib/activity-note";
 import type { AttachmentView } from "@/lib/attachments";
 import { isDemo } from "@/lib/demo";
 import { REACTIONS, addComment, getPost, setEta as setEtaFn, setStatus, setTags, togglePin, toggleReaction } from "@/functions/posts";
@@ -180,7 +181,7 @@ function Inbox() {
                   <ChatCircleIcon className="size-[13px]" /> {p.commentCount}
                 </span>
               ) : null}
-              <span className="min-w-9 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums">{ago(p.createdAt)}</span>
+              <span className="min-w-9 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums" suppressHydrationWarning>{ago(p.createdAt)}</span>
               <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={24} />
               <VoteChip n={p.voteCount} />
             </Link>
@@ -452,7 +453,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                           <LockSimpleIcon className="size-[9px]" /> {m.dash_inbox_internal_badge()}
                         </span>
                       ) : null}
-                      <span className="text-[12px] text-faint">{ago(item.at)}</span>
+                      <span className="text-[12px] text-faint" suppressHydrationWarning>{ago(item.at)}</span>
                     </div>
                     {item.kind === "comment" ? (
                       <>
@@ -467,7 +468,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
                             {m.dash_inbox_moved_to()} <StatusChip status={item.to} showOpen />
                           </span>
                         ) : null}
-                        {item.note ? <div className="mt-1">{item.note}</div> : null}
+                        {item.note ? <div className="mt-1">{activityNote(item)}</div> : null}
                       </div>
                     )}
                   </div>
@@ -600,7 +601,7 @@ function Detail({ post: p, onClose, nav }: { post: PostData; onClose: () => void
           <div className="flex flex-col gap-3 border-t pt-4 text-[13px]">
             <div className="flex items-center gap-3">
               <span className="w-[60px] shrink-0 text-faint">{m.dash_inbox_created()}</span>
-              <span title={fullDate(p.createdAt)}>{since(p.createdAt)}</span>
+              <span title={fullDate(p.createdAt)} suppressHydrationWarning>{since(p.createdAt)}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="w-[60px] shrink-0 text-faint">{m.dash_inbox_author()}</span>

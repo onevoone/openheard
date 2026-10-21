@@ -227,7 +227,7 @@ function BoardPage() {
                       <span className="inline-flex items-center gap-1.5 text-faint">
                         <Avatar name={p.author?.name ?? "?"} image={p.author?.image} size={16} />
                         {p.author?.name ?? m.common_someone()}
-                        <span>· {ago(p.createdAt)}</span>
+                        <span suppressHydrationWarning>· {ago(p.createdAt)}</span>
                       </span>
                     </div>
                   </div>

@@ -18,6 +18,12 @@ const units: [number, Unit][] = [
   [Infinity, "year"],
 ];
 
+// Relative times are computed from the clock, so the server's text and the
+// browser's can differ by a second ("1 minute ago" vs "58 seconds ago"). The
+// elements that show them carry `suppressHydrationWarning`; React keeps the
+// server text until the next render and logs no mismatch. Do the same where
+// you render a new one.
+//
 // How long ago, as a whole number of the largest unit that fits. Null when it
 // is fresh enough to say "now".
 function elapsed(date: Input, now = Date.now()): { count: number; unit: Unit } | null {

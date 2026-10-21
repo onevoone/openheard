@@ -3,6 +3,7 @@ import type { Db } from "@openheard/db";
 import { m } from "@openheard/i18n/messages";
 import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 
+import { encodeNote } from "@/lib/activity-note";
 import { emailLocale } from "@/lib/email-locale";
 import { HELP_SLUG, type HelpIcon, uniqueSlug } from "@/lib/help";
 import { removeHelpArticle } from "@/lib/help-db";
@@ -180,6 +181,7 @@ export async function saveChangelog(ctx: OpCtx, data: { id?: number; title: stri
   const entryId = id!;
   const done = data.publish && postIds.length ? ((await statusOfKind(db, ws, "done"))?.key ?? "done") : "done";
   const note = `shipped in ${version || title}`;
+  const noteData = encodeNote({ code: "shipped", name: version || title });
   const actorId = ctx.actor?.id ?? null;
   // D1 allows 100 bound values per statement; 40 ids plus a few extras stays under.
   const chunks: number[][] = [];
@@ -213,6 +215,7 @@ export async function saveChangelog(ctx: OpCtx, data: { id?: number; title: stri
                 fromStatus: post.status,
                 toStatus: sql`${done}`.as("to_status"),
                 note: sql`${note}`.as("note"),
+                noteData: sql`${noteData}`.as("note_data"),
                 createdAt: sql`cast(unixepoch('subsecond') * 1000 as integer)`.as("created_at"),
               })
               .from(post)

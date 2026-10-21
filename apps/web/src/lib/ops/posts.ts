@@ -2,6 +2,7 @@ import { activity, attachment, board, changelogPost, comment, post, postTag, tag
 import { m } from "@openheard/i18n/messages";
 import { and, desc, eq, inArray, notInArray, or, sql } from "drizzle-orm";
 
+import { encodeNote } from "@/lib/activity-note";
 import { claimQuery, reserveAttachments } from "@/lib/attachment-db";
 import { AttachmentGoneError } from "@/lib/attachment-db";
 import { notifyIntegrations } from "@/lib/integration-db";
@@ -97,7 +98,7 @@ export async function setPinned(ctx: OpCtx, postId: number, pinned?: boolean) {
   const next = pinned ?? !current.pinned;
   if (next === current.pinned) return { pinned: next };
   await ctx.db.update(post).set({ pinned: next }).where(eq(post.id, postId));
-  await ctx.db.insert(activity).values({ postId, actorId: ctx.actor?.id ?? null, type: "pin", note: next ? "pinned" : "unpinned" });
+  await ctx.db.insert(activity).values({ postId, actorId: ctx.actor?.id ?? null, type: "pin", note: next ? "pinned" : "unpinned", noteData: encodeNote({ code: next ? "pinned" : "unpinned" }) });
   refresh(ctx, [postId]);
   return { pinned: next };
 }
@@ -130,8 +131,9 @@ export async function mergePosts(ctx: OpCtx, from: number, into: number) {
   await db.update(post).set({ mergedIntoId: into, status: closed?.key ?? "closed" }).where(eq(post.id, from));
   const actorId = ctx.actor?.id ?? null;
   await db.insert(activity).values([
-    { postId: into, actorId, type: "merge", note: `merged "${source.title}" into this, +${moved.length} votes` },
-    { postId: from, actorId, type: "merge", note: `merged into "${target.title}"` },
+    // `note` is English for the API and MCP; `noteData` lets the dashboard word it in the reader's language.
+    { postId: into, actorId, type: "merge", note: `merged "${source.title}" into this, +${moved.length} votes`, noteData: encodeNote({ code: "merged_into_this", title: source.title, votes: moved.length }) },
+    { postId: from, actorId, type: "merge", note: `merged into "${target.title}"`, noteData: encodeNote({ code: "merged_into", title: target.title }) },
   ]);
   refresh(ctx, [from, into]);
   return { into, alreadyMerged: false, votesAdded: moved.length };

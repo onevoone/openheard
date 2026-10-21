@@ -129,6 +129,46 @@ bun run db:seed         # optional demo posts
 Keyboard on the board: `j` `k` move, `v` vote, `enter` open, `/` search,
 `c` new post.
 
+## Languages
+
+The interface is in Ukrainian (the base language) and English. There are no
+`/en` URLs: a page has one address, and its language is chosen per visitor,
+first match wins:
+
+1. the language they picked in the switcher (a `PARAGLIDE_LOCALE` cookie)
+2. their browser's `Accept-Language`, if it is one we ship
+3. the workspace's **Board language** (Settings → General), which a new
+   workspace starts with in the language it was created in
+4. Ukrainian
+
+Every public page and the dashboard carry a small language switcher. Emails,
+and the Slack and Discord alerts, are written in the workspace's board
+language, because their reader has no request to take a language from. The
+widget follows the same chain (`data-lang` on its script tag overrides it,
+see [docs/widget.md](docs/widget.md)).
+
+Not translated, on purpose: the REST API, the MCP server, the CSV and JSON
+export, the generic webhook payload, the prompt you paste into an AI coding
+agent, and anything your team typed (post titles, comments, boards, tags, status
+names). Notes the app adds to a post's timeline (a merge, a release) keep an
+English copy for the API and are shown in the reader's language on the page.
+
+**Add a language** (say `de`):
+
+1. `packages/i18n/project.inlang/settings.json`: add `"de"` to `locales`.
+2. `packages/i18n/src/locales.ts`: add it to `LOCALES` and give it a name in
+   `LOCALE_NAMES`, written in that language ("Deutsch").
+3. `packages/i18n/messages/de.json`: copy `en.json` and translate it. `bun run
+   test` fails until every key and `{placeholder}` is there, with the plural
+   forms the language needs.
+4. `apps/web/src/lib/format.ts`: add its tag to `BCP47` (`de: "de-DE"`), so dates
+   and numbers follow it.
+5. If it is not written in Latin or Cyrillic letters, check the font preload
+   in `apps/web/src/routes/__root.tsx`.
+
+The switcher, the Board language setting and the widget pick the new language up
+from that list. [CONTRIBUTING.md](CONTRIBUTING.md) has the rules for writing text.
+
 ## Stack
 
 - [TanStack Start](https://tanstack.com/start), React 19, TypeScript

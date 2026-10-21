@@ -53,6 +53,7 @@ const event: AlertEvent = {
   votes: 12,
   postId: 7,
   at: "2026-09-25T12:00:00.000Z",
+  locale: "en",
 };
 
 describe("checkIntegrationUrl", () => {
@@ -203,7 +204,19 @@ describe("payloads", () => {
     expect(metaLine({ ...event, type: "post.status_changed", fromStatus: "Planned", status: "In progress" })).toBe("Status changed · by Sam · Planned → In progress · 12 votes");
   });
 
+  it("words Slack and Discord in the workspace language and keeps the user's text as typed", () => {
+    const uk = { ...event, locale: "uk" as const };
+    expect(metaLine(uk)).toBe("Нова ідея · Sam · Planned · 12 голосів");
+    expect(metaLine({ ...uk, votes: 1 })).toBe("Нова ідея · Sam · Planned · 1 голос");
+    expect(metaLine({ ...uk, votes: 3 })).toBe("Нова ідея · Sam · Planned · 3 голоси");
+    expect(metaLine({ ...uk, test: true, author: null, status: null, votes: null })).toBe("Тестове повідомлення");
+    expect(slackPayload(uk).text).toBe("Нова ідея: Dark mode &lt;!channel&gt; &amp; more");
+    expect(discordPayload(uk).embeds[0]!.description).toBe("Нова ідея · Sam · Planned · 12 голосів");
+    expect(metaLine({ ...uk, type: "post.status_changed", fromStatus: "Planned", status: "In progress" })).toBe("Статус змінено · Sam · Planned → In progress · 12 голосів");
+  });
+
   it("gives webhooks the whole event as JSON", () => {
+    expect(JSON.stringify(webhookPayload({ ...event, locale: "uk" }))).toBe(JSON.stringify(webhookPayload(event)));
     expect(webhookPayload(event)).toMatchObject({ event: "post.created", test: false, workspace: { id: "acme" }, data: { postId: 7, votes: 12, status: "Planned", boardId: "features" } });
   });
 });
@@ -258,7 +271,7 @@ describe("dispatchEvent", () => {
   beforeEach(async () => {
     db = await freshDb();
     for (const id of ["acme", "demo"]) {
-      await db.insert(schema.workspace).values({ id, name: id === "acme" ? "Acme" : "Demo" });
+      await db.insert(schema.workspace).values({ id, name: id === "acme" ? "Acme" : "Demo", locale: "en" });
       await db.insert(schema.status).values({ workspaceId: id, key: "open", label: "Pending", color: "#fff", kind: "open" });
       await db.insert(schema.board).values({ id: `${id}-features`, workspaceId: id, name: "Features" });
       await db.insert(schema.board).values({ id: `${id}-bugs`, workspaceId: id, name: "Bugs" });
@@ -291,6 +304,19 @@ describe("dispatchEvent", () => {
     expect(bodies[0]).toContain("Pending · 3 votes");
     const [row] = await db.select().from(integration).where(eq(integration.id, "acme-slack"));
     expect(row!.lastStatus).toBe("ok");
+  });
+
+  it("words the message in the workspace's language, whatever the request language", async () => {
+    await db.update(schema.workspace).set({ locale: "uk" }).where(eq(schema.workspace.id, "acme"));
+    const bodies: string[] = [];
+    const fetchImpl = (async (_url: string, init: RequestInit) => {
+      bodies.push(init.body as string);
+      return new Response("ok");
+    }) as unknown as typeof fetch;
+    const postId = await newPost("acme", "acme-features");
+    await dispatchEvent(db, "acme", { type: "post.created", postId }, "https://acme.test", fetchImpl);
+    expect(bodies[0]).toContain("Нова ідея: Export to CSV");
+    expect(bodies[0]).toContain("Pending · 3 голоси");
   });
 
   it("skips boards that are not picked", async () => {

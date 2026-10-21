@@ -197,7 +197,7 @@ function ArticleRow({ article: a }: { article: Article }) {
           {m.dash_help_helpful_percent({ percent: Math.round((a.helpfulCount / votes) * 100) })}
         </span>
       ) : null}
-      <span className="min-w-10 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(a.updatedAt)}>
+      <span className="min-w-10 shrink-0 text-right text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(a.updatedAt)} suppressHydrationWarning>
         {ago(a.updatedAt)}
       </span>
     </button>

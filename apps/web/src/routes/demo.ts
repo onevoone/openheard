@@ -1,4 +1,5 @@
 import { createDb } from "@openheard/db";
+import { m } from "@openheard/i18n/messages";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { DEMO_ADMIN_EMAIL, DEMO_WORKSPACE_ID } from "@/lib/demo";
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/demo")({
           headers: request.headers,
           asResponse: true,
         });
-        if (!signIn.ok) return new Response("The demo is not available right now", { status: 503 });
+        if (!signIn.ok) return new Response(m.err_demo_unavailable(), { status: 503 });
 
         const headers = new Headers({ location: "/dashboard", "cache-control": "private, no-store" });
         for (const cookie of signIn.headers.getSetCookie()) headers.append("set-cookie", cookie);

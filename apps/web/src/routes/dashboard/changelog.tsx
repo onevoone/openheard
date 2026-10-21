@@ -76,7 +76,7 @@ function ChangelogPage() {
                 </span>
               ) : null}
               <span className="flex-1" />
-              <span className="text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(e.publishedAt ?? e.createdAt)}>
+              <span className="text-[12px] whitespace-nowrap text-faint tabular-nums" title={fullDate(e.publishedAt ?? e.createdAt)} suppressHydrationWarning>
                 {ago(e.publishedAt ?? e.createdAt)}
               </span>
               <Avatar name={root.user?.name ?? "?"} image={root.user?.image} size={24} />
@@ -139,7 +139,7 @@ function Editor({ entry, onClose }: { entry: Entry | null; onClose: () => void }
               <ArrowLeftIcon className="size-4" />
             </button>
             <span className="text-[15px] font-semibold">{entry ? entry.title : m.dash_changelog_new_entry()}</span>
-            <span className={cn("ml-1 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium", published ? "bg-status-shipped/15 text-status-shipped" : "bg-status-planned/15 text-status-planned")}>
+            <span className={cn("ml-1 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium", published ? "bg-status-shipped/15 text-status-shipped" : "bg-status-planned/15 text-status-planned")} suppressHydrationWarning>
               {published ? m.dash_changelog_published_since({ since: since(entry!.publishedAt!) }) : m.dash_draft()}
             </span>
           </div>

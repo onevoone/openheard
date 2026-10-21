@@ -1,3 +1,4 @@
+import { m } from "@openheard/i18n/messages";
 import Stripe from "stripe";
 
 // Server-only. Every export loads the env lazily so nothing here reaches the client bundle.
@@ -17,6 +18,6 @@ export async function getStripe(): Promise<Stripe | null> {
 export async function priceFor(interval: "month" | "year"): Promise<string> {
   const e = await billingEnv();
   const id = interval === "month" ? e.STRIPE_PRICE_MONTHLY : e.STRIPE_PRICE_YEARLY;
-  if (!id) throw new Error("Billing is not configured");
+  if (!id) throw new Error(m.err_billing_not_configured());
   return id;
 }

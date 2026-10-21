@@ -224,7 +224,7 @@ function DeliveryStatus({ saved }: { saved: Saved | null }) {
   return (
     <span className="flex max-w-[60%] items-center gap-1.5 text-xs text-faint" title={saved.lastError ?? undefined}>
       <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", ok ? "bg-status-shipped" : "bg-destructive")} />
-      <span className="truncate tabular-nums">{ok ? m.settings_int_delivered({ when: since(saved.lastAt) }) : m.settings_int_failed({ when: since(saved.lastAt), error: saved.lastError ?? m.settings_int_unknown_error() })}</span>
+      <span className="truncate tabular-nums" suppressHydrationWarning>{ok ? m.settings_int_delivered({ when: since(saved.lastAt) }) : m.settings_int_failed({ when: since(saved.lastAt), error: saved.lastError ?? m.settings_int_unknown_error() })}</span>
     </span>
   );
 }

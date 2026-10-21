@@ -54,8 +54,33 @@ workspace's board language, then Ukrainian.
   default props, so a caller can still pass its own label.
 - **Sentences around a link or bold part** are split into `_before`, `_link` and
   `_after` messages; a count that sits in a sentence is a plural message.
+- **Alerts and other text sent outside a request** (Slack and Discord messages,
+  emails) are worded in the workspace's language, passed on every call:
+  `m.integration_headline_post_created({}, { locale: event.locale })`. Never
+  read `getLocale()` there. What a delivery stores about itself (`lastError`:
+  "HTTP 404", "Timed out after 5s") stays English: no reader's language is
+  known when it is written.
+- **Notes the app writes into the database** (the timeline's merge, release and
+  pin notes) store English text in `note`, which the REST API and MCP return
+  as it is, and a JSON `noteData` that `activityNote()` words in the reader's
+  language. A new kind of note needs a code in `lib/activity-note.ts` and a message.
+- **Errors from better-auth** are worded by `authErrorMessage()` from their
+  `code`; an unknown code falls back to better-auth's own English message.
+- **Relative times** (`ago()`, `since()`) differ by a second between the server
+  and the browser, so the element that shows one carries `suppressHydrationWarning`.
 - **Not translated:** the REST API, MCP, CSV export and the generic webhook,
-  and anything the team typed (statuses, boards, tags, posts).
+  the prompt pasted into an AI coding agent (in Settings → API keys), and
+  anything the team typed (statuses, boards, tags, posts). Brand names, code
+  samples and example values in placeholders are written as they are.
+- **No new literals.** `apps/web/src/lib/i18n-literals.test.ts` parses every
+  component and fails on readable text written in code: JSX text, `placeholder`,
+  `aria-label`, `title`, `alt`, `label`, `toast.*()`, `confirm()` and
+  `new Error("...")`. Fix it with a message. If the text really is not for a
+  reader (a brand, a code sample, an example value, machine output), add it
+  under its file in `apps/web/src/lib/i18n-literals.allow.ts` with a reason; the
+  test also fails on an entry that no longer matches, so the list stays honest.
+  It does not see text in plain objects (`{ label: "Board" }`), so keep those
+  as `() => m.nav_board()`.
 
 ### Ukrainian glossary and tone
 

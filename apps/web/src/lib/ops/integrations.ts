@@ -4,6 +4,7 @@ import { m } from "@openheard/i18n/messages";
 import { and, asc, eq } from "drizzle-orm";
 
 import { assertNotDemo } from "@/lib/demo";
+import { emailLocale } from "@/lib/email-locale";
 import { allowLocal, deliver, recordDelivery, seal, unseal } from "@/lib/integration-db";
 import { type AlertEvent, checkIntegrationUrl, newSigningSecret, ownedBoards, parseList, urlHint } from "@/lib/integrations";
 
@@ -98,9 +99,12 @@ export async function testIntegration(ctx: OpCtx, kind: IntegrationKind, rawUrl 
     type: "post.created",
     test: true,
     workspace: { id: ws.id, name: ws.name },
+    // The message goes to the team's channel, so the workspace's language, not
+    // the language the admin happens to be reading the dashboard in.
+    locale: emailLocale(ws),
     boardId: null,
     url: `${ctx.origin}/`,
-    title: `Alerts from ${ws.name} are connected`,
+    title: m.integration_test_title({ workspace: ws.name }, { locale: emailLocale(ws) }),
     author: ctx.actor?.name ?? ws.name,
     status: null,
     votes: null,

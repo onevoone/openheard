@@ -70,6 +70,8 @@ describe("publishing a changelog", () => {
     const rows = await db.select().from(schema.activity);
     expect(rows).toHaveLength(50);
     expect(rows.every((a) => a.fromStatus === "open" && a.toStatus === "done" && a.actorId === "ann")).toBe(true);
+    // English text for the API, coded data for the dashboard.
+    expect(rows.every((a) => a.note === "shipped in Big release" && a.noteData === '{"code":"shipped","name":"Big release"}')).toBe(true);
     expect((await db.select().from(schema.changelogPost)).length).toBe(50);
     expect(background).toHaveBeenCalledTimes(1);
   });
@@ -98,6 +100,12 @@ describe("merging posts", () => {
     expect((await db.select().from(schema.vote).where(eq(schema.vote.postId, 101))).length).toBe(70);
     const [into] = await db.select().from(schema.post).where(eq(schema.post.id, 101));
     expect(into!.voteCount).toBe(69);
+    const notes = await db.select().from(schema.activity);
+    expect(notes.map((a) => a.note).sort()).toEqual(['merged "Post 100" into this, +69 votes', 'merged into "Post 101"']);
+    expect(notes.map((a) => JSON.parse(a.noteData!)).sort((a, b) => a.code.localeCompare(b.code))).toEqual([
+      { code: "merged_into", title: "Post 101" },
+      { code: "merged_into_this", title: "Post 100", votes: 69 },
+    ]);
   });
 });
 
