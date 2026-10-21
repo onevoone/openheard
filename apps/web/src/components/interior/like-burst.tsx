@@ -7,6 +7,7 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
+import { m } from "@openheard/i18n/messages";
 import { formatNumber } from "@/lib/format";
 
 const EASE = [0.23, 1, 0.32, 1] as const;
@@ -321,7 +322,7 @@ export function LikeBurst({
       </button>
 
       <span role="status" aria-live="polite" className="sr-only">
-        {`${format(settled.count)} likes, ${settled.liked ? "liked" : "not liked"}`}
+        {settled.liked ? m.vote_status_voted({ count: settled.count, shown: format(settled.count) }) : m.vote_status_not_voted({ count: settled.count, shown: format(settled.count) })}
       </span>
     </span>
   );

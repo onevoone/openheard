@@ -298,7 +298,7 @@ export function Own() {
 /* --------------------------------------------------------------- pricing */
 
 const plans = () => [
-  { name: "Free", price: "$0", per: m.landing_pricing_per(), desc: m.landing_pricing_free_desc(), cta: m.landing_cta_start(), lead: m.landing_pricing_free_lead(), items: [m.landing_pricing_free_item_1(), m.landing_pricing_free_item_2(), m.landing_pricing_free_item_3(), m.landing_pricing_free_item_4(), m.landing_pricing_free_item_5(), m.landing_pricing_free_item_6()] },
+  { name: m.landing_pricing_free_name(), price: "$0", per: m.landing_pricing_per(), desc: m.landing_pricing_free_desc(), cta: m.landing_cta_start(), lead: m.landing_pricing_free_lead(), items: [m.landing_pricing_free_item_1(), m.landing_pricing_free_item_2(), m.landing_pricing_free_item_3(), m.landing_pricing_free_item_4(), m.landing_pricing_free_item_5(), m.landing_pricing_free_item_6()] },
   { name: "Pro", price: "$19", per: m.landing_pricing_per(), desc: m.landing_pricing_pro_desc(), cta: m.landing_pricing_pro_cta(), primary: true, lead: m.landing_pricing_pro_lead(), items: [m.landing_pricing_pro_item_1(), m.landing_pricing_pro_item_2()] },
 ];
 

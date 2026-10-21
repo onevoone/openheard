@@ -91,7 +91,7 @@ function Billing() {
             }
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            <Plan name="Free" price="$0" per={m.settings_billing_forever()} current={b.plan === "free"} features={[m.settings_billing_workspaces({ count: PLANS.free.workspaces }), m.settings_billing_f_unlimited(), m.settings_billing_f_public(), m.settings_billing_f_api()]} />
+            <Plan name={m.settings_billing_plan_free()} price="$0" per={m.settings_billing_forever()} current={b.plan === "free"} features={[m.settings_billing_workspaces({ count: PLANS.free.workspaces }), m.settings_billing_f_unlimited(), m.settings_billing_f_public(), m.settings_billing_f_api()]} />
             <Plan
               name="Pro"
               price={`$${price}`}
